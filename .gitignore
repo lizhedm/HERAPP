@@ -1,0 +1,30 @@
+# --- 工具生成的本地产物 ---
+# TophantAI 设计预览与审查中间产物，由工具重新生成，不入库
+.tophant/
+.claude/
+
+# --- macOS ---
+.DS_Store
+
+# --- Python（构建脚本运行产物）---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- 本地配置与密钥 ---
+# 技术方案中的后端 baseUrl / Bearer Token / AI Key 属于本地配置，
+# 一旦出现对应文件，务必保持忽略状态。
+config.local.*
+*.local.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# --- 临时文件 ---
+*.log
+*.tmp
+~$*
