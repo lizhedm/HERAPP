@@ -2,13 +2,24 @@
  {
   "id": "SYS-RULE-030",
   "title": "30 种情绪完整映射到 6 个色系，无遗漏无重复归属",
-  "req": ["REQ-16-19"],
-  "reqSection": ["9.4"],
-  "screens": ["E2", "E3"],
+  "req": [
+   "REQ-16-19"
+  ],
+  "reqSection": [
+   "9.4"
+  ],
+  "screens": [
+   "E2",
+   "E3"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["需求 9.4 列出的 30 种情绪类型"],
-  "when": ["查询每种情绪的色系"],
+  "given": [
+   "需求 9.4 列出的 30 种情绪类型"
+  ],
+  "when": [
+   "查询每种情绪的色系"
+  ],
   "then": [
    "30 种情绪各归属唯一色系",
    "暖黄、粉、浅绿、浅蓝、橙红、灰褐 6 个色系合计覆盖 30 种情绪",
@@ -17,36 +28,306 @@
   "oracle": {
    "fn": "emotion_color",
    "cases": [
-    {"args": ["开心", 80], "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}},
-    {"args": ["兴奋", 80], "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}},
-    {"args": ["调皮", 80], "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}},
-    {"args": ["骄傲", 80], "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}},
-    {"args": ["期待", 80], "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}},
-    {"args": ["亲昵", 80], "expect": {"family": "PINK", "brightness": "VIVID"}},
-    {"args": ["宠溺", 80], "expect": {"family": "PINK", "brightness": "VIVID"}},
-    {"args": ["感动", 80], "expect": {"family": "PINK", "brightness": "VIVID"}},
-    {"args": ["感激", 80], "expect": {"family": "PINK", "brightness": "VIVID"}},
-    {"args": ["吃醋", 80], "expect": {"family": "PINK", "brightness": "VIVID"}},
-    {"args": ["平静", 60], "expect": {"family": "LIGHT_GREEN", "brightness": "MID_HIGH"}},
-    {"args": ["治愈", 60], "expect": {"family": "LIGHT_GREEN", "brightness": "MID_HIGH"}},
-    {"args": ["释然", 60], "expect": {"family": "LIGHT_GREEN", "brightness": "MID_HIGH"}},
-    {"args": ["中性", 60], "expect": {"family": "LIGHT_GREEN", "brightness": "MID_HIGH"}},
-    {"args": ["低落", 30], "expect": {"family": "LIGHT_BLUE", "brightness": "MID_LOW"}},
-    {"args": ["难过", 30], "expect": {"family": "LIGHT_BLUE", "brightness": "MID_LOW"}},
-    {"args": ["委屈", 30], "expect": {"family": "LIGHT_BLUE", "brightness": "MID_LOW"}},
-    {"args": ["失望", 30], "expect": {"family": "LIGHT_BLUE", "brightness": "MID_LOW"}},
-    {"args": ["怀念", 30], "expect": {"family": "LIGHT_BLUE", "brightness": "MID_LOW"}},
-    {"args": ["生气", 20], "expect": {"family": "ORANGE_RED", "brightness": "DIM"}},
-    {"args": ["烦躁", 20], "expect": {"family": "ORANGE_RED", "brightness": "DIM"}},
-    {"args": ["焦虑", 20], "expect": {"family": "ORANGE_RED", "brightness": "DIM"}},
-    {"args": ["纠结", 20], "expect": {"family": "ORANGE_RED", "brightness": "DIM"}},
-    {"args": ["无聊", 10], "expect": {"family": "GRAY_BROWN", "brightness": "DIM"}},
-    {"args": ["疲惫", 10], "expect": {"family": "GRAY_BROWN", "brightness": "DIM"}},
-    {"args": ["冷淡", 10], "expect": {"family": "GRAY_BROWN", "brightness": "DIM"}},
-    {"args": ["尴尬", 10], "expect": {"family": "GRAY_BROWN", "brightness": "DIM"}},
-    {"args": ["无奈", 10], "expect": {"family": "GRAY_BROWN", "brightness": "DIM"}},
-    {"args": ["愧疚", 10], "expect": {"family": "GRAY_BROWN", "brightness": "DIM"}},
-    {"args": ["惊讶", 10], "expect": {"family": "GRAY_BROWN", "brightness": "DIM"}}
+    {
+     "args": [
+      "开心",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "兴奋",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "调皮",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "骄傲",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "期待",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "亲昵",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "宠溺",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "感动",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "感激",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "吃醋",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "平静",
+      60
+     ],
+     "expect": {
+      "family": "LIGHT_GREEN",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "治愈",
+      60
+     ],
+     "expect": {
+      "family": "LIGHT_GREEN",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "释然",
+      60
+     ],
+     "expect": {
+      "family": "LIGHT_GREEN",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "中性",
+      60
+     ],
+     "expect": {
+      "family": "LIGHT_GREEN",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "低落",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "难过",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "委屈",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "失望",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "怀念",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "生气",
+      20
+     ],
+     "expect": {
+      "family": "ORANGE_RED",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "烦躁",
+      20
+     ],
+     "expect": {
+      "family": "ORANGE_RED",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "焦虑",
+      20
+     ],
+     "expect": {
+      "family": "ORANGE_RED",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "纠结",
+      20
+     ],
+     "expect": {
+      "family": "ORANGE_RED",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "无聊",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "疲惫",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "冷淡",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "尴尬",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "无奈",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "愧疚",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "惊讶",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    }
    ]
   },
   "testId": "packages/ling_core/test/emotion_test.dart::情绪色系全映射"
@@ -54,13 +335,24 @@
  {
   "id": "SYS-RULE-031",
   "title": "情绪分决定明度档，4 个区间在端点取到唯一明度",
-  "req": ["REQ-16-19"],
-  "reqSection": ["9.4"],
-  "screens": ["E2", "E3"],
+  "req": [
+   "REQ-16-19"
+  ],
+  "reqSection": [
+   "9.4"
+  ],
+  "screens": [
+   "E2",
+   "E3"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["固定情绪类型与 0-100 的情绪分"],
-  "when": ["计算情绪着色的明度档"],
+  "given": [
+   "固定情绪类型与 0-100 的情绪分"
+  ],
+  "when": [
+   "计算情绪着色的明度档"
+  ],
   "then": [
    "76-100 为高饱和，51-75 为中高，26-50 为中低，0-25 为暗",
    "4 个区间的 8 个端点各命中唯一明度档",
@@ -69,14 +361,86 @@
   "oracle": {
    "fn": "emotion_color",
    "cases": [
-    {"args": ["开心", 100], "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}},
-    {"args": ["开心", 76], "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}},
-    {"args": ["开心", 75], "expect": {"family": "WARM_YELLOW", "brightness": "MID_HIGH"}},
-    {"args": ["开心", 51], "expect": {"family": "WARM_YELLOW", "brightness": "MID_HIGH"}},
-    {"args": ["开心", 50], "expect": {"family": "WARM_YELLOW", "brightness": "MID_LOW"}},
-    {"args": ["开心", 26], "expect": {"family": "WARM_YELLOW", "brightness": "MID_LOW"}},
-    {"args": ["开心", 25], "expect": {"family": "WARM_YELLOW", "brightness": "DIM"}},
-    {"args": ["开心", 0], "expect": {"family": "WARM_YELLOW", "brightness": "DIM"}}
+    {
+     "args": [
+      "开心",
+      100
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      76
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      75
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      51
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      50
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      26
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      25
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      0
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "DIM"
+     }
+    }
    ]
   },
   "testId": "packages/ling_core/test/emotion_test.dart::情绪明度端点"
@@ -84,13 +448,24 @@
  {
   "id": "SYS-RULE-032",
   "title": "待评估日期情绪着色为中性灰且不带明度",
-  "req": ["REQ-16-19"],
-  "reqSection": ["9.3", "9.4"],
-  "screens": ["E2"],
+  "req": [
+   "REQ-16-19"
+  ],
+  "reqSection": [
+   "9.3",
+   "9.4"
+  ],
+  "screens": [
+   "E2"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["日期评估状态为待评估、评估中或评估失败"],
-  "when": ["计算情绪着色"],
+  "given": [
+   "日期评估状态为待评估、评估中或评估失败"
+  ],
+  "when": [
+   "计算情绪着色"
+  ],
   "then": [
    "色系为中性灰",
    "明度为空，着色不依赖情绪分",
@@ -99,11 +474,61 @@
   "oracle": {
    "fn": "emotion_color",
    "cases": [
-    {"kwargs": {"emotion_type": "开心", "emotion_score": 80, "eval_status": "PENDING"}, "expect": {"family": "NEUTRAL_GRAY", "brightness": null}},
-    {"kwargs": {"emotion_type": "开心", "emotion_score": 80, "eval_status": "RUNNING"}, "expect": {"family": "NEUTRAL_GRAY", "brightness": null}},
-    {"kwargs": {"emotion_type": "开心", "emotion_score": 80, "eval_status": "FAILED"}, "expect": {"family": "NEUTRAL_GRAY", "brightness": null}},
-    {"kwargs": {"emotion_type": "开心", "emotion_score": 80, "eval_status": "SUCCESS"}, "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}},
-    {"kwargs": {"emotion_type": "开心", "emotion_score": 80, "eval_status": "STALE"}, "expect": {"family": "WARM_YELLOW", "brightness": "VIVID"}}
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "PENDING"
+     },
+     "expect": {
+      "family": "NEUTRAL_GRAY",
+      "brightness": null
+     }
+    },
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "RUNNING"
+     },
+     "expect": {
+      "family": "NEUTRAL_GRAY",
+      "brightness": null
+     }
+    },
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "FAILED"
+     },
+     "expect": {
+      "family": "NEUTRAL_GRAY",
+      "brightness": null
+     }
+    },
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "SUCCESS"
+     },
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "STALE"
+     },
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    }
    ]
   },
   "testId": "packages/ling_core/test/emotion_test.dart::待评估中性灰"
@@ -111,13 +536,24 @@
  {
   "id": "SYS-E-001",
   "title": "趋势页曲线与情绪日历为 Tab 切换且各自保留粒度",
-  "req": ["REQ-16-18"],
-  "reqSection": ["9.1"],
-  "screens": ["E1", "E2"],
+  "req": [
+   "REQ-16-18"
+  ],
+  "reqSection": [
+   "9.1"
+  ],
+  "screens": [
+   "E1",
+   "E2"
+  ],
   "layer": "widget",
   "priority": "P0",
-  "given": ["趋势页存在曲线与情绪日历两个 Tab"],
-  "when": ["在曲线 Tab 选择月粒度后切到情绪日历再切回"],
+  "given": [
+   "趋势页存在曲线与情绪日历两个 Tab"
+  ],
+  "when": [
+   "在曲线 Tab 选择月粒度后切到情绪日历再切回"
+  ],
   "then": [
    "两个 Tab 由顶部切换器切换，同屏只呈现一个",
    "切回曲线 Tab 时粒度保持为月",
@@ -128,13 +564,23 @@
  {
   "id": "SYS-E-002",
   "title": "曲线在缺评估日期处断开而非插值",
-  "req": ["REQ-16-18"],
-  "reqSection": ["9.2"],
-  "screens": ["E1"],
+  "req": [
+   "REQ-16-18"
+  ],
+  "reqSection": [
+   "9.2"
+  ],
+  "screens": [
+   "E1"
+  ],
   "layer": "widget",
   "priority": "P0",
-  "given": ["周期内部分日期评估成功、部分日期待评估"],
-  "when": ["渲染趋势曲线"],
+  "given": [
+   "周期内部分日期评估成功、部分日期待评估"
+  ],
+  "when": [
+   "渲染趋势曲线"
+  ],
   "then": [
    "待评估日期不产生数据点，曲线在该位置断开",
    "相邻成功日期之间不做线性插值",
@@ -145,13 +591,26 @@
  {
   "id": "SYS-E-003",
   "title": "点击曲线数据点跳转该点对应周期",
-  "req": ["REQ-16-18"],
-  "reqSection": ["9.2"],
-  "screens": ["E1", "B3", "B4", "D1"],
+  "req": [
+   "REQ-16-18"
+  ],
+  "reqSection": [
+   "9.2"
+  ],
+  "screens": [
+   "E1",
+   "B3",
+   "B4",
+   "D1"
+  ],
   "layer": "widget",
   "priority": "P1",
-  "given": ["曲线依次处于周、月、年三种粒度并显示若干数据点"],
-  "when": ["点击某个数据点"],
+  "given": [
+   "曲线依次处于周、月、年三种粒度并显示若干数据点"
+  ],
+  "when": [
+   "点击某个数据点"
+  ],
   "then": [
    "周粒度的点对应单日，跳转日详情",
    "月粒度的点对应单周，跳转月视图的周定位态",
@@ -163,13 +622,23 @@
  {
   "id": "SYS-E-004",
   "title": "情绪日历按色系与明度着色并支持点击进入日详情",
-  "req": ["REQ-16-19"],
-  "reqSection": ["9.3"],
-  "screens": ["E2"],
+  "req": [
+   "REQ-16-19"
+  ],
+  "reqSection": [
+   "9.3"
+  ],
+  "screens": [
+   "E2"
+  ],
   "layer": "widget",
   "priority": "P0",
-  "given": ["当月日期含评估成功与待评估两类"],
-  "when": ["进入情绪日历 Tab"],
+  "given": [
+   "当月日期含评估成功与待评估两类"
+  ],
+  "when": [
+   "进入情绪日历 Tab"
+  ],
   "then": [
    "成功日期格子按情绪色系与明度着色",
    "待评估日期格子为中性灰",
@@ -180,13 +649,23 @@
  {
   "id": "SYS-E-005",
   "title": "情绪色系速查页列出 6 色系与 30 种情绪的完整对应",
-  "req": ["REQ-16-19"],
-  "reqSection": ["9.4"],
-  "screens": ["E3"],
+  "req": [
+   "REQ-16-19"
+  ],
+  "reqSection": [
+   "9.4"
+  ],
+  "screens": [
+   "E3"
+  ],
   "layer": "widget",
   "priority": "P2",
-  "given": ["从情绪日历进入色系速查页"],
-  "when": ["浏览页面"],
+  "given": [
+   "从情绪日历进入色系速查页"
+  ],
+  "when": [
+   "浏览页面"
+  ],
   "then": [
    "6 个色系分组展示，组内列出归属该色系的情绪类型",
    "情绪类型合计 30 个，与规则实现同源",
@@ -197,13 +676,23 @@
  {
   "id": "SYS-E-006",
   "title": "趋势页无评估数据时展示空状态并引导同步",
-  "req": ["REQ-16-18"],
-  "reqSection": ["9.1"],
-  "screens": ["E4"],
+  "req": [
+   "REQ-16-18"
+  ],
+  "reqSection": [
+   "9.1"
+  ],
+  "screens": [
+   "E4"
+  ],
   "layer": "widget",
   "priority": "P2",
-  "given": ["本地无任何评估成功的日期"],
-  "when": ["进入趋势页"],
+  "given": [
+   "本地无任何评估成功的日期"
+  ],
+  "when": [
+   "进入趋势页"
+  ],
   "then": [
    "两个 Tab 均展示空状态",
    "空状态引导至设置页执行同步",

@@ -1,0 +1,212 @@
+[
+ {
+  "id": "SYS-A-013",
+  "title": "配置加载成功后进入密码门禁，正确放行错误清空输入框",
+  "req": ["REQ-16-40"],
+  "reqSection": ["3.10"],
+  "screens": ["A1", "A2"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["配置加载成功，免输入有效期已过"],
+  "when": ["先输入错误密码，再输入正确密码"],
+  "then": [
+   "门禁页只有密码输入框、确认按钮与错误提示，不展示任何数据内容",
+   "密码错误时显示「密码错误」并清空输入框，留在门禁页",
+   "密码正确时进入同步流程",
+   "输入框为空时确认按钮为禁用态"
+  ],
+  "testId": "packages/ling_app/test/widget/gate_test.dart::门禁校验与错误提示"
+ },
+ {
+  "id": "SYS-A-014",
+  "title": "免输入有效期 10 分钟按单调时钟计时，改系统时间不延长",
+  "req": ["REQ-16-41"],
+  "reqSection": ["3.10"],
+  "screens": ["A2"],
+  "layer": "service",
+  "priority": "P0",
+  "given": ["已通过一次密码校验"],
+  "when": ["推进单调时钟到 9 分 59 秒与 10 分 01 秒，并在其间把系统时间往前调 1 小时"],
+  "then": [
+   "9 分 59 秒时重新进入应用直接放行，不展示门禁页",
+   "10 分 01 秒时重新进入应用展示门禁页",
+   "修改设备系统时间不延长有效期",
+   "应用退到后台再回到前台不清除有效期"
+  ],
+  "testId": "packages/ling_app/test/service/gate_service_test.dart::免输入有效期与单调时钟"
+ },
+ {
+  "id": "SYS-A-015",
+  "title": "连续错误 5 次锁定 60 秒且跨重启继续生效",
+  "req": ["REQ-16-42"],
+  "reqSection": ["3.10"],
+  "screens": ["A2", "A3"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["处于门禁页，错误次数为 0"],
+  "when": ["连续输入 5 次错误密码，重启应用，倒计时结束后再输错一次"],
+  "then": [
+   "第 5 次错误后进入锁定态，输入框禁用并显示剩余秒数",
+   "重启应用后锁定态与剩余秒数继续生效，重启不绕过锁定",
+   "倒计时结束后输入框恢复可用",
+   "恢复后再次输错立即重新锁定 60 秒"
+  ],
+  "testId": "packages/ling_app/integration_test/gate_lockout_test.dart::错误锁定与跨重启"
+ },
+ {
+  "id": "SYS-A-016",
+  "title": "密码哈希由后端下发并在每次成功同步后刷新，本地比对不依赖网络",
+  "req": ["REQ-16-43"],
+  "reqSection": ["3.10"],
+  "screens": ["A2"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["首次安装尚未成功同步，随后后台修改访问密码并完成一次同步"],
+  "when": ["依次在同步前、同步后、断网状态下校验密码"],
+  "then": [
+   "尚未取到后端哈希时用配置文件内置的默认密码哈希校验，首次进入可用",
+   "同步成功后缓存的哈希与盐值刷新，新密码生效且旧密码失效",
+   "哈希与盐值存入系统安全存储，后端不下发明文",
+   "断网状态下门禁照常校验，不发起网络请求"
+  ],
+  "testId": "packages/ling_app/integration_test/gate_credential_test.dart::哈希下发与刷新"
+ },
+ {
+  "id": "SYS-A-017",
+  "title": "设置页锁定立即清除免输入有效期并返回门禁页",
+  "req": ["REQ-16-44"],
+  "reqSection": ["3.10", "12.1"],
+  "screens": ["H1", "A2"],
+  "layer": "integration",
+  "priority": "P1",
+  "given": ["处于免输入有效期内，正在浏览设置页"],
+  "when": ["点击「锁定」"],
+  "then": [
+   "免输入有效期立即清除",
+   "界面返回门禁页要求重新输入密码",
+   "重新校验通过后免输入有效期重新起算"
+  ],
+  "testId": "packages/ling_app/integration_test/gate_lock_test.dart::设置页锁定"
+ },
+ {
+  "id": "SYS-A-018",
+  "title": "用户编辑立即生效于界面并入回写队列",
+  "req": ["REQ-16-45"],
+  "reqSection": ["3.11"],
+  "screens": ["C6", "C7", "F4", "G2", "H4"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["联网状态，回写队列为空"],
+  "when": ["依次编辑总结、备注、收藏、高光、喜好、礼物与偏好"],
+  "then": [
+   "每次编辑立即写本地缓存，界面即时反映结果，不等待网络往返",
+   "七类编辑均入回写队列，队列按入队顺序提交",
+   "提交成功的条目出队，队列清空后设置页待同步行展示「全部已同步」",
+   "回写成功后以后端返回的更新时刻覆盖本地记录"
+  ],
+  "testId": "packages/ling_app/integration_test/writeback_test.dart::编辑入队与提交"
+ },
+ {
+  "id": "SYS-A-019",
+  "title": "离线编辑显示待同步标识并在联网后自动提交",
+  "req": ["REQ-16-46"],
+  "reqSection": ["3.11"],
+  "screens": ["C6", "H1"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["断网状态"],
+  "when": ["编辑一句话总结，随后恢复联网"],
+  "then": [
+   "离线编辑写入本地缓存并在对应条目上显示「待同步」标识",
+   "恢复联网后队列按入队顺序自动提交，不需要用户手动触发",
+   "提交成功后「待同步」标识消失"
+  ],
+  "testId": "packages/ling_app/integration_test/writeback_test.dart::离线编辑与自动提交"
+ },
+ {
+  "id": "SYS-A-020",
+  "title": "回写失败退避重试上限 5 次，耗尽后设置页提供立即重试",
+  "req": ["REQ-16-47"],
+  "reqSection": ["3.11", "12.1"],
+  "screens": ["H1"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["后端持续返回错误，队列中有 2 条待提交编辑"],
+  "when": ["等待重试耗尽后进入设置页并点击「立即重试」"],
+  "then": [
+   "提交失败按退避重试，上限 5 次",
+   "重试耗尽后条目保留在队列，设置页展示「待同步 2 条」与「立即重试」",
+   "点击「立即重试」重新提交队列，成功后条数递减",
+   "队列清空后该行展示「全部已同步」"
+  ],
+  "testId": "packages/ling_app/integration_test/writeback_retry_test.dart::退避重试与立即重试"
+ },
+ {
+  "id": "SYS-A-021",
+  "title": "同一条记录的多次编辑在队列中合并为最后一次结果",
+  "req": ["REQ-16-48"],
+  "reqSection": ["3.11"],
+  "screens": [],
+  "layer": "service",
+  "priority": "P1",
+  "given": ["断网状态，队列为空"],
+  "when": ["对同一天的总结连续编辑 3 次，随后恢复联网"],
+  "then": [
+   "队列中该记录只保留一个条目，内容为最后一次编辑结果",
+   "恢复联网后只提交一次，不重复提交中间状态",
+   "不同记录的编辑各自独立入队，不被合并"
+  ],
+  "testId": "packages/ling_app/test/service/writeback_queue_test.dart::同记录编辑合并"
+ },
+ {
+  "id": "SYS-A-022",
+  "title": "同步以远端版本覆盖本地缓存并在覆盖本地编辑时提示",
+  "req": ["REQ-16-49"],
+  "reqSection": ["3.11"],
+  "screens": ["D1", "C6"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["某日总结在本端已编辑并回写成功，随后该条在另一端被改为更新的版本"],
+  "when": ["本端执行同步"],
+  "then": [
+   "远端版本覆盖本地缓存，界面展示远端版本",
+   "本地编辑被覆盖时提示「该条内容已在其他设备上更新，已显示最新版本」",
+   "回写队列中尚未提交的编辑不被同步清除"
+  ],
+  "testId": "packages/ling_app/integration_test/writeback_conflict_test.dart::远端覆盖与提示"
+ },
+ {
+  "id": "SYS-BACKEND-015",
+  "title": "同一条记录被多端编辑时后端按更新时刻保留较新者",
+  "req": ["REQ-16-50"],
+  "reqSection": ["3.11"],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["两个客户端对同一条记录分别提交编辑，更新时刻一前一后"],
+  "when": ["后端按到达顺序与逆序各处理一遍"],
+  "then": [
+   "两种到达顺序下后端均保留更新时刻较新的版本",
+   "较旧的提交被判定为过期，不覆盖较新版本",
+   "任一端的编辑在其他端下一次同步后可见"
+  ],
+  "testId": "backend/tests/test_writeback.py::多端编辑按更新时刻取较新"
+ },
+ {
+  "id": "SYS-BACKEND-016",
+  "title": "访问密码只下发加盐哈希，改密码脚本刷新哈希与盐值",
+  "req": ["REQ-16-43"],
+  "reqSection": ["3.10"],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["后端配置项 gate.password 为默认值"],
+  "when": ["调用改密码脚本设置新密码，再请求门禁凭据接口"],
+  "then": [
+   "接口返回加盐哈希与盐值，响应体不含明文密码",
+   "改密码脚本写入新的哈希与新盐值，旧哈希不再校验通过",
+   "同一密码在两次改密后得到不同盐值与不同哈希"
+  ],
+  "testId": "backend/tests/test_gate.py::密码哈希下发与改密脚本"
+ }
+]

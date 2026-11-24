@@ -2,13 +2,23 @@
  {
   "id": "SYS-RULE-010",
   "title": "封面综合关系分按亲密 0.6、情绪 0.4 加权并四舍五入",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.1"],
-  "screens": ["C1"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.1"
+  ],
+  "screens": [
+   "C1"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一组亲密度与情绪分，取值均在 0-100"],
-  "when": ["计算封面综合关系分"],
+  "given": [
+   "一组亲密度与情绪分，取值均在 0-100"
+  ],
+  "when": [
+   "计算封面综合关系分"
+  ],
   "then": [
    "结果等于 亲密度×0.6 + 情绪分×0.4 四舍五入取整",
    "亲密度 90、情绪分 82 得 87",
@@ -17,11 +27,41 @@
   "oracle": {
    "fn": "cover_score",
    "cases": [
-    {"args": [90, 82], "expect": 87},
-    {"args": [0, 0], "expect": 0},
-    {"args": [100, 100], "expect": 100},
-    {"args": [34, 34], "expect": 34},
-    {"args": [33, 34], "expect": 33}
+    {
+     "args": [
+      90,
+      82
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      0,
+      0
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      100,
+      100
+     ],
+     "expect": 100
+    },
+    {
+     "args": [
+      34,
+      34
+     ],
+     "expect": 34
+    },
+    {
+     "args": [
+      33,
+      34
+     ],
+     "expect": 33
+    }
    ]
   },
   "testId": "packages/ling_core/test/cover_test.dart::封面综合关系分加权"
@@ -29,13 +69,24 @@
  {
   "id": "SYS-RULE-011",
   "title": "封面等级 L1-L5 在每个区间端点取到唯一等级",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.1"],
-  "screens": ["C1", "H6"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.1"
+  ],
+  "screens": [
+   "C1",
+   "H6"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["0-100 的封面综合关系分"],
-  "when": ["按 5.1 的等级区间映射"],
+  "given": [
+   "0-100 的封面综合关系分"
+  ],
+  "when": [
+   "按 5.1 的等级区间映射"
+  ],
   "then": [
    "L1 覆盖 0-20，L2 覆盖 21-40，L3 覆盖 41-60，L4 覆盖 61-80，L5 覆盖 81-100",
    "5 个区间的 10 个端点各命中唯一等级，区间无空隙、无重叠"
@@ -43,16 +94,76 @@
   "oracle": {
    "fn": "cover_level",
    "cases": [
-    {"args": [0, 0], "expect": "L1"},
-    {"args": [20, 20], "expect": "L1"},
-    {"args": [21, 21], "expect": "L2"},
-    {"args": [40, 40], "expect": "L2"},
-    {"args": [41, 41], "expect": "L3"},
-    {"args": [60, 60], "expect": "L3"},
-    {"args": [61, 61], "expect": "L4"},
-    {"args": [80, 80], "expect": "L4"},
-    {"args": [81, 81], "expect": "L5"},
-    {"args": [100, 100], "expect": "L5"}
+    {
+     "args": [
+      0,
+      0
+     ],
+     "expect": "L1"
+    },
+    {
+     "args": [
+      20,
+      20
+     ],
+     "expect": "L1"
+    },
+    {
+     "args": [
+      21,
+      21
+     ],
+     "expect": "L2"
+    },
+    {
+     "args": [
+      40,
+      40
+     ],
+     "expect": "L2"
+    },
+    {
+     "args": [
+      41,
+      41
+     ],
+     "expect": "L3"
+    },
+    {
+     "args": [
+      60,
+      60
+     ],
+     "expect": "L3"
+    },
+    {
+     "args": [
+      61,
+      61
+     ],
+     "expect": "L4"
+    },
+    {
+     "args": [
+      80,
+      80
+     ],
+     "expect": "L4"
+    },
+    {
+     "args": [
+      81,
+      81
+     ],
+     "expect": "L5"
+    },
+    {
+     "args": [
+      100,
+      100
+     ],
+     "expect": "L5"
+    }
    ]
   },
   "testId": "packages/ling_core/test/cover_test.dart::封面等级端点"
@@ -60,13 +171,23 @@
  {
   "id": "SYS-RULE-012",
   "title": "亲密度档 D1-D5 与情绪档 E1-E4 在端点取到唯一档位",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.1"],
-  "screens": ["H6"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.1"
+  ],
+  "screens": [
+   "H6"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["0-100 的亲密度与 0-100 的情绪分"],
-  "when": ["按 5.1 的档位区间映射"],
+  "given": [
+   "0-100 的亲密度与 0-100 的情绪分"
+  ],
+  "when": [
+   "按 5.1 的档位区间映射"
+  ],
   "then": [
    "亲密度档按 20 分一档切为 5 档",
    "情绪档按 25 分一档切为 4 档",
@@ -75,16 +196,66 @@
   "oracle": {
    "fn": "intimacy_tier",
    "cases": [
-    {"args": [0], "expect": "D1"},
-    {"args": [20], "expect": "D1"},
-    {"args": [21], "expect": "D2"},
-    {"args": [40], "expect": "D2"},
-    {"args": [41], "expect": "D3"},
-    {"args": [60], "expect": "D3"},
-    {"args": [61], "expect": "D4"},
-    {"args": [80], "expect": "D4"},
-    {"args": [81], "expect": "D5"},
-    {"args": [100], "expect": "D5"}
+    {
+     "args": [
+      0
+     ],
+     "expect": "D1"
+    },
+    {
+     "args": [
+      20
+     ],
+     "expect": "D1"
+    },
+    {
+     "args": [
+      21
+     ],
+     "expect": "D2"
+    },
+    {
+     "args": [
+      40
+     ],
+     "expect": "D2"
+    },
+    {
+     "args": [
+      41
+     ],
+     "expect": "D3"
+    },
+    {
+     "args": [
+      60
+     ],
+     "expect": "D3"
+    },
+    {
+     "args": [
+      61
+     ],
+     "expect": "D4"
+    },
+    {
+     "args": [
+      80
+     ],
+     "expect": "D4"
+    },
+    {
+     "args": [
+      81
+     ],
+     "expect": "D5"
+    },
+    {
+     "args": [
+      100
+     ],
+     "expect": "D5"
+    }
    ]
   },
   "testId": "packages/ling_core/test/cover_test.dart::亲密度档端点"
@@ -92,25 +263,77 @@
  {
   "id": "SYS-RULE-013",
   "title": "情绪档 E1-E4 在端点取到唯一档位",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.1"],
-  "screens": ["H6"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.1"
+  ],
+  "screens": [
+   "H6"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["0-100 的情绪分"],
-  "when": ["按 5.1 的情绪档区间映射"],
-  "then": ["E1 覆盖 0-25，E2 覆盖 26-50，E3 覆盖 51-75，E4 覆盖 76-100"],
+  "given": [
+   "0-100 的情绪分"
+  ],
+  "when": [
+   "按 5.1 的情绪档区间映射"
+  ],
+  "then": [
+   "E1 覆盖 0-25，E2 覆盖 26-50，E3 覆盖 51-75，E4 覆盖 76-100"
+  ],
   "oracle": {
    "fn": "emotion_tier",
    "cases": [
-    {"args": [0], "expect": "E1"},
-    {"args": [25], "expect": "E1"},
-    {"args": [26], "expect": "E2"},
-    {"args": [50], "expect": "E2"},
-    {"args": [51], "expect": "E3"},
-    {"args": [75], "expect": "E3"},
-    {"args": [76], "expect": "E4"},
-    {"args": [100], "expect": "E4"}
+    {
+     "args": [
+      0
+     ],
+     "expect": "E1"
+    },
+    {
+     "args": [
+      25
+     ],
+     "expect": "E1"
+    },
+    {
+     "args": [
+      26
+     ],
+     "expect": "E2"
+    },
+    {
+     "args": [
+      50
+     ],
+     "expect": "E2"
+    },
+    {
+     "args": [
+      51
+     ],
+     "expect": "E3"
+    },
+    {
+     "args": [
+      75
+     ],
+     "expect": "E3"
+    },
+    {
+     "args": [
+      76
+     ],
+     "expect": "E4"
+    },
+    {
+     "args": [
+      100
+     ],
+     "expect": "E4"
+    }
    ]
   },
   "testId": "packages/ling_core/test/cover_test.dart::情绪档端点"
@@ -118,13 +341,24 @@
  {
   "id": "SYS-RULE-014",
   "title": "池内变体由档位中值差决定，5×4 查找表的 20 个格子逐一对应",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.2"],
-  "screens": ["C1", "H6"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.2"
+  ],
+  "screens": [
+   "C1",
+   "H6"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一组亲密度档与情绪档"],
-  "when": ["按中值差 gap = 亲密度档中值 − 情绪档中值 判定变体"],
+  "given": [
+   "一组亲密度档与情绪档"
+  ],
+  "when": [
+   "按中值差 gap = 亲密度档中值 − 情绪档中值 判定变体"
+  ],
   "then": [
    "gap ≤ −25 得 V1，−25 < gap < 0 得 V2，0 ≤ gap < 25 得 V3，gap ≥ 25 得 V4",
    "20 个档位组合各命中唯一变体，与需求 5.2 的查找表逐格一致"
@@ -132,26 +366,146 @@
   "oracle": {
    "fn": "cover_variant",
    "cases": [
-    {"args": ["D1", "E1"], "expect": "V2"},
-    {"args": ["D1", "E2"], "expect": "V1"},
-    {"args": ["D1", "E3"], "expect": "V1"},
-    {"args": ["D1", "E4"], "expect": "V1"},
-    {"args": ["D2", "E1"], "expect": "V3"},
-    {"args": ["D2", "E2"], "expect": "V2"},
-    {"args": ["D2", "E3"], "expect": "V1"},
-    {"args": ["D2", "E4"], "expect": "V1"},
-    {"args": ["D3", "E1"], "expect": "V4"},
-    {"args": ["D3", "E2"], "expect": "V3"},
-    {"args": ["D3", "E3"], "expect": "V2"},
-    {"args": ["D3", "E4"], "expect": "V1"},
-    {"args": ["D4", "E1"], "expect": "V4"},
-    {"args": ["D4", "E2"], "expect": "V4"},
-    {"args": ["D4", "E3"], "expect": "V3"},
-    {"args": ["D4", "E4"], "expect": "V2"},
-    {"args": ["D5", "E1"], "expect": "V4"},
-    {"args": ["D5", "E2"], "expect": "V4"},
-    {"args": ["D5", "E3"], "expect": "V4"},
-    {"args": ["D5", "E4"], "expect": "V3"}
+    {
+     "args": [
+      "D1",
+      "E1"
+     ],
+     "expect": "V2"
+    },
+    {
+     "args": [
+      "D1",
+      "E2"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D1",
+      "E3"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D1",
+      "E4"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D2",
+      "E1"
+     ],
+     "expect": "V3"
+    },
+    {
+     "args": [
+      "D2",
+      "E2"
+     ],
+     "expect": "V2"
+    },
+    {
+     "args": [
+      "D2",
+      "E3"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D2",
+      "E4"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D3",
+      "E1"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D3",
+      "E2"
+     ],
+     "expect": "V3"
+    },
+    {
+     "args": [
+      "D3",
+      "E3"
+     ],
+     "expect": "V2"
+    },
+    {
+     "args": [
+      "D3",
+      "E4"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D4",
+      "E1"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D4",
+      "E2"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D4",
+      "E3"
+     ],
+     "expect": "V3"
+    },
+    {
+     "args": [
+      "D4",
+      "E4"
+     ],
+     "expect": "V2"
+    },
+    {
+     "args": [
+      "D5",
+      "E1"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D5",
+      "E2"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D5",
+      "E3"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D5",
+      "E4"
+     ],
+     "expect": "V3"
+    }
    ]
   },
   "testId": "packages/ling_core/test/cover_test.dart::池内变体查找表"
@@ -159,13 +513,23 @@
  {
   "id": "SYS-RULE-015",
   "title": "穷举全部整数输入得到 18 个可达子池，不可达子池恰为 L1V4 与 L5V1",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.2"],
-  "screens": ["H6"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.2"
+  ],
+  "screens": [
+   "H6"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["亲密度与情绪分各取 0-100 的全部整数，共 10201 组输入"],
-  "when": ["对每组输入求 (封面等级, 池内变体)"],
+  "given": [
+   "亲密度与情绪分各取 0-100 的全部整数，共 10201 组输入"
+  ],
+  "when": [
+   "对每组输入求 (封面等级, 池内变体)"
+  ],
   "then": [
    "可达子池共 18 个，对应 90 张实际出图",
    "不可达子池恰为 (L1, V4) 与 (L5, V1)，因综合关系分由亲密度与情绪分推导，这两组在算术上无法成立",
@@ -180,13 +544,24 @@
  {
   "id": "SYS-RULE-016",
   "title": "同一日期在同一档位组合下稳定取到同一张封面图",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.2"],
-  "screens": ["B3", "C1"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.2"
+  ],
+  "screens": [
+   "B3",
+   "C1"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["亲密度 90、情绪分 82，日期为 2026-11-11"],
-  "when": ["反复执行封面选图"],
+  "given": [
+   "亲密度 90、情绪分 82，日期为 2026-11-11"
+  ],
+  "when": [
+   "反复执行封面选图"
+  ],
   "then": [
    "assetKey 恒为 cover/L5/V3/4",
    "索引由 FNV-1a 32 位哈希对子池张数取模得出，跨进程、跨设备结果一致",
@@ -195,11 +570,71 @@
   "oracle": {
    "fn": "select_cover",
    "cases": [
-    {"args": [90, 82, "2026-11-11"], "expect": {"level": "L5", "variant": "V3", "assetKey": "cover/L5/V3/4", "reachable": true}},
-    {"args": [90, 82, "2026-01-01"], "expect": {"level": "L5", "variant": "V3", "assetKey": "cover/L5/V3/3", "reachable": true}},
-    {"args": [90, 82, "2026-11-24"], "expect": {"level": "L5", "variant": "V3", "assetKey": "cover/L5/V3/1", "reachable": true}},
-    {"args": [0, 0, "2026-01-01"], "expect": {"level": "L1", "variant": "V2", "assetKey": "cover/L1/V2/3", "reachable": true}},
-    {"args": [100, 100, "2026-01-01"], "expect": {"level": "L5", "variant": "V3", "assetKey": "cover/L5/V3/3", "reachable": true}}
+    {
+     "args": [
+      90,
+      82,
+      "2026-11-11"
+     ],
+     "expect": {
+      "level": "L5",
+      "variant": "V3",
+      "assetKey": "cover/L5/V3/4",
+      "reachable": true
+     }
+    },
+    {
+     "args": [
+      90,
+      82,
+      "2026-01-01"
+     ],
+     "expect": {
+      "level": "L5",
+      "variant": "V3",
+      "assetKey": "cover/L5/V3/3",
+      "reachable": true
+     }
+    },
+    {
+     "args": [
+      90,
+      82,
+      "2026-11-24"
+     ],
+     "expect": {
+      "level": "L5",
+      "variant": "V3",
+      "assetKey": "cover/L5/V3/1",
+      "reachable": true
+     }
+    },
+    {
+     "args": [
+      0,
+      0,
+      "2026-01-01"
+     ],
+     "expect": {
+      "level": "L1",
+      "variant": "V2",
+      "assetKey": "cover/L1/V2/3",
+      "reachable": true
+     }
+    },
+    {
+     "args": [
+      100,
+      100,
+      "2026-01-01"
+     ],
+     "expect": {
+      "level": "L5",
+      "variant": "V3",
+      "assetKey": "cover/L5/V3/3",
+      "reachable": true
+     }
+    }
    ]
   },
   "testId": "packages/ling_core/test/cover_test.dart::日期哈希稳定选图"
@@ -207,13 +642,21 @@
  {
   "id": "SYS-RULE-017",
   "title": "FNV-1a 哈希对固定输入给出固定值，Dart 与 Python 结果一致",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.2"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.2"
+  ],
   "screens": [],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一组日期字符串"],
-  "when": ["执行 stableHash"],
+  "given": [
+   "一组日期字符串"
+  ],
+  "when": [
+   "执行 stableHash"
+  ],
   "then": [
    "空串得 FNV-1a 偏移基准 2166136261",
    "固定日期得固定 32 位无符号整数",
@@ -222,10 +665,30 @@
   "oracle": {
    "fn": "stable_hash",
    "cases": [
-    {"args": [""], "expect": 2166136261},
-    {"args": ["2026-01-01"], "expect": 2049302883},
-    {"args": ["2026-11-11"], "expect": 1830542489},
-    {"args": ["2026-11-24"], "expect": 35190161}
+    {
+     "args": [
+      ""
+     ],
+     "expect": 2166136261
+    },
+    {
+     "args": [
+      "2026-01-01"
+     ],
+     "expect": 2049302883
+    },
+    {
+     "args": [
+      "2026-11-11"
+     ],
+     "expect": 1830542489
+    },
+    {
+     "args": [
+      "2026-11-24"
+     ],
+     "expect": 35190161
+    }
    ]
   },
   "testId": "packages/ling_core/test/cover_test.dart::稳定哈希跨语言一致"
@@ -233,13 +696,26 @@
  {
   "id": "SYS-COVER-001",
   "title": "封面情绪蒙层不透明度按主题取 4 个固定值",
-  "req": ["REQ-16-32"],
-  "reqSection": ["5.3", "11.2"],
-  "screens": ["C1", "H2", "H3"],
+  "req": [
+   "REQ-16-32"
+  ],
+  "reqSection": [
+   "5.3",
+   "11.2"
+  ],
+  "screens": [
+   "C1",
+   "H2",
+   "H3"
+  ],
   "layer": "widget",
   "priority": "P1",
-  "given": ["日卡片处于封面状态，评估成功且情绪色系已确定"],
-  "when": ["依次切换纸月历、星图、色域、磨砂玻璃四套主题"],
+  "given": [
+   "日卡片处于封面状态，评估成功且情绪色系已确定"
+  ],
+  "when": [
+   "依次切换纸月历、星图、色域、磨砂玻璃四套主题"
+  ],
   "then": [
    "四套主题均展示封面图，情绪色块以蒙层叠加在封面图之上",
    "不透明度依次为 15%、15%、45%、30%",
@@ -250,13 +726,23 @@
  {
   "id": "SYS-COVER-002",
   "title": "不可达子池命中时回落到占位图并记录告警",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.2"],
-  "screens": ["C1"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.2"
+  ],
+  "screens": [
+   "C1"
+  ],
   "layer": "service",
   "priority": "P1",
-  "given": ["封面寻址因资源缺失或档位组合异常落到不可达子池"],
-  "when": ["请求封面图"],
+  "given": [
+   "封面寻址因资源缺失或档位组合异常落到不可达子池"
+  ],
+  "when": [
+   "请求封面图"
+  ],
   "then": [
    "返回占位图 cover/placeholder，日卡片保持可渲染",
    "记录一条告警日志，内容含等级与变体",
@@ -267,13 +753,21 @@
  {
   "id": "SYS-COVER-003",
   "title": "封面资源清单与寻址表在构建期校验一致",
-  "req": ["REQ-16-33"],
-  "reqSection": ["5.2"],
+  "req": [
+   "REQ-16-33"
+  ],
+  "reqSection": [
+   "5.2"
+  ],
   "screens": [],
   "layer": "integration",
   "priority": "P1",
-  "given": ["assets/cover/manifest.json 声明每个子池的图片张数"],
-  "when": ["执行构建期资源校验"],
+  "given": [
+   "assets/cover/manifest.json 声明每个子池的图片张数"
+  ],
+  "when": [
+   "执行构建期资源校验"
+  ],
   "then": [
    "18 个可达子池在清单中均有记录且张数大于 0",
    "清单中出现寻址表以外的子池时校验失败",

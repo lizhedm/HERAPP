@@ -209,6 +209,30 @@
    "timing": "下次同步",
    "requirement": "6.2"
   },
+  "thresholds.gateGraceMinutes": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "10",
+   "range": "1-120",
+   "timing": "即时",
+   "requirement": "3.10"
+  },
+  "thresholds.gateMaxAttempts": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "5",
+   "range": "3-10",
+   "timing": "即时",
+   "requirement": "3.10"
+  },
+  "thresholds.gateLockoutSeconds": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "60",
+   "range": "30-600",
+   "timing": "即时",
+   "requirement": "3.10"
+  },
   "coverPools.manifestPath": {
    "section": "coverPools 封面资源池",
    "type": "string",
@@ -233,6 +257,38 @@
    "timing": "启动",
    "requirement": "10.3"
   },
+  "gate.password": {
+   "section": "gate 访问密码",
+   "type": "string",
+   "default": "`QWEasdZXC@2026`",
+   "range": "长度不少于 8 位且含字母与数字",
+   "timing": "下次同步",
+   "requirement": "3.10"
+  },
+  "gate.hashAlgo": {
+   "section": "gate 访问密码",
+   "type": "string",
+   "default": "`argon2id`",
+   "range": "固定值",
+   "timing": "启动",
+   "requirement": "3.10"
+  },
+  "gate.defaultPasswordHash": {
+   "section": "gate 访问密码",
+   "type": "string",
+   "default": "无，必填",
+   "range": "argon2id 哈希串",
+   "timing": "启动",
+   "requirement": "3.10"
+  },
+  "gate.defaultSalt": {
+   "section": "gate 访问密码",
+   "type": "string",
+   "default": "无，必填",
+   "range": "base64 编码的 16 字节盐值",
+   "timing": "启动",
+   "requirement": "3.10"
+  },
   "theme": {
    "section": "UserPreference 用户可写偏好",
    "type": "Theme",
@@ -245,7 +301,7 @@
    "section": "UserPreference 用户可写偏好",
    "type": "CardState",
    "default": "`COVER`",
-   "range": "需求 14.1 的 3 个取值",
+   "range": "需求 14.1 的 2 个取值",
    "timing": "下次进入月视图",
    "requirement": "12.4、13"
   },

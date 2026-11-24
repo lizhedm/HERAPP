@@ -90,7 +90,7 @@ table.tb th{background:#ededed}
   <p><b>图例</b>：实线框＝已明确元素；<span class="box d" style="display:inline-block;padding:0 4px">虚线框</span>＝占位/未填充数据；斜线块＝图片占位；<span class="tbd" style="display:inline-block;padding:0 5px"><b>规则</b>执行规则</span>＝该屏适用的判定规则，位于手机壳外。</p>
   <p><b>底部导航（固定 5 项）</b>：时间墙 / 趋势 / 喜好与礼物 / 回忆 / 设置。</p>
   <div class="idx">
-    <a href="#ga">A 启动与同步（8 屏）</a><a href="#gb">B 时间墙 年→月份→月（5 屏）</a><a href="#gc">C 日卡片三态与长按（7 屏）</a>
+    <a href="#ga">A 启动与同步（10 屏）</a><a href="#gb">B 时间墙 年→月份→月（5 屏）</a><a href="#gc">C 日卡片两态与长按（7 屏）</a>
     <a href="#gd">D 日详情与评估（9 屏）</a><a href="#ge">E 趋势与热力图（4 屏）</a><a href="#gf">F 喜好与礼物（14 屏）</a>
     <a href="#gg">G 回忆（高光）（4 屏）</a><a href="#gh">H 设置（8 屏）</a><a href="#rules">规则速查</a><a href="#coverpool">封面资源寻址</a>
   </div>
@@ -100,17 +100,19 @@ table.tb th{background:#ededed}
 <h4 style="margin:0 0 4px;font-size:13px">核心交互流程总图</h4>
 <pre class="flow">
 启动
- └─ A1 启动页 ──ConfigService 读 AppConfig · 超时上限 8s
-      ├─ 超时 ────────────────────► A2 配置加载超时 CONFIG_TIMEOUT ──► 重新加载（重新计时）
-      ├─ 配置缺失 ────────────────► A3 待配置 PENDING_CONFIG（只读提示页）
-      ├─ 401/403 ────────────────► A4 鉴权失败 AUTH_FAILED（只读提示页）
-      └─ 配置有效 ─► A5 同步中 SYNCING ─ manifest → 比对 date+version/ETag → 增量拉日文件
-                        ├─ 用户取消 ──► A6 已取消 CANCELLED（已落盘保留 · 继续同步断点续传）
-                        ├─ FAILED ───► A7 同步失败（失败原因分类 + 重试 / 离线查看）
-                        ├─ PARTIAL ──► A8 部分成功（失败日期列表 · 单日重试 + 批量重试）
-                        └─ SUCCESS ──► StatsService 本地统计 → EvaluationService 送 AI
-                                        │  AI: PENDING → RUNNING → SUCCESS / FAILED / STALE
-                                        │  AI 输出含 confidence，置信度 &lt;40 → 日天气 FOG；0 消息日与当天保持 PENDING
+ └─ A1 启动页 ── 读配置 · 超时上限 8s
+      ├─ 超时 ────────────────────► A4 配置加载超时 ──► 重新加载（重新计时）
+      ├─ 配置缺失 ────────────────► A5 待配置（只读提示页）
+      ├─ 401/403 ────────────────► A6 鉴权失败（只读提示页）
+      └─ 配置有效 ─► A2 密码门禁（免输入有效期 10 分钟 · 本地比对哈希 · 断网可用）
+                        ├─ 连续错误 5 次 ──► A3 锁定 60 秒（跨重启保留）
+                        └─ 校验通过 ─► A7 同步中 ─ 日清单 → 比对 → 增量拉日文件 → 提交回写队列
+                        ├─ 用户取消 ──► A8 已取消（已落盘保留 · 继续同步断点续传）
+                        ├─ 失败 ─────► A9 同步失败（失败原因分类 + 重试 / 离线查看）
+                        ├─ 部分成功 ──► A10 部分成功（失败日期列表 · 单日重试 + 批量重试）
+                        └─ 成功 ─────► 本地统计 → 送 AI 评估
+                                        │  评估状态：待评估 → 评估中 → 成功 / 失败 / 待重评
+                                        │  置信度 &lt;40 → 日天气雾；0 消息日与当天保持待评估
                                         │  调度：日期倒序 · 并发 3 · 单次上限 300 · 超出部分进日详情时单日评估
                                         ▼
                                      B1 年视图（无数据 → B0 空状态）· 展示年度均分
@@ -120,12 +122,12 @@ table.tb th{background:#ededed}
                                         │ 点击有记录月份
                                         ▼
                                      B3 月视图 日卡片墙（2 列 · 顶部月份切换器 + 本月天气/均分 · B4 为周定位态）
-                                        ├─ 点击卡片主体 ──► C1 封面 → C2 日期数字 → C3 总结 → C1（每张卡片独立切换，进入月视图时按默认状态初始化）
-                                        │                     ├─ 评估缺失 ──► C4 占位封面降级
-                                        │                     └─ 未同步日 ──► C5 占位态（长按可编辑总结/备注）
-                                        ├─ 长按卡片 ──► C6 底部动作面板（收藏 / 编辑总结 / 添加备注）
-                                        │                     ├─ 编辑总结 ──► C7 编辑总结（≤50 字 · 恢复为 AI 总结 · 未保存二次确认）
-                                        │                     └─ 添加备注 ──► C8 备注（≤200 字 · 非空显示备注图标）
+                                        ├─ 点击卡片主体 ──► C1 封面态 ⇄ C2 一句话总结态（每张卡片独立切换，进入月视图时按默认状态初始化）
+                                        │                     ├─ 评估缺失 ──► C3 占位封面降级
+                                        │                     └─ 未同步日 ──► C4 占位态（长按可编辑总结/备注）
+                                        ├─ 长按卡片 ──► C5 底部动作面板（收藏 / 编辑总结 / 添加备注）
+                                        │                     ├─ 编辑总结 ──► C6 编辑总结（≤120 字 · 恢复为 AI 总结 · 未保存二次确认）
+                                        │                     └─ 添加备注 ──► C7 备注（≤200 字 · 非空显示备注图标）
                                         └─ 点击右下角箭头 ──► D1 日详情
                                                               ├─ 展开互动统计 ──► D2（12 项 · 占比用堆叠条 · 连续段阈值 30 分钟）
                                                               ├─ RUNNING ──► D3 评估中
@@ -172,12 +174,12 @@ table.tb th{background:#ededed}
               ├─ 隐私说明 ──► H5
               ├─ 封面与天气规则说明 ──► H6（两套综合分公式 + L1-L5 + 天气优先级 + 情绪色系）
               ├─ 关于 ──► H7（五条版本轴 / 资源来源 / 数据来源 / 存储位置）
-              └─ 失败日期列表 ──► H8（单日重试 + 批量重试，与 A8 同组件）
+              └─ 失败日期列表 ──► H8（单日重试 + 批量重试，与 A10 同组件）
 </pre>
 </div>
 <div class="grp" id="ga">
 <h2>A · 启动与同步（需求 3）</h2>
-<div class="gnote">应用启动必经链路。配置与鉴权凭据由代码或配置文件提供，待配置页与鉴权失败页均为只读提示页。同步状态枚举：IDLE / SYNCING / CANCELLED / SUCCESS / PARTIAL_SUCCESS / FAILED / PENDING_CONFIG / AUTH_FAILED / CONFIG_TIMEOUT。</div>
+<div class="gnote">应用启动必经链路：读配置 → 密码门禁 → 同步 → 时间墙。配置与鉴权凭据由配置文件提供，待配置页与鉴权失败页均为只读提示页。门禁校验通过后 10 分钟内重新进入直接放行，有效期内不展示门禁页。</div>
 <div class="screens">
 <div class="screen">
   <div class="sc-head"><span class="sid">A1</span><h3>启动页 · 配置加载（加载中）</h3>
@@ -189,11 +191,40 @@ table.tb th{background:#ededed}
     <div class="box d" style="width:100%">读取配置中…</div>
     <div class="skel" style="width:70%"></div>
   </div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>应用图标与名称</li><li>加载提示「读取配置中…」</li><li>骨架占位条</li><li>读取内容：sync / ai / thresholds / coverPools / cardDefaultState / displayPreference</li></ul><h4>用户可执行操作</h4><ul><li>等待加载完成（无可点击元素）</li></ul><h4>操作后去向</h4><ul><li>配置有效 <span class="to">→ A5 同步中</span></li><li>配置缺失或关键字段为空 <span class="to">→ A3 待配置</span></li><li>返回 401/403 <span class="to">→ A4 鉴权失败</span></li><li>超过 8 秒 <span class="to">→ A2 配置加载超时</span></li></ul><div class="tbd"><b>规则</b>启动页存在，加载超时上限 8 秒。</div><div class="tbd"><b>规则</b>鉴权凭据由配置文件提供，配置有效即直接进入同步流程。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>应用图标与名称</li><li>加载提示「读取配置中…」</li><li>骨架占位条</li></ul><h4>用户可执行操作</h4><ul><li>等待加载完成（无可点击元素）</li></ul><h4>操作后去向</h4><ul><li>配置有效 <span class="to">→ A2 密码门禁</span></li><li>配置缺失或关键字段为空 <span class="to">→ A5 待配置</span></li><li>返回 401/403 <span class="to">→ A6 鉴权失败</span></li><li>超过 8 秒 <span class="to">→ A4 配置加载超时</span></li></ul><div class="tbd"><b>规则</b>启动页存在，加载超时上限 8 秒。</div><div class="tbd"><b>规则</b>读取内容为同步、AI、阈值、封面资源池、默认卡片状态与显示偏好六组配置，均不在界面上呈现。</div><div class="tbd"><b>规则</b>配置有效后进入密码门禁；免输入有效期内直接进入同步流程。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">A2</span><h3>配置加载超时 CONFIG_TIMEOUT（异常）</h3>
+  <div class="sc-head"><span class="sid">A2</span><h3>密码门禁 · 输入访问密码</h3>
+  <span class="pos">流程位置：配置加载成功后 · 免输入有效期外必经</span></div>
+  <div class="sc-body">
+    <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="body"><div class="ctr">
+    <div class="img" style="width:48px;height:48px">LOGO</div>
+    <div style="font-size:11px;font-weight:700">LingLing</div>
+    <div style="font-size:9px;color:#666">请输入访问密码</div>
+    <div class="inp" style="width:100%;text-align:center;letter-spacing:3px;font-size:12px">● ● ● ● ● ●</div>
+    <div class="btn pri" style="width:100%">进入</div>
+  </div></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>应用图标与名称</li><li>提示文案「请输入访问密码」</li><li>密码输入框，输入内容以圆点遮蔽</li><li>「进入」按钮，输入框为空时置灰</li><li>页面不展示任何聊天、评分或总结内容</li></ul><h4>用户可执行操作</h4><ul><li>输入密码</li><li>点击「进入」</li></ul><h4>操作后去向</h4><ul><li>密码正确 <span class="to">→ A4 同步中</span></li><li>密码错误 <span class="to">→ A2 本屏（提示「密码错误」并清空输入框）</span></li><li>连续错误 5 次 <span class="to">→ A3 门禁锁定</span></li></ul><div class="tbd"><b>规则</b>校验通过后 10 分钟内重新进入应用直接放行，不展示本页。</div><div class="tbd"><b>规则</b>有效期按单调时钟计时，修改设备系统时间不延长有效期。</div><div class="tbd"><b>规则</b>应用退到后台不清除有效期；设置页点击「锁定」立即清除，下次进入重新输入。</div><div class="tbd"><b>规则</b>客户端在本地比对密码哈希，不发起网络请求，断网时门禁照常工作。</div><div class="tbd"><b>规则</b>密码由后端持有并在每次成功同步时刷新，后台改密码后各端在下一次同步后生效。</div></div>
+  </div>
+</div>
+<div class="screen">
+  <div class="sc-head"><span class="sid">A3</span><h3>密码门禁 · 连续错误锁定</h3>
+  <span class="pos">流程位置：A2 连续输错 5 次后</span></div>
+  <div class="sc-body">
+    <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="body"><div class="ctr">
+    <div class="img" style="width:48px;height:48px">LOGO</div>
+    <div style="font-size:11px;font-weight:700">LingLing</div>
+    <div class="box" style="width:100%;font-size:9px;color:#444;text-align:center">
+      密码错误次数过多<br>请在 47 秒后重试</div>
+    <div class="inp d" style="width:100%;text-align:center;color:#bbb;letter-spacing:3px">输入已暂时停用</div>
+    <div class="btn d" style="width:100%;color:#bbb">进入</div>
+  </div></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>提示文案「密码错误次数过多」与剩余秒数倒计时</li><li>输入框为禁用态，显示「输入已暂时停用」</li><li>「进入」按钮为禁用态</li><li>页面不展示任何数据内容</li></ul><h4>用户可执行操作</h4><ul><li>等待倒计时结束</li></ul><h4>操作后去向</h4><ul><li>倒计时结束 <span class="to">→ A2 密码门禁（输入框恢复）</span></li></ul><div class="tbd"><b>规则</b>连续输入错误 5 次锁定 60 秒，期间输入框禁用并显示剩余秒数。</div><div class="tbd"><b>规则</b>锁定状态与错误次数保存在本地，重启应用后继续生效。</div><div class="tbd"><b>规则</b>锁定结束后再次输错立即重新锁定 60 秒，错误尝试的速率上限不变。</div></div>
+  </div>
+</div>
+<div class="screen">
+  <div class="sc-head"><span class="sid">A4</span><h3>配置加载超时（异常）</h3>
   <span class="pos">流程位置：A1 之后分支 · 加载超过 8 秒</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="body"><div class="ctr">
@@ -202,11 +233,11 @@ table.tb th{background:#ededed}
     <div class="box" style="width:100%;font-size:9.5px;color:#444">请检查应用配置文件后重新启动</div>
     <div class="btn pri" style="width:100%">重新加载</div>
   </div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>超时图标</li><li>标题「配置加载超时」</li><li>正文「配置加载超时，请检查应用配置文件后重新启动」</li><li>「重新加载」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新加载」</li></ul><h4>操作后去向</h4><ul><li>重新计时后配置有效 <span class="to">→ A5 同步中</span></li><li>再次超时 <span class="to">→ A2 本屏</span></li><li>配置缺失 <span class="to">→ A3 待配置</span></li></ul><div class="tbd"><b>规则</b>加载超时上限 8 秒；点击「重新加载」重新计时。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>超时图标</li><li>标题「配置加载超时」</li><li>正文「配置加载超时，请检查应用配置文件后重新启动」</li><li>「重新加载」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新加载」</li></ul><h4>操作后去向</h4><ul><li>重新计时后配置有效 <span class="to">→ A2 密码门禁</span></li><li>再次超时 <span class="to">→ A4 本屏</span></li><li>配置缺失 <span class="to">→ A5 待配置</span></li></ul><div class="tbd"><b>规则</b>加载超时上限 8 秒；点击「重新加载」重新计时。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">A3</span><h3>待配置 PENDING_CONFIG（异常）</h3>
+  <div class="sc-head"><span class="sid">A5</span><h3>待配置（异常）</h3>
   <span class="pos">流程位置：A1 之后分支 · 配置缺失或关键字段为空</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="body"><div class="ctr">
@@ -218,11 +249,11 @@ table.tb th{background:#ededed}
     <div class="btn" style="width:100%">重新加载配置</div>
     <div class="btn" style="width:100%">查看配置说明</div>
   </div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>只读提示图标与标题</li><li>正文说明配置由代码或配置文件提供</li><li>「重新加载配置」按钮</li><li>「查看配置说明」入口</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新加载配置」</li><li>点击「查看配置说明」</li></ul><h4>操作后去向</h4><ul><li>配置已补全 <span class="to">→ A5 同步中</span></li><li>仍缺失 <span class="to">→ A3 本屏</span></li><li>查看说明 <span class="to">→ H6 封面与天气规则说明 / H5 隐私说明</span></li></ul><div class="tbd"><b>规则</b>配置由代码或配置文件维护，本屏操作限于重新加载与查看说明。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>只读提示图标与标题</li><li>正文说明配置由代码或配置文件提供</li><li>「重新加载配置」按钮</li><li>「查看配置说明」入口</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新加载配置」</li><li>点击「查看配置说明」</li></ul><h4>操作后去向</h4><ul><li>配置已补全 <span class="to">→ A7 同步中</span></li><li>仍缺失 <span class="to">→ A5 本屏</span></li><li>查看说明 <span class="to">→ H6 封面与天气规则说明 / H5 隐私说明</span></li></ul><div class="tbd"><b>规则</b>配置由代码或配置文件维护，本屏操作限于重新加载与查看说明。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">A4</span><h3>鉴权失败 AUTH_FAILED（异常）</h3>
+  <div class="sc-head"><span class="sid">A6</span><h3>鉴权失败（异常）</h3>
   <span class="pos">流程位置：同步请求返回 401 / 403</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="body"><div class="ctr">
@@ -234,11 +265,11 @@ table.tb th{background:#ededed}
     <div class="btn pri" style="width:100%">重试同步</div>
     <div class="btn" style="width:100%">离线查看已同步内容</div>
   </div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>失败图标与标题「鉴权失败」</li><li>正文「配置文件中的 Token 已失效，请更新配置文件后重新启动应用」</li><li>「重试同步」按钮</li><li>「离线查看已同步内容」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「重试同步」</li><li>点击「离线查看已同步内容」</li></ul><h4>操作后去向</h4><ul><li>鉴权通过 <span class="to">→ A5 同步中</span></li><li>仍失败 <span class="to">→ A4 本屏</span></li><li>离线查看 <span class="to">→ B1 年视图（仅已同步数据）</span></li></ul><div class="tbd"><b>规则</b>Token 由配置文件维护，本屏操作限于重试同步与离线查看。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>失败图标与标题「鉴权失败」</li><li>正文「配置文件中的 Token 已失效，请更新配置文件后重新启动应用」</li><li>「重试同步」按钮</li><li>「离线查看已同步内容」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「重试同步」</li><li>点击「离线查看已同步内容」</li></ul><h4>操作后去向</h4><ul><li>鉴权通过 <span class="to">→ A7 同步中</span></li><li>仍失败 <span class="to">→ A6 本屏</span></li><li>离线查看 <span class="to">→ B1 年视图（仅已同步数据）</span></li></ul><div class="tbd"><b>规则</b>Token 由配置文件维护，本屏操作限于重试同步与离线查看。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">A5</span><h3>同步中 SYNCING（加载中）</h3>
+  <div class="sc-head"><span class="sid">A7</span><h3>同步中（加载中）</h3>
   <span class="pos">流程位置：配置有效后自动进入 · 可中途取消</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>时间墙</span></div><div class="body"><div class="box" style="background:#f0f0f0">
@@ -246,7 +277,7 @@ table.tb th{background:#ededed}
       <div class="skel" style="width:40%;margin-top:3px"></div>
     </div>
     <div class="box" style="font-size:9px;line-height:1.7">
-      ✓ 请求 manifest<br>
+      ✓ 获取日期清单<br>
       ✓ 比对本地版本<br>
       ✓ 拉取日文件 30/30<br>
       ✓ 本地统计<br>
@@ -258,12 +289,12 @@ table.tb th{background:#ededed}
     <div class="g3">
       <div class="dcard">11</div><div class="dcard">12</div><div class="dcard d"></div>
     </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>同步阶段清单（manifest → 比对 → 拉取 → 统计 → 评估）</li><li>批量进度与评估进度「评估中 N / M」</li><li>「取消同步」按钮</li><li>已同步卡片可浏览区</li></ul><h4>用户可执行操作</h4><ul><li>点击「取消同步」</li><li>继续浏览已同步内容</li><li>切底部导航 <span class="to">→ B1 / E1 / F1 / G1 / H1</span></li></ul><h4>操作后去向</h4><ul><li>全部成功 <span class="to">→ B1 年视图</span></li><li>用户取消 <span class="to">→ A6 已取消</span></li><li>部分日期失败 <span class="to">→ A8 部分成功</span></li><li>整体失败 <span class="to">→ A7 同步失败</span></li><li>401/403 <span class="to">→ A4 鉴权失败</span></li></ul><div class="tbd"><b>规则</b>「取消同步」停止发起新请求，中断正在传输的请求，已完整落盘的日文件保留；同时清空待执行的 AI 评估队列，正在执行的单日评估保留至结束。</div><div class="tbd"><b>规则</b>评估调度：本次新增或变更的全部日期立即入队，按日期倒序从最近开始，并发 3，单次同步上限 300 个日期。</div><div class="tbd"><b>规则</b>超过 300 个时取最近 300 个入队，更早日期保持待评估，用户进入其日详情时触发单日评估。</div><div class="tbd"><b>规则</b>当天为进行中日期，不进入评估队列，跨入次日后入队。</div><div class="tbd"><b>规则</b>同步不阻塞浏览。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>同步阶段清单（获取日期清单 → 比对本地版本 → 拉取日文件 → 本地统计 → AI 评估）</li><li>批量进度与评估进度「评估中 N / M」</li><li>「取消同步」按钮</li><li>已同步卡片可浏览区</li></ul><h4>用户可执行操作</h4><ul><li>点击「取消同步」</li><li>继续浏览已同步内容</li><li>切底部导航 <span class="to">→ B1 / E1 / F1 / G1 / H1</span></li></ul><h4>操作后去向</h4><ul><li>全部成功 <span class="to">→ B1 年视图</span></li><li>用户取消 <span class="to">→ A8 已取消</span></li><li>部分日期失败 <span class="to">→ A10 部分成功</span></li><li>整体失败 <span class="to">→ A9 同步失败</span></li><li>401/403 <span class="to">→ A6 鉴权失败</span></li></ul><div class="tbd"><b>规则</b>「取消同步」停止发起新请求，中断正在传输的请求，已完整落盘的日文件保留；同时清空待执行的 AI 评估队列，正在执行的单日评估保留至结束。</div><div class="tbd"><b>规则</b>评估调度：本次新增或变更的全部日期立即入队，按日期倒序从最近开始，并发 3，单次同步上限 300 个日期。</div><div class="tbd"><b>规则</b>超过 300 个时取最近 300 个入队，更早日期保持待评估，用户进入其日详情时触发单日评估。</div><div class="tbd"><b>规则</b>当天为进行中日期，不进入评估队列，跨入次日后入队。</div><div class="tbd"><b>规则</b>同步不阻塞浏览。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">A6</span><h3>同步已取消 CANCELLED</h3>
-  <span class="pos">流程位置：A5 用户点击取消同步后</span></div>
+  <div class="sc-head"><span class="sid">A8</span><h3>同步已取消</h3>
+  <span class="pos">流程位置：A7 用户点击取消同步后</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>时间墙</span></div><div class="body"><div class="box" style="background:#f0f0f0">
       <div style="font-weight:700;font-size:10px">同步已取消</div>
@@ -275,12 +306,12 @@ table.tb th{background:#ededed}
     <div class="g3">
       <div class="dcard">11</div><div class="dcard">12</div><div class="dcard d" style="color:#aaa">未同步</div>
     </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>取消状态条「同步已取消」</li><li>进度摘要「已同步 N 天，剩余 M 天未同步」</li><li>「继续同步」按钮</li><li>已同步与未同步日卡片并存</li></ul><h4>用户可执行操作</h4><ul><li>点击「继续同步」</li><li>浏览已同步日期</li><li>切底部导航 <span class="to">→ B1 / E1 / F1 / G1 / H1</span></li></ul><h4>操作后去向</h4><ul><li>继续同步 <span class="to">→ A5 同步中（断点续传）</span></li><li>浏览未同步日 <span class="to">→ D7b 该日未同步</span></li></ul><div class="tbd"><b>规则</b>继续同步从未完成日期断点续传，不重新拉取已落盘日期。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>取消状态条「同步已取消」</li><li>进度摘要「已同步 N 天，剩余 M 天未同步」</li><li>「继续同步」按钮</li><li>已同步与未同步日卡片并存</li></ul><h4>用户可执行操作</h4><ul><li>点击「继续同步」</li><li>浏览已同步日期</li><li>切底部导航 <span class="to">→ B1 / E1 / F1 / G1 / H1</span></li></ul><h4>操作后去向</h4><ul><li>继续同步 <span class="to">→ A7 同步中（断点续传）</span></li><li>浏览未同步日 <span class="to">→ D7b 该日未同步</span></li></ul><div class="tbd"><b>规则</b>继续同步从未完成日期断点续传，不重新拉取已落盘日期。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">A7</span><h3>同步失败 FAILED（异常恢复）</h3>
-  <span class="pos">流程位置：A5 之后分支 · 网络/超时/服务端/重试耗尽</span></div>
+  <div class="sc-head"><span class="sid">A9</span><h3>同步失败（异常恢复）</h3>
+  <span class="pos">流程位置：A7 之后分支 · 网络/超时/服务端/重试耗尽</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="body"><div class="ctr">
     <div class="box" style="width:58px;height:58px;display:flex;align-items:center;justify-content:center;font-size:20px">⚠</div>
@@ -292,12 +323,12 @@ table.tb th{background:#ededed}
     <div class="btn pri" style="width:100%">重试同步</div>
     <div class="btn" style="width:100%">离线查看已同步内容</div>
   </div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>整页失败态</li><li>失败原因分类（网络不可用 / 请求超时 / 服务端错误 / 重试次数耗尽）</li><li>最近一次同步时间</li><li>「重试同步」与「离线查看已同步内容」</li></ul><h4>用户可执行操作</h4><ul><li>点击「重试同步」</li><li>点击「离线查看已同步内容」</li></ul><h4>操作后去向</h4><ul><li>重试成功 <span class="to">→ B1 年视图</span></li><li>部分成功 <span class="to">→ A8 部分成功</span></li><li>再次失败 <span class="to">→ A7 本屏</span></li><li>离线查看 <span class="to">→ B1 年视图（仅已同步数据）</span></li></ul><div class="tbd"><b>规则</b>同步失败按整页失败态呈现，展示失败原因分类与最近成功同步时间。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>整页失败态</li><li>失败原因分类（网络不可用 / 请求超时 / 服务端错误 / 重试次数耗尽）</li><li>最近一次同步时间</li><li>「重试同步」与「离线查看已同步内容」</li></ul><h4>用户可执行操作</h4><ul><li>点击「重试同步」</li><li>点击「离线查看已同步内容」</li></ul><h4>操作后去向</h4><ul><li>重试成功 <span class="to">→ B1 年视图</span></li><li>部分成功 <span class="to">→ A10 部分成功</span></li><li>再次失败 <span class="to">→ A9 本屏</span></li><li>离线查看 <span class="to">→ B1 年视图（仅已同步数据）</span></li></ul><div class="tbd"><b>规则</b>同步失败按整页失败态呈现，展示失败原因分类与最近成功同步时间。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">A8</span><h3>部分成功 PARTIAL_SUCCESS（异常恢复）</h3>
-  <span class="pos">流程位置：A5 之后分支 · 部分日期拉取失败</span></div>
+  <div class="sc-head"><span class="sid">A10</span><h3>部分成功（异常恢复）</h3>
+  <span class="pos">流程位置：A7 之后分支 · 部分日期拉取失败</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="body"><div class="ttl"><span>同步结果</span></div>
     <div class="box" style="background:#f0f0f0;font-size:9.5px">
@@ -316,7 +347,7 @@ table.tb th{background:#ededed}
     </div>
     <div class="btn pri" style="width:100%">重试全部失败项</div>
     <div class="btn" style="width:100%">继续浏览</div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>成功/失败天数摘要</li><li>失败日期列表（来源 SyncState.failedDates，每条含日期与失败原因）</li><li>每行单日「重试」按钮</li><li>底部「重试全部失败项」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击某日期行的「重试」（仅重拉该日）</li><li>点击「重试全部失败项」</li><li>点击「继续浏览」</li></ul><h4>操作后去向</h4><ul><li>该日成功则从列表移除；全部成功 <span class="to">→ B1 年视图</span></li><li>仍有失败 <span class="to">→ A8 本屏（列表更新）</span></li><li>继续浏览 <span class="to">→ B1 年视图</span></li></ul><div class="tbd"><b>规则</b>向用户暴露失败日期列表，重试粒度同时支持单日与批量。</div><div class="tbd"><b>规则</b>设置页同样提供该列表入口（H6），两处使用同一组件。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>成功/失败天数摘要</li><li>失败日期列表（来源 SyncState.failedDates，每条含日期与失败原因）</li><li>每行单日「重试」按钮</li><li>底部「重试全部失败项」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击某日期行的「重试」（仅重拉该日）</li><li>点击「重试全部失败项」</li><li>点击「继续浏览」</li></ul><h4>操作后去向</h4><ul><li>该日成功则从列表移除；全部成功 <span class="to">→ B1 年视图</span></li><li>仍有失败 <span class="to">→ A10 本屏（列表更新）</span></li><li>继续浏览 <span class="to">→ B1 年视图</span></li></ul><div class="tbd"><b>规则</b>向用户暴露失败日期列表，重试粒度同时支持单日与批量。</div><div class="tbd"><b>规则</b>设置页同样提供该列表入口（H6），两处使用同一组件。</div></div>
   </div>
 </div>
 </div>
@@ -396,31 +427,31 @@ table.tb th{background:#ededed}
       本月 🌈 彩虹 · 均分 88 · 亲密度 85</div>
     <div class="row" style="gap:5px">
       <div class="dcard" style="min-height:62px;padding:0;position:relative">
-        <div class="img" style="flex:1;border:0;font-size:8px">L5 封面</div>
-        <div style="position:absolute;top:2px;left:3px;font-size:8px;background:#fff;padding:0 2px">11</div>
-        <div style="position:absolute;top:2px;right:3px;font-size:8px">🌈😊</div>
-        <div style="position:absolute;bottom:2px;left:3px;font-size:7.5px">★📝</div>
-        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
+        <div class="img" style="flex:1;border:0;font-size:8px">封面图</div>
+        <div style="position:absolute;top:2px;right:3px;font-size:8px">★📝</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;font-size:7.6px;padding:1px 3px">
+          <b>11日</b> 🌈 87</div>
+        <div style="position:absolute;bottom:12px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
       </div>
-      <div class="dcard" style="min-height:62px;padding:0;position:relative">
-        <div class="img" style="flex:1;border:0;font-size:8px">L4 封面</div>
-        <div style="position:absolute;top:2px;left:3px;font-size:8px;background:#fff;padding:0 2px">12</div>
-        <div style="position:absolute;top:2px;right:3px;font-size:8px">☀😌</div>
+      <div class="dcard" style="min-height:62px;position:relative">
+        <div style="font-size:7.6px"><b>12日</b> ☀ 😌</div>
+        <div style="font-size:8px;line-height:1.45;margin-top:2px">日常闲聊，中午聊到各自的午饭，氛围轻松。</div>
         <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
       </div>
     </div>
     <div class="row" style="gap:5px">
       <div class="dcard" style="min-height:62px;padding:0;position:relative">
-        <div class="img" style="flex:1;border:0;font-size:8px">L3 封面</div>
-        <div style="position:absolute;top:2px;left:3px;font-size:8px;background:#fff;padding:0 2px">13</div>
-        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
+        <div class="img" style="flex:1;border:0;font-size:8px">封面图</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;font-size:7.6px;padding:1px 3px">
+          <b>13日</b> ⛅ 79</div>
+        <div style="position:absolute;bottom:12px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
       </div>
       <div class="dcard d" style="min-height:62px;background:#f5f5f5;color:#aaa;align-items:center;justify-content:center;position:relative">
         <div style="text-align:center;font-size:8.5px">14<br>未同步</div>
         <div style="position:absolute;bottom:2px;right:2px;border:1px solid #bbb;background:#fff;font-size:8px;padding:0 3px;color:#999">›</div>
       </div>
     </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>顶部月份切换器：◀ 2026年11月 ▶，点击年月文字返回月份选择页</li><li>顶部摘要：本月关系天气、本月平均总分、本月平均亲密度</li><li>日卡片 2 列排列，卡片面积更大以容纳三态内容</li><li>卡片角标区：高光标记 ★、收藏标记、备注标记 📝</li><li>卡片右下角独立箭头按钮 ›</li><li>未同步日卡片置灰并显示「未同步」占位</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体 → 切换该张卡片的三态</li><li>点击卡片右下角箭头 → 进入日详情</li><li>长按卡片 → 底部动作面板</li><li>点击 ◀ ▶ 切换上下月</li><li>点击年月文字返回月份选择页</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C1 → C2 → C3 → C1 循环</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C6 底部动作面板</span></li><li>点击年月 <span class="to">→ B2 月份选择页</span></li><li>未同步日点箭头 <span class="to">→ D7b 该日未同步</span></li></ul><div class="tbd"><b>规则</b>点击切换三态，卡片上的独立箭头进入详情，两个手势不再冲突。</div><div class="tbd"><b>规则</b>月份切换采用顶部切换器，卡片墙 2 列。</div><div class="tbd"><b>规则</b>未同步日在月视图置灰并标注「未同步」。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>顶部月份切换器：◀ 2026年11月 ▶，点击年月文字返回月份选择页</li><li>顶部摘要：本月关系天气、本月平均总分、本月平均亲密度</li><li>日卡片 2 列排列，卡片面积更大以容纳总结态文字</li><li>封面态卡片左下角信息条：日期、天气图标、天气分数</li><li>卡片角标区：高光标记 ★、收藏标记、备注标记 📝</li><li>卡片右下角独立箭头按钮 ›</li><li>同屏卡片可处于不同状态，图中第 2 张为总结态、其余为封面态</li><li>未同步日卡片置灰并显示「未同步」占位</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体 → 在封面态与总结态之间切换该张卡片</li><li>点击卡片右下角箭头 → 进入日详情</li><li>长按卡片 → 底部动作面板</li><li>点击 ◀ ▶ 切换上下月</li><li>点击年月文字返回月份选择页</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C1 封面态 ⇄ C2 一句话总结态</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C5 底部动作面板</span></li><li>点击年月 <span class="to">→ B2 月份选择页</span></li><li>未同步日点箭头 <span class="to">→ D7b 该日未同步</span></li></ul><div class="tbd"><b>规则</b>点击主体切换该张卡片的状态，卡片上的独立箭头进入详情，两个目标各自独立。</div><div class="tbd"><b>规则</b>月份切换采用顶部切换器，卡片墙 2 列。</div><div class="tbd"><b>规则</b>未同步日在月视图置灰并标注「未同步」。</div></div>
   </div>
 </div>
 </div>
@@ -446,76 +477,72 @@ table.tb th{background:#ededed}
       <div class="dcard" style="min-height:52px;opacity:.5">16<br><span style="font-size:7px">晴 · 88</span></div>
       <div class="dcard" style="min-height:52px;opacity:.5">17<br><span style="font-size:7px">多云 · 76</span></div>
     </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>顶部月份切换器与本月摘要，与 B3 一致</li><li>摘要区下方插入一行周摘要：周序号、起止日期、周天气、周均分</li><li>周摘要行右侧「显示全月」按钮</li><li>该周 7 张卡片加描边高亮，其余卡片常规展示</li></ul><h4>用户可执行操作</h4><ul><li>浏览该周卡片</li><li>点击「显示全月」清除高亮</li><li>点击卡片主体切换该张卡片三态</li><li>点击右下角箭头进入日详情</li></ul><h4>操作后去向</h4><ul><li>显示全月 <span class="to">→ B3 月视图（普通态）</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>切换月份 <span class="to">→ B3 月视图（普通态）</span></li></ul><div class="tbd"><b>规则</b>进入方式：趋势页月粒度曲线的数据点对应单周，点击后跳转该周起始日所属月份的月视图并自动滚动至该周第一张卡片。</div><div class="tbd"><b>规则</b>跨月的周在起始日所属月份展示，落在其他月份的日期不加高亮。</div><div class="tbd"><b>规则</b>点击「显示全月」清除高亮与周摘要行，回到 B3 普通月视图。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>顶部月份切换器与本月摘要，与 B3 一致</li><li>摘要区下方插入一行周摘要：周序号、起止日期、周天气、周均分</li><li>周摘要行右侧「显示全月」按钮</li><li>该周 7 张卡片加描边高亮，其余卡片常规展示</li></ul><h4>用户可执行操作</h4><ul><li>浏览该周卡片</li><li>点击「显示全月」清除高亮</li><li>点击卡片主体切换该张卡片状态</li><li>点击右下角箭头进入日详情</li></ul><h4>操作后去向</h4><ul><li>显示全月 <span class="to">→ B3 月视图（普通态）</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>切换月份 <span class="to">→ B3 月视图（普通态）</span></li></ul><div class="tbd"><b>规则</b>进入方式：趋势页月粒度曲线的数据点对应单周，点击后跳转该周起始日所属月份的月视图并自动滚动至该周第一张卡片。</div><div class="tbd"><b>规则</b>跨月的周在起始日所属月份展示，落在其他月份的日期不加高亮。</div><div class="tbd"><b>规则</b>点击「显示全月」清除高亮与周摘要行，回到 B3 普通月视图。</div></div>
   </div>
 </div>
 <div class="grp" id="gc">
-<h2>C · 日卡片三态与长按（需求 4.4-4.7）</h2>
-<div class="gnote">三态顺序：封面 → 日期数字 → 一句话总结 → 封面。<b>每张卡片独立切换</b>，切换单张卡片不影响同屏其他卡片，默认状态在设置页 H4 配置。长按面板含收藏、编辑总结、添加备注，重新评估入口位于日详情 D1。</div>
+<h2>C · 日卡片两态与长按（需求 4.4-4.7）</h2>
+<div class="gnote">两态互切：封面态 ⇄ 一句话总结态，点击卡片主体在两态之间来回切换。<b>每张卡片独立切换</b>，点击一张卡片只改变这张卡片的状态，同屏可同时存在封面态与总结态，界面不提供全部切换入口；默认状态在设置页 H4 配置。长按面板含收藏、编辑总结、添加备注，重新评估入口位于日详情 D1。</div>
 <div class="screens">
 <div class="screen">
-  <div class="sc-head"><span class="sid">C1</span><h3>日卡片 · 封面状态 COVER（默认态）</h3>
+  <div class="sc-head"><span class="sid">C1</span><h3>日卡片 · 封面态（默认态）</h3>
   <span class="pos">流程位置：B3 月视图卡片状态之一</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>2026年11月</span></div><div class="body"><div class="row" style="gap:5px">
-      <div class="dcard" style="min-height:70px;padding:0;position:relative">
-        <div class="img" style="flex:1;border:0;font-size:8px">L5 封面图<br>（V3 子池按日期哈希）</div>
-        <div style="position:absolute;top:2px;left:3px;font-size:8.5px;background:#fff;padding:0 2px">11</div>
-        <div style="position:absolute;top:2px;right:3px;font-size:9px">🌈 😊</div>
-        <div style="position:absolute;bottom:2px;left:3px;font-size:8px">★ 📝</div>
-        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
+      <div class="dcard" style="min-height:76px;padding:0;position:relative">
+        <div class="img" style="flex:1;border:0;font-size:8px">封面图</div>
+        <div style="position:absolute;top:2px;right:3px;font-size:9px">★ 📝</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;
+                    font-size:8.5px;padding:2px 3px;display:flex;align-items:center;gap:3px">
+          <b>11月11日</b><span>🌈</span><span>87</span></div>
+        <div style="position:absolute;bottom:14px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
       </div>
-      <div class="dcard" style="min-height:70px;padding:0;position:relative">
-        <div class="img" style="flex:1;border:0;font-size:8px">L4 封面图</div>
-        <div style="position:absolute;top:2px;left:3px;font-size:8.5px;background:#fff;padding:0 2px">12</div>
-        <div style="position:absolute;top:2px;right:3px;font-size:9px">☀ 😌</div>
-        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
+      <div class="dcard" style="min-height:76px;padding:0;position:relative">
+        <div class="img" style="flex:1;border:0;font-size:8px">封面图</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;
+                    font-size:8.5px;padding:2px 3px;display:flex;align-items:center;gap:3px">
+          <b>11月12日</b><span>☀</span><span>82</span></div>
+        <div style="position:absolute;bottom:14px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
       </div>
     </div>
-    <div class="lbl">综合关系分 = 亲密度×0.6 + 情绪分×0.4</div>
-    <div class="box" style="font-size:8px;padding:3px;line-height:1.7">
-      L1 0-20 · L2 21-40 · L3 41-60 · L4 61-80 · L5 81-100<br>等级定主池 · 亲密度档与情绪档定池内变体 V1-V4</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>封面等级图片铺满卡片（等级定主池、D/E 档定池内变体、日期哈希选图）</li><li>左上角日期角标</li><li>右上角天气图标与情绪图标</li><li>角标区：高光标记 ★、收藏标记、备注标记 📝</li><li>右下角独立箭头 ›</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体切换到日期数字状态</li><li>点击箭头进入日详情</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C2 日期数字状态（仅该张卡片）</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C6 动作面板</span></li></ul><div class="tbd"><b>规则</b>进入月视图时按 UserPreference.cardDefaultState 初始化全部卡片；单张切换结果在当次浏览期间保持，离开月视图回到默认状态。</div></div>
+    <div class="row" style="gap:5px">
+      <div class="dcard" style="min-height:76px;position:relative">
+        <div style="font-size:8px;display:flex;justify-content:space-between">
+          <span><b>11月13日</b> ⛅ 😌</span><span class="tag">AI</span></div>
+        <div style="font-size:8.6px;line-height:1.5;margin-top:3px">
+          下午聊了周末的安排，说好一起去看那家新开的书店，晚上又聊回最近的工作。</div>
+        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
+      </div>
+      <div class="dcard" style="min-height:76px;padding:0;position:relative">
+        <div class="img" style="flex:1;border:0;font-size:8px">封面图</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;
+                    font-size:8.5px;padding:2px 3px;display:flex;align-items:center;gap:3px">
+          <b>11月14日</b><span>☁</span><span>72</span></div>
+        <div style="position:absolute;bottom:14px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
+      </div>
+    </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>封面图片铺满卡片</li><li>左下角信息条：日期、天气图标、天气分数，置于半透明暗色底衬之上以保证图片上的可读性</li><li>右上角角标：高光标记 ★、收藏标记、备注标记 📝</li><li>右下角独立箭头 ›</li><li>同屏第 3 张为总结态，示意两态按张独立切换</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体切换到一句话总结态</li><li>点击箭头进入日详情</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C3 一句话总结态（仅该张卡片）</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C5 动作面板</span></li></ul><div class="tbd"><b>规则</b>进入月视图时按显示偏好里的默认卡片状态初始化全部卡片，之后每张卡片的状态各自保持，离开月视图回到默认状态。</div><div class="tbd"><b>规则</b>封面选图规则参见 H6 封面与天气规则说明。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">C2</span><h3>日卡片 · 日期数字状态 DATE</h3>
+  <div class="sc-head"><span class="sid">C2</span><h3>日卡片 · 一句话总结态</h3>
   <span class="pos">流程位置：C1 点击主体后 · 仅该张卡片</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>2026年11月</span></div><div class="body"><div class="row" style="gap:5px">
-      <div class="dcard" style="min-height:70px;position:relative;align-items:center;justify-content:center">
-        <div style="font-size:26px;font-weight:700;text-align:center;line-height:1">11</div>
-        <div style="font-size:8.5px;text-align:center;margin-top:2px">🌈 😊 · 88 / 85</div>
+      <div class="dcard" style="min-height:94px;position:relative">
+        <div style="font-size:8px;display:flex;justify-content:space-between">
+          <span><b>11月11日</b> 🌈 😊</span><span class="tag k">已编辑</span></div>
+        <div style="font-size:8.6px;line-height:1.5;margin-top:3px">
+          今天聊了明年春天的旅行计划，先定了想去的两座城市，又一起翻了住处和路线，
+          互相分享了很多期待，最后说好这个周末一起把行程表落下来。</div>
         <div style="position:absolute;bottom:2px;left:3px;font-size:8px">★ 📝</div>
         <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
       </div>
-      <div class="dcard" style="min-height:70px;position:relative;align-items:center;justify-content:center">
-        <div style="font-size:26px;font-weight:700;text-align:center;line-height:1">12</div>
-        <div style="font-size:8.5px;text-align:center;margin-top:2px">☀ 😌 · 82 / 80</div>
-        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
-      </div>
-    </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>大号日期数字居中</li><li>下方一行：天气图标、情绪图标、总分 / 亲密度数值</li><li>角标区：高光、收藏、备注标记</li><li>右下角箭头 ›</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体切换到一句话总结状态</li><li>点击箭头进入日详情</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C3 一句话总结状态</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C6 动作面板</span></li></ul></div>
-  </div>
-</div>
-<div class="screen">
-  <div class="sc-head"><span class="sid">C3</span><h3>日卡片 · 一句话总结状态 SUMMARY</h3>
-  <span class="pos">流程位置：C2 点击主体后 · 含来源标识</span></div>
-  <div class="sc-body">
-    <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>2026年11月</span></div><div class="body"><div class="row" style="gap:5px">
-      <div class="dcard" style="min-height:70px;position:relative">
+      <div class="dcard" style="min-height:94px;position:relative">
         <div style="font-size:8px;display:flex;justify-content:space-between">
-          <span>11 🌈 😊</span><span class="tag k">已编辑</span></div>
-        <div style="font-size:9px;line-height:1.5;margin-top:3px">
-          今天聊了旅行计划，互相分享了很多期待。</div>
-        <div style="position:absolute;bottom:2px;left:3px;font-size:8px">★ 📝</div>
-        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
-      </div>
-      <div class="dcard" style="min-height:70px;position:relative">
-        <div style="font-size:8px;display:flex;justify-content:space-between">
-          <span>12 ☀ 😌</span><span class="tag">AI</span></div>
-        <div style="font-size:9px;line-height:1.5;margin-top:3px">
-          日常闲聊，氛围轻松。</div>
+          <span><b>11月12日</b> ☀ 😌</span><span class="tag">AI</span></div>
+        <div style="font-size:8.6px;line-height:1.5;margin-top:3px">
+          日常闲聊，中午聊到各自的午饭，晚上说了几句工作上的小事，氛围轻松。</div>
         <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
       </div>
     </div>
@@ -523,11 +550,11 @@ table.tb th{background:#ededed}
     <div class="box" style="font-size:8.5px;padding:3px">
       <span class="tag k">已编辑</span> 用户改过 ·
       <span class="tag">AI</span> AI 原始总结</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>总结文字占据卡片主体</li><li>顶部一行：日期、天气图标、情绪图标</li><li>总结右上角来源标识：「已编辑」或「AI」</li><li>角标区：高光、收藏、备注标记</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体切回封面状态</li><li>点击箭头进入日详情</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C1 封面状态</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C6 动作面板</span></li></ul><div class="tbd"><b>规则</b>界面标明总结来源：用户编辑过显示「已编辑」标签，未编辑显示「AI」标签。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>总结文字占据卡片主体，上限 120 字在卡片内完整展示不截断</li><li>顶部一行：日期、天气图标、情绪图标</li><li>总结右上角来源标识：「已编辑」或「AI」</li><li>角标区：高光 ★、收藏、备注 📝</li><li>右下角独立箭头 ›</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体切回封面态</li><li>点击箭头进入日详情</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C1 封面态（仅该张卡片）</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C5 动作面板</span></li></ul><div class="tbd"><b>规则</b>界面标明总结来源：用户编辑过显示「已编辑」标签，未编辑显示「AI」标签。</div><div class="tbd"><b>规则</b>总结上限 120 字：卡片宽 179pt、可用高 193pt，13pt 字号下可排 10 行每行约 12 字，120 字在不缩小字号的前提下完整落下。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">C4</span><h3>日卡片 · 评估缺失降级（异常/首次）</h3>
+  <div class="sc-head"><span class="sid">C3</span><h3>日卡片 · 评估缺失降级（异常/首次）</h3>
   <span class="pos">流程位置：评估未完成或失败时的卡片表现</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>2026年11月</span></div><div class="body"><div class="row" style="gap:5px">
@@ -549,11 +576,11 @@ table.tb th{background:#ededed}
       评估未完成 → 今天还没有总结<br>
       评估失败 → 总结生成失败<br>
       未同步日 → 这天还没有同步</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>封面状态降级为默认占位封面</li><li>天气图标显示 ⏳ 待评估 PENDING</li><li>总结状态按三种情形显示对应浅灰文案</li><li>卡片底部提供对应操作提示</li><li>日期状态与总结状态继续可用</li></ul><h4>用户可执行操作</h4><ul><li>点击主体仍可切换三态</li><li>点击箭头进入日详情查看评估状态</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击箭头（评估中） <span class="to">→ D3 评估中</span></li><li>点击箭头（评估失败） <span class="to">→ D4 评估失败</span></li><li>长按 <span class="to">→ C6 动作面板</span></li></ul><div class="tbd"><b>规则</b>总结为空时按评估未完成、评估失败、未同步三种情形显示不同文案，均为浅灰色。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>封面状态降级为默认占位封面</li><li>天气图标显示 ⏳ 待评估 PENDING</li><li>总结态按三种情形显示对应浅灰文案</li><li>卡片底部提供对应操作提示</li><li>两态切换继续可用</li></ul><h4>用户可执行操作</h4><ul><li>点击主体仍可在封面态与总结态之间切换</li><li>点击箭头进入日详情查看评估状态</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击箭头（评估中） <span class="to">→ D3 评估中</span></li><li>点击箭头（评估失败） <span class="to">→ D4 评估失败</span></li><li>长按 <span class="to">→ C5 动作面板</span></li></ul><div class="tbd"><b>规则</b>总结为空时按评估未完成、评估失败、未同步三种情形显示不同文案，均为浅灰色。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">C5</span><h3>日卡片 · 未同步日</h3>
+  <div class="sc-head"><span class="sid">C4</span><h3>日卡片 · 未同步日</h3>
   <span class="pos">流程位置：该日期在服务端存在、本地尚未拉取</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>2026年11月</span></div><div class="body"><div class="row" style="gap:5px">
@@ -574,8 +601,8 @@ table.tb th{background:#ededed}
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">C6</span><h3>日卡片长按 · 底部动作面板</h3>
-  <span class="pos">流程位置：B3 / C1-C4 长按卡片后弹出</span></div>
+  <div class="sc-head"><span class="sid">C5</span><h3>日卡片长按 · 底部动作面板</h3>
+  <span class="pos">流程位置：B3 / C1-C3 长按卡片后弹出</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>2026年11月</span></div><div class="body"><div class="row" style="gap:5px;opacity:.45">
       <div class="dcard" style="min-height:52px"><div class="img" style="flex:1;border:0"></div></div>
@@ -590,30 +617,31 @@ table.tb th{background:#ededed}
       <div class="hr"></div>
       <div class="btn">取消</div>
     </div></div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>底部动作面板，顶部显示日期</li><li>操作项：收藏 / 取消收藏、编辑总结、添加备注 / 编辑备注、取消</li><li>重新评估入口位于日详情</li></ul><h4>用户可执行操作</h4><ul><li>点击「收藏」切换 favorite</li><li>点击「编辑总结」</li><li>点击「添加备注」</li><li>点击「取消」或遮罩关闭</li></ul><h4>操作后去向</h4><ul><li>收藏 → 写 DayCardUserData.favorite，关闭面板 <span class="to">→ B3 月视图（标记刷新）</span></li><li>编辑总结 <span class="to">→ C7 编辑一句话总结</span></li><li>添加备注 <span class="to">→ C8 添加 / 编辑备注</span></li><li>取消 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>菜单形态为底部动作面板。</div><div class="tbd"><b>规则</b>重新评估入口位于日详情 D1。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>底部动作面板，顶部显示日期</li><li>操作项：收藏 / 取消收藏、编辑总结、添加备注 / 编辑备注、取消</li><li>重新评估入口位于日详情</li></ul><h4>用户可执行操作</h4><ul><li>点击「收藏」切换 favorite</li><li>点击「编辑总结」</li><li>点击「添加备注」</li><li>点击「取消」或遮罩关闭</li></ul><h4>操作后去向</h4><ul><li>收藏 → 写 DayCardUserData.favorite，关闭面板 <span class="to">→ B3 月视图（标记刷新）</span></li><li>编辑总结 <span class="to">→ C6 编辑一句话总结</span></li><li>添加备注 <span class="to">→ C7 添加 / 编辑备注</span></li><li>取消 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>菜单形态为底部动作面板。</div><div class="tbd"><b>规则</b>重新评估入口位于日详情 D1。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">C7</span><h3>编辑一句话总结</h3>
-  <span class="pos">流程位置：C6 / D1 进入 · 上限 50 字</span></div>
+  <div class="sc-head"><span class="sid">C6</span><h3>编辑一句话总结</h3>
+  <span class="pos">流程位置：C5 / D1 进入 · 上限 120 字</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>编辑总结</span><span class="ic">←</span></div><div class="body"><div class="lbl">11月11日</div>
-    <div class="inp" style="min-height:52px;color:#111;font-size:9.5px">
-      今天聊了旅行计划，互相分享了很多期待。</div>
+    <div class="inp" style="min-height:66px;color:#111;font-size:9.5px;line-height:1.6">
+      今天聊了明年春天的旅行计划，先定了想去的两座城市，又一起翻了住处和路线，
+      互相分享了很多期待，最后说好这个周末一起把行程表落下来。</div>
     <div style="display:flex;justify-content:space-between;font-size:8.5px;color:#666">
-      <span>用户总结优先展示</span><span>19 / 50</span></div>
+      <span>用户总结优先展示</span><span>72 / 120</span></div>
     <div class="btn">恢复为 AI 总结</div>
     <div class="hr"></div>
     <div class="lbl">AI 原始总结</div>
     <div class="box d" style="font-size:9px;color:#777">日常闲聊，氛围轻松。</div>
     <div style="margin-top:auto"></div>
     <div class="row"><div class="btn">取消</div><div class="btn pri">保存</div></div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>文本输入框，预填当前展示的总结</li><li>实时字数计数 19 / 50</li><li>「恢复为 AI 总结」按钮（AI 原始总结为空时置灰）</li><li>AI 原始总结只读对照区</li><li>取消 / 保存按钮</li></ul><h4>用户可执行操作</h4><ul><li>编辑文本</li><li>点击「恢复为 AI 总结」（输入框替换为 AI 原始总结）</li><li>点击保存</li><li>点击取消或返回</li></ul><h4>操作后去向</h4><ul><li>保存 → 写 userSummary，来源标识变「已编辑」 <span class="to">→ 调用来源屏</span></li><li>恢复为 AI 总结并保存 → 清空 userSummary，标识回「AI」 <span class="to">→ 调用来源屏</span></li><li>有改动点返回 <span class="to">→ C7a 未保存二次确认</span></li><li>无改动点返回 <span class="to">→ 调用来源屏</span></li></ul><div class="tbd"><b>规则</b>用户总结同样受 50 字限制，超出时禁用保存并提示「总结不超过 50 字」。</div><div class="tbd"><b>规则</b>提供「恢复为 AI 总结」能力。</div><div class="tbd"><b>规则</b>未保存退出需二次确认。</div><div class="tbd"><b>规则</b>无评估的日期也允许编辑总结。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>文本输入框，预填当前展示的总结</li><li>实时字数计数 72 / 120</li><li>「恢复为 AI 总结」按钮（AI 原始总结为空时置灰）</li><li>AI 原始总结只读对照区</li><li>取消 / 保存按钮</li></ul><h4>用户可执行操作</h4><ul><li>编辑文本</li><li>点击「恢复为 AI 总结」（输入框替换为 AI 原始总结）</li><li>点击保存</li><li>点击取消或返回</li></ul><h4>操作后去向</h4><ul><li>保存 → 写 userSummary，来源标识变「已编辑」 <span class="to">→ 调用来源屏</span></li><li>恢复为 AI 总结并保存 → 清空 userSummary，标识回「AI」 <span class="to">→ 调用来源屏</span></li><li>有改动点返回 <span class="to">→ C7a 未保存二次确认</span></li><li>无改动点返回 <span class="to">→ 调用来源屏</span></li></ul><div class="tbd"><b>规则</b>用户总结同样受 120 字限制，超出时禁用保存并提示「总结不超过 120 字」。</div><div class="tbd"><b>规则</b>提供「恢复为 AI 总结」能力。</div><div class="tbd"><b>规则</b>未保存退出需二次确认。</div><div class="tbd"><b>规则</b>无评估的日期也允许编辑总结。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">C8</span><h3>添加 / 编辑备注</h3>
-  <span class="pos">流程位置：C6 / D1 进入 · 上限 200 字</span></div>
+  <div class="sc-head"><span class="sid">C7</span><h3>添加 / 编辑备注</h3>
+  <span class="pos">流程位置：C5 / D1 进入 · 上限 200 字</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>备注</span><span class="ic">←</span></div><div class="body"><div class="lbl">11月11日</div>
     <div class="inp" style="min-height:84px;color:#111;font-size:9.5px">
@@ -621,7 +649,7 @@ table.tb th{background:#ededed}
     <div style="display:flex;justify-content:flex-end;font-size:8.5px;color:#666">
       <span>28 / 200</span></div>
     <div class="box" style="font-size:8.5px;padding:3px">
-      备注非空时，日卡片三态均显示 📝 标记</div>
+      备注非空时，日卡片两态均显示 📝 标记</div>
     <div style="margin-top:auto"></div>
     <div class="row"><div class="btn">取消</div><div class="btn pri">保存</div></div></div></div>
     <div class="meta"><h4>关键元素</h4><ul><li>多行文本输入框</li><li>实时字数计数 28 / 200</li><li>备注标记说明</li><li>取消 / 保存按钮</li></ul><h4>用户可执行操作</h4><ul><li>编辑备注文本</li><li>点击保存</li><li>点击取消或返回</li></ul><h4>操作后去向</h4><ul><li>保存 → 写 DayCardUserData.note，卡片显示 📝 <span class="to">→ 调用来源屏</span></li><li>有改动点返回 <span class="to">→ C8a 未保存二次确认</span></li><li>无改动点返回 <span class="to">→ 调用来源屏</span></li></ul><div class="tbd"><b>规则</b>备注字数上限 200 字，超出时禁用保存并提示「备注不超过 200 字」。</div><div class="tbd"><b>规则</b>备注非空时在日卡片角标区增加备注图标 📝。</div><div class="tbd"><b>规则</b>未保存退出需二次确认，文案「备注尚未保存，确认放弃修改？」。</div></div>
@@ -634,7 +662,7 @@ table.tb th{background:#ededed}
 <div class="gnote">由 B3 卡片右下角箭头进入。AI 输出新增 confidence 置信度字段，置信度 &lt;40 时日天气映射为雾并显示提示行。亮点与有趣内容只读。当日无消息与该日未同步为两种独立空状态。</div>
 <div class="screens">
 <div class="screen">
-  <div class="sc-head"><span class="sid">D1</span><h3>日详情 · 对话流（正常 SUCCESS，核心屏）</h3>
+  <div class="sc-head"><span class="sid">D1</span><h3>日详情 · 对话流（评估成功，核心屏）</h3>
   <span class="pos">流程位置：B3 点击卡片右下角箭头进入</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>11月11日</span><span class="ic">←</span><span class="ic">⋯</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
@@ -650,7 +678,7 @@ table.tb th{background:#ededed}
     <div class="box d" style="font-size:8.5px">一起确定了旅行日期</div>
     <div class="lbl">有趣内容（只读）</div>
     <div class="box d" style="font-size:8.5px">互相吐槽表情包</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>顶部评估条：天气、情绪、总分、亲密度</li><li>「互动统计」折叠区（默认展开状态由设置 H2 控制）</li><li>聊天气泡对话流，左右区分双方，含时间与类型</li><li>亮点区与有趣内容区（只读，不可编辑）</li><li>右上角 ⋯ 菜单：重新评估、标记为高光、编辑总结、编辑备注、收藏</li></ul><h4>用户可执行操作</h4><ul><li>展开互动统计</li><li>点击 ⋯ 打开操作菜单</li><li>点击「重新评估」</li><li>点击「标记为高光」</li><li>编辑总结 / 备注 / 切换收藏</li></ul><h4>操作后去向</h4><ul><li>展开统计 <span class="to">→ D2 互动统计展开</span></li><li>重新评估 <span class="to">→ D3 评估中</span></li><li>标记为高光 → 生成手动高光 <span class="to">→ G1 高光列表可见</span></li><li>编辑总结 <span class="to">→ C7</span></li><li>编辑备注 <span class="to">→ C8</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>亮点与有趣内容只读展示，不可编辑。</div><div class="tbd"><b>规则</b>「标记为高光」入口在日详情提供，手动高光类型固定为综合高光。</div><div class="tbd"><b>规则</b>「重新评估」入口仅在本屏提供。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>顶部评估条：天气、情绪、总分、亲密度</li><li>「互动统计」折叠区（默认展开状态由设置 H2 控制）</li><li>聊天气泡对话流，左右区分双方，含时间与类型</li><li>亮点区与有趣内容区（只读，不可编辑）</li><li>右上角 ⋯ 菜单：重新评估、标记为高光、编辑总结、编辑备注、收藏</li></ul><h4>用户可执行操作</h4><ul><li>展开互动统计</li><li>点击 ⋯ 打开操作菜单</li><li>点击「重新评估」</li><li>点击「标记为高光」</li><li>编辑总结 / 备注 / 切换收藏</li></ul><h4>操作后去向</h4><ul><li>展开统计 <span class="to">→ D2 互动统计展开</span></li><li>重新评估 <span class="to">→ D3 评估中</span></li><li>标记为高光 → 生成手动高光 <span class="to">→ G1 高光列表可见</span></li><li>编辑总结 <span class="to">→ C6</span></li><li>编辑备注 <span class="to">→ C7</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>亮点与有趣内容只读展示，不可编辑。</div><div class="tbd"><b>规则</b>「标记为高光」入口在日详情提供，手动高光类型固定为综合高光。</div><div class="tbd"><b>规则</b>「重新评估」入口仅在本屏提供。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -691,7 +719,7 @@ table.tb th{background:#ededed}
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">D3</span><h3>日详情 · 评估中 RUNNING（加载中）</h3>
+  <div class="sc-head"><span class="sid">D3</span><h3>日详情 · 评估中（加载中）</h3>
   <span class="pos">流程位置：首次评估或点击重新评估后</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>11月15日</span><span class="ic">←</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
@@ -705,7 +733,7 @@ table.tb th{background:#ededed}
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">D4</span><h3>日详情 · 评估失败 FAILED（异常恢复）</h3>
+  <div class="sc-head"><span class="sid">D4</span><h3>日详情 · 评估失败（异常恢复）</h3>
   <span class="pos">流程位置：AI 调用失败或 JSON 解析失败</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>11月16日</span><span class="ic">←</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
@@ -715,11 +743,11 @@ table.tb th{background:#ededed}
     <div class="hr"></div>
     <div class="bub">在忙吗</div>
     <div class="bub me">刚开完会</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>失败状态条与失败原因</li><li>「重试评估」按钮</li><li>对话流正常展示</li><li>已有评估数据保留不被清空</li></ul><h4>用户可执行操作</h4><ul><li>点击「重试评估」</li><li>浏览对话流</li><li>展开互动统计</li><li>编辑总结（无评估也可编辑）</li></ul><h4>操作后去向</h4><ul><li>重试成功 <span class="to">→ D1 对话流</span></li><li>重试仍失败 <span class="to">→ D4 本屏</span></li><li>编辑总结 <span class="to">→ C7</span></li></ul><div class="tbd"><b>规则</b>评估失败时保留已有数据，同步与对话流继续可用；卡片总结状态显示「总结生成失败」。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>失败状态条与失败原因</li><li>「重试评估」按钮</li><li>对话流正常展示</li><li>已有评估数据保留不被清空</li></ul><h4>用户可执行操作</h4><ul><li>点击「重试评估」</li><li>浏览对话流</li><li>展开互动统计</li><li>编辑总结（无评估也可编辑）</li></ul><h4>操作后去向</h4><ul><li>重试成功 <span class="to">→ D1 对话流</span></li><li>重试仍失败 <span class="to">→ D4 本屏</span></li><li>编辑总结 <span class="to">→ C6</span></li></ul><div class="tbd"><b>规则</b>评估失败时保留已有数据，同步与对话流继续可用；卡片总结状态显示「总结生成失败」。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">D5</span><h3>日详情 · 待重评 STALE（状态提示）</h3>
+  <div class="sc-head"><span class="sid">D5</span><h3>日详情 · 待重新评估（状态提示）</h3>
   <span class="pos">流程位置：该日期聊天文件变更后</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>11月10日</span><span class="ic">←</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
@@ -736,19 +764,19 @@ table.tb th{background:#ededed}
 </div>
 <div class="screen">
   <div class="sc-head"><span class="sid">D6</span><h3>日详情 · 低置信度提示</h3>
-  <span class="pos">流程位置：AI 返回 confidence &lt; 40 时</span></div>
+  <span class="pos">流程位置：评估置信度低于 40 时</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>11月18日</span><span class="ic">←</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
       🌫 雾 · 😐 中性 48 · 总分 52 · 亲密度 50</div>
     <div class="box" style="font-size:8.5px;padding:3px;border-style:dashed">
       ⓘ 本次评估置信度较低
-      <div style="color:#666;margin-top:1px">置信度 32 / 100</div></div>
+      <div style="color:#666;margin-top:1px">当天消息偏少，评估依据不足</div></div>
     <div class="btn" style="width:100%">重新评估</div>
     <div class="hr"></div>
     <div class="bub">嗯</div>
     <div class="bub me">👌</div>
     <div class="bub">在</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>天气显示为 🌫 雾（置信度 &lt;40 的判定结果）</li><li>置信度提示行「本次评估置信度较低」与数值</li><li>封面与分数仍按评估结果展示</li><li>「重新评估」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新评估」</li><li>浏览对话流</li></ul><h4>操作后去向</h4><ul><li>重新评估 <span class="to">→ D3 评估中</span></li><li>置信度提升至 ≥40 → 天气按分数区间映射 <span class="to">→ D1 对话流</span></li></ul><div class="tbd"><b>规则</b>AI 输出新增 confidence 字段（0-100）。</div><div class="tbd"><b>规则</b>置信度 &lt;40 → 日天气映射为雾，日详情显示置信度提示行。</div><div class="tbd"><b>规则</b>置信度参考：消息充足语义明确 70-100；偏少模糊 40-69；极少无法判断 0-39。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>天气显示为 🌫 雾（置信度 &lt;40 的判定结果）</li><li>置信度提示行「本次评估置信度较低」与一句原因说明，界面不展示置信度数值</li><li>封面与分数仍按评估结果展示</li><li>「重新评估」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新评估」</li><li>浏览对话流</li></ul><h4>操作后去向</h4><ul><li>重新评估 <span class="to">→ D3 评估中</span></li><li>置信度提升至 ≥40 → 天气按分数区间映射 <span class="to">→ D1 对话流</span></li></ul><div class="tbd"><b>规则</b>AI 输出新增 confidence 字段（0-100）。</div><div class="tbd"><b>规则</b>置信度 &lt;40 → 日天气映射为雾，日详情显示置信度提示行。</div><div class="tbd"><b>规则</b>置信度参考：消息充足语义明确 70-100；偏少模糊 40-69；极少无法判断 0-39。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -763,7 +791,7 @@ table.tb th{background:#ededed}
     <div class="btn" style="width:100%">写一句话总结</div>
     <div class="btn" style="width:100%">添加备注</div>
   </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>空状态标题「这天没有聊天记录」</li><li>说明行「该日期已同步，文件内消息为空」</li><li>「写一句话总结」与「添加备注」按钮</li><li>操作限于编辑总结与备注</li></ul><h4>用户可执行操作</h4><ul><li>点击「写一句话总结」</li><li>点击「添加备注」</li><li>返回月视图</li></ul><h4>操作后去向</h4><ul><li>写总结 <span class="to">→ C7 编辑一句话总结</span></li><li>添加备注 <span class="to">→ C8 备注</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>当日无消息与该日未同步为两种独立空状态，文案与可执行操作不同。</div><div class="tbd"><b>规则</b>无评估日期允许用户编辑一句话总结。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>空状态标题「这天没有聊天记录」</li><li>说明行「该日期已同步，文件内消息为空」</li><li>「写一句话总结」与「添加备注」按钮</li><li>操作限于编辑总结与备注</li></ul><h4>用户可执行操作</h4><ul><li>点击「写一句话总结」</li><li>点击「添加备注」</li><li>返回月视图</li></ul><h4>操作后去向</h4><ul><li>写总结 <span class="to">→ C6 编辑一句话总结</span></li><li>添加备注 <span class="to">→ C7 备注</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>当日无消息与该日未同步为两种独立空状态，文案与可执行操作不同。</div><div class="tbd"><b>规则</b>无评估日期允许用户编辑一句话总结。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -778,7 +806,7 @@ table.tb th{background:#ededed}
     <div class="btn pri" style="width:100%">同步这一天</div>
     <div class="btn" style="width:100%">写一句话总结</div>
   </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>空状态标题「这天还没有同步」</li><li>说明行「该日期在服务端存在，本地尚未拉取」</li><li>「同步这一天」按钮（仅拉取该日期文件）</li><li>「写一句话总结」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「同步这一天」</li><li>点击「写一句话总结」</li><li>返回月视图</li></ul><h4>操作后去向</h4><ul><li>同步后有消息 <span class="to">→ D1 对话流</span></li><li>同步后文件为空 <span class="to">→ D7a 当日无消息</span></li><li>同步失败 → 停留本屏并提示失败原因</li><li>写总结 <span class="to">→ C7</span></li></ul><div class="tbd"><b>规则</b>提供单日重试同步入口，与 A8 的单日重试使用同一服务能力。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>空状态标题「这天还没有同步」</li><li>说明行「该日期在服务端存在，本地尚未拉取」</li><li>「同步这一天」按钮（仅拉取该日期文件）</li><li>「写一句话总结」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「同步这一天」</li><li>点击「写一句话总结」</li><li>返回月视图</li></ul><h4>操作后去向</h4><ul><li>同步后有消息 <span class="to">→ D1 对话流</span></li><li>同步后文件为空 <span class="to">→ D7a 当日无消息</span></li><li>同步失败 → 停留本屏并提示失败原因</li><li>写总结 <span class="to">→ C6</span></li></ul><div class="tbd"><b>规则</b>提供单日重试同步入口，与 A10 的单日重试使用同一服务能力。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -797,7 +825,7 @@ table.tb th{background:#ededed}
     <div class="bub me">楼下那家吧</div>
     <div class="row" style="margin-top:4px">
       <div class="btn">写一句话总结</div><div class="btn">添加备注</div></div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>进行中状态条「今天还在进行中」与说明行</li><li>评估结果区：天气与情绪显示待评估，分数显示「--」</li><li>互动统计按当前已同步消息实时计算</li><li>对话流正常展示</li><li>「写一句话总结」与「添加备注」入口</li></ul><h4>用户可执行操作</h4><ul><li>浏览对话流</li><li>展开互动统计</li><li>编辑总结</li><li>添加备注</li><li>切换收藏</li></ul><h4>操作后去向</h4><ul><li>写总结 <span class="to">→ C7 编辑一句话总结</span></li><li>添加备注 <span class="to">→ C8 添加 / 编辑备注</span></li><li>跨入次日后入队评估 <span class="to">→ D3 评估中</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>日期归属以后端切分日文件的时区为权威，设备时区变化不改变日期归属与统计结果。</div><div class="tbd"><b>规则</b>进行中日期不进入评估队列，评估状态保持 PENDING，日天气按优先级 1 显示为待评估，封面为默认占位封面。</div><div class="tbd"><b>规则</b>进行中日期不计入年/月均分、周期天气与趋势曲线。</div><div class="tbd"><b>规则</b>跨入次日后进入评估队列，评估完成时封面、天气、情绪、总结一次性落定，达标则生成高光。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>进行中状态条「今天还在进行中」与说明行</li><li>评估结果区：天气与情绪显示待评估，分数显示「--」</li><li>互动统计按当前已同步消息实时计算</li><li>对话流正常展示</li><li>「写一句话总结」与「添加备注」入口</li></ul><h4>用户可执行操作</h4><ul><li>浏览对话流</li><li>展开互动统计</li><li>编辑总结</li><li>添加备注</li><li>切换收藏</li></ul><h4>操作后去向</h4><ul><li>写总结 <span class="to">→ C6 编辑一句话总结</span></li><li>添加备注 <span class="to">→ C7 添加 / 编辑备注</span></li><li>跨入次日后入队评估 <span class="to">→ D3 评估中</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>日期归属以后端切分日文件的时区为权威，设备时区变化不改变日期归属与统计结果。</div><div class="tbd"><b>规则</b>进行中日期不进入评估队列，评估状态保持 PENDING，日天气按优先级 1 显示为待评估，封面为默认占位封面。</div><div class="tbd"><b>规则</b>进行中日期不计入年/月均分、周期天气与趋势曲线。</div><div class="tbd"><b>规则</b>跨入次日后进入评估队列，评估完成时封面、天气、情绪、总结一次性落定，达标则生成高光。</div></div>
   </div>
 </div>
 </div>
@@ -1290,21 +1318,21 @@ table.tb th{background:#ededed}
       <span class="chip">高情绪</span><span class="chip">有趣</span><span class="chip">高总分</span></div>
     <div class="lbl">按日期倒序 · 7 条</div>
     <div class="box" style="font-size:9px;padding:0;display:flex;gap:4px">
-      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">L5</div>
+      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">封面</div>
       <div style="padding:3px;flex:1">
         <div style="display:flex;justify-content:space-between">
           <b>11月11日</b><span class="tag k">综合高光</span></div>
         <div style="font-size:8px;color:#666">🌈 88 / 85 · 😊 开心</div>
         <div style="font-size:8px">今天聊了旅行计划…</div></div></div>
     <div class="box" style="font-size:9px;padding:0;display:flex;gap:4px">
-      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">L5</div>
+      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">封面</div>
       <div style="padding:3px;flex:1">
         <div style="display:flex;justify-content:space-between">
           <b>11月03日</b><span class="tag">高亲密</span></div>
         <div style="font-size:8px;color:#666">☀ 91 / 93 · 🥰 亲昵</div>
         <div style="font-size:8px">说了很多心里话…</div></div></div>
     <div class="box" style="font-size:9px;padding:0;display:flex;gap:4px">
-      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">L4</div>
+      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">封面</div>
       <div style="padding:3px;flex:1">
         <div style="display:flex;justify-content:space-between">
           <b>10月28日</b><span class="tag">有趣对话</span></div>
@@ -1341,13 +1369,13 @@ table.tb th{background:#ededed}
       <span class="chip">高情绪</span><span class="chip">有趣</span><span class="chip">高总分</span></div>
     <div class="lbl">高亲密 · 2 条</div>
     <div class="box" style="font-size:9px;padding:0;display:flex;gap:4px">
-      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">L5</div>
+      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">封面</div>
       <div style="padding:3px;flex:1">
         <div style="display:flex;justify-content:space-between">
           <b>11月03日</b><span class="tag">高亲密</span></div>
         <div style="font-size:8px;color:#666">☀ 91 / 93 · 🥰 亲昵</div></div></div>
     <div class="box" style="font-size:9px;padding:0;display:flex;gap:4px">
-      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">L5</div>
+      <div class="img" style="width:46px;height:46px;border:0;font-size:7px">封面</div>
       <div style="padding:3px;flex:1">
         <div style="display:flex;justify-content:space-between">
           <b>09月14日</b><span class="tag">高亲密</span></div>
@@ -1381,7 +1409,7 @@ table.tb th{background:#ededed}
 </div>
 <div class="grp" id="gh">
 <h2>H · 设置（需求 12）</h2>
-<div class="gnote">设置页提供同步状态与「立即同步」作为 A5/A7/A8 重试流程的用户侧落点。主题提供纸月历、星图、色域、磨砂玻璃 4 套，点击即应用。默认卡片状态决定进入月视图时全部卡片的初始状态，单张卡片的切换结果为视图层临时状态。</div>
+<div class="gnote">设置页提供同步状态与「立即同步」作为 A7/A9/A10 重试流程的用户侧落点。主题提供纸月历、星图、色域、磨砂玻璃 4 套，点击即应用。默认卡片状态决定进入月视图时全部卡片的初始状态，单张卡片的切换结果为视图层临时状态。</div>
 <div class="screens">
 <div class="screen">
   <div class="sc-head"><span class="sid">H1</span><h3>设置首页</h3>
@@ -1395,6 +1423,12 @@ table.tb th{background:#ededed}
         上次同步 11-13 23:00<br>已同步 27 天 · 失败 3 天</div>
       <div class="row" style="margin-top:3px">
         <div class="btn">查看失败日期</div><div class="btn pri">立即同步</div></div></div>
+    <div class="box" style="font-size:9px;padding:4px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span>待同步</span><b>2 条</b></div>
+      <div style="font-size:8px;color:#666;margin-top:2px">
+        离线期间的编辑会在联网后自动提交</div>
+      <div class="btn" style="width:100%;margin-top:3px">立即重试</div></div>
     <div class="lbl">偏好</div>
     <div class="box" style="font-size:9px;padding:3px;display:flex;justify-content:space-between">
       <span>主题</span><span style="color:#666">纸月历 ›</span></div>
@@ -1407,8 +1441,10 @@ table.tb th{background:#ededed}
       <span>封面与天气规则说明</span><span>›</span></div>
     <div class="lbl">其他</div>
     <div class="box" style="font-size:9px;padding:3px;display:flex;justify-content:space-between">
-      <span>关于</span><span>›</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>同步分组：同步状态、上次同步时间、已同步天数、失败天数</li><li>「立即同步」按钮</li><li>失败天数不为零时显示「查看失败日期」</li><li>偏好分组：主题（右侧显示当前主题名）、显示偏好</li><li>说明分组：隐私说明、封面与天气规则说明</li><li>其他分组：关于</li></ul><h4>用户可执行操作</h4><ul><li>点击「立即同步」</li><li>点击「查看失败日期」</li><li>进入各子页</li></ul><h4>操作后去向</h4><ul><li>立即同步 <span class="to">→ A5 同步中</span></li><li>查看失败日期 <span class="to">→ H8 失败日期列表</span></li><li>主题 <span class="to">→ H2 主题选择</span></li><li>显示偏好 <span class="to">→ H4</span></li><li>隐私说明 <span class="to">→ H5</span></li><li>规则说明 <span class="to">→ H6</span></li><li>关于 <span class="to">→ H7</span></li></ul><div class="tbd"><b>规则</b>设置页展示同步状态并提供「立即同步」，作为 A5/A7/A8 重试流程的用户侧落点。</div></div>
+      <span>关于</span><span>›</span></div>
+    <div class="box" style="font-size:9px;padding:3px;display:flex;justify-content:space-between">
+      <span>锁定</span><span style="color:#666">立即需要密码 ›</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>同步分组：同步状态、上次同步时间、已同步天数、失败天数</li><li>「立即同步」按钮</li><li>失败天数不为零时显示「查看失败日期」</li><li>待同步行：待提交的编辑条数与「立即重试」按钮</li><li>偏好分组：主题（右侧显示当前主题名）、显示偏好</li><li>说明分组：隐私说明、封面与天气规则说明</li><li>其他分组：关于、锁定</li></ul><h4>用户可执行操作</h4><ul><li>点击「立即同步」</li><li>点击「查看失败日期」</li><li>点击「立即重试」提交待同步的编辑</li><li>点击「锁定」</li><li>进入各子页</li></ul><h4>操作后去向</h4><ul><li>立即同步 <span class="to">→ A7 同步中</span></li><li>查看失败日期 <span class="to">→ H8 失败日期列表</span></li><li>立即重试 <span class="to">→ H1 本屏（提交成功后条数减少，全部成功后该行显示「全部已同步」）</span></li><li>锁定 <span class="to">→ A2 密码门禁</span></li><li>主题 <span class="to">→ H2 主题选择</span></li><li>显示偏好 <span class="to">→ H4</span></li><li>隐私说明 <span class="to">→ H5</span></li><li>规则说明 <span class="to">→ H6</span></li><li>关于 <span class="to">→ H7</span></li></ul><div class="tbd"><b>规则</b>设置页展示同步状态并提供「立即同步」，作为 A7/A9/A10 重试流程的用户侧落点。</div><div class="tbd"><b>规则</b>待同步行在有待提交编辑时展示条数与「立即重试」；全部提交完成后该行展示「全部已同步」。</div><div class="tbd"><b>规则</b>点击「锁定」立即清除密码免输入有效期，返回门禁页重新输入。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -1466,11 +1502,9 @@ table.tb th{background:#ededed}
     <div class="box" style="font-size:9px;padding:3px">
       <div style="display:flex;justify-content:space-between"><span>封面</span><span>●</span></div>
       <div class="hr"></div>
-      <div style="display:flex;justify-content:space-between"><span>日期数字</span><span>○</span></div>
-      <div class="hr"></div>
       <div style="display:flex;justify-content:space-between"><span>一句话总结</span><span>○</span></div></div>
     <div class="box d" style="font-size:8px;color:#666">
-      修改后全部日卡片立即切换为所选状态</div>
+      下次进入月视图时，日卡片按所选状态初始化</div>
     <div class="lbl">趋势默认指标</div>
     <div><span class="chip on">总分</span><span class="chip">亲密度</span><span class="chip">情绪分</span></div>
     <div class="lbl">趋势默认粒度</div>
@@ -1479,7 +1513,7 @@ table.tb th{background:#ededed}
       <span>曲线叠加显示</span><span>○—</span></div>
     <div class="box" style="font-size:9px;padding:3px;display:flex;justify-content:space-between">
       <span>日详情互动统计默认展开</span><span>—●</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>默认卡片状态单选：封面 / 日期数字 / 一句话总结</li><li>修改后全部日卡片立即切换</li><li>趋势默认指标单选</li><li>趋势默认粒度单选</li><li>曲线叠加显示开关</li><li>日详情互动统计默认展开开关</li></ul><h4>用户可执行操作</h4><ul><li>选择默认卡片状态</li><li>选择趋势默认指标与粒度</li><li>切换两个开关</li></ul><h4>操作后去向</h4><ul><li>修改默认卡片状态 → 下次进入月视图生效 <span class="to">→ B3 月视图</span></li><li>修改趋势偏好 <span class="to">→ E1 曲线（按新默认加载）</span></li></ul><div class="tbd"><b>规则</b>默认卡片状态作用于进入月视图时的初始化；进入后单张卡片独立切换，切换结果随月视图生命周期存在。</div><div class="tbd"><b>规则</b>显示偏好共 5 项：默认卡片状态、趋势默认指标、趋势默认粒度、曲线叠加、统计默认展开。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>默认卡片状态单选：封面 / 一句话总结</li><li>下次进入月视图时按所选状态初始化</li><li>趋势默认指标单选</li><li>趋势默认粒度单选</li><li>曲线叠加显示开关</li><li>日详情互动统计默认展开开关</li></ul><h4>用户可执行操作</h4><ul><li>选择默认卡片状态</li><li>选择趋势默认指标与粒度</li><li>切换两个开关</li></ul><h4>操作后去向</h4><ul><li>修改默认卡片状态 → 下次进入月视图生效 <span class="to">→ B3 月视图</span></li><li>修改趋势偏好 <span class="to">→ E1 曲线（按新默认加载）</span></li></ul><div class="tbd"><b>规则</b>默认卡片状态作用于进入月视图时的初始化；进入后每张卡片独立切换，切换结果随月视图生命周期存在。</div><div class="tbd"><b>规则</b>显示偏好共 5 项：默认卡片状态、趋势默认指标、趋势默认粒度、曲线叠加、统计默认展开。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -1503,42 +1537,43 @@ table.tb th{background:#ededed}
 </div>
 <div class="screen">
   <div class="sc-head"><span class="sid">H6</span><h3>封面与天气规则说明（只读）</h3>
-  <span class="pos">流程位置：H1 进入 · 合并展示三套规则</span></div>
+  <span class="pos">流程位置：H1 进入 · 合并展示封面、天气与情绪色系三套规则</span></div>
   <div class="sc-body">
-    <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>规则说明</span><span class="ic">←</span></div><div class="body"><div class="lbl">综合关系分</div>
-    <div class="box" style="font-size:8.5px;padding:3px">
-      = 亲密度 × 0.6 + 情绪分 × 0.4（四舍五入）</div>
+    <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>规则说明</span><span class="ic">←</span></div><div class="body"><div class="lbl">关系分</div>
+    <div class="box" style="font-size:8.5px;padding:3px;line-height:1.6">
+      由亲密度与情绪分合成 0-100 的关系分<br>
+      <span style="color:#666">亲密度占比更高，情绪分为辅</span></div>
     <div class="lbl">封面等级</div>
     <div class="box" style="font-size:8px;padding:3px;line-height:1.7">
-      L1 0-20 · L2 21-40 · L3 41-60<br>L4 61-80 · L5 81-100</div>
+      按关系分分 5 档，关系分越高画面越明亮<br>
+      第 1 档 0-20 · 第 2 档 21-40 · 第 3 档 41-60<br>第 4 档 61-80 · 第 5 档 81-100</div>
     <div class="lbl">封面选图</div>
     <div class="box" style="font-size:7.6px;padding:3px;line-height:1.6">
-      等级定主池，亲密度档与情绪档合成池内变体<br>
-      差值 = 亲密度档中值 − 情绪档中值<br>
-      ≤-25 → V1 情绪张力 · &lt;0 → V2 轻快<br>
-      &lt;25 → V3 陪伴 · ≥25 → V4 静默相处<br>
-      子池内按日期哈希轮换，同一日期取同一张</div>
-    <div class="lbl">天气综合分</div>
-    <div class="box" style="font-size:8.5px;padding:3px">
-      = 总分 × 0.5 + 情绪分 × 0.3 + 亲密度 × 0.2
-      <div style="font-size:7.6px;color:#666;margin-top:1px">
-        与封面综合分独立计算，侧重当天体感</div></div>
+      等级决定封面的整体基调<br>
+      亲密与情绪的偏向决定同档内的画面取向：<br>
+      偏情绪张力 · 偏轻快 · 偏陪伴 · 偏静默相处<br>
+      同一天固定取同一张，反复进入画面不变</div>
+    <div class="lbl">天气分</div>
+    <div class="box" style="font-size:8.5px;padding:3px;line-height:1.6">
+      由总分、情绪分与亲密度合成<br>
+      <span style="color:#666">总分占比最高，情绪分次之，亲密度再次之<br>
+        与封面的关系分各自计算，天气分侧重当天体感</span></div>
     <div class="lbl">日天气判定优先级</div>
     <div class="box" style="font-size:7.6px;padding:3px;line-height:1.6">
       1 待评估 未同步或评估未完成<br>
-      2 🌫 雾 置信度 &lt; 40<br>
-      3 ❄ 雪 消息总条数 &lt; 10 且情绪分 ≥ 50<br>
-      4-12 按天气综合分区间：<br>
+      2 🌫 雾 评估依据不足<br>
+      3 ❄ 雪 当天消息很少且情绪平稳<br>
+      4-12 按天气分区间：<br>
       🌈95-100 ☀85-94 ⛅75-84 ☁65-74<br>
       🌬55-64 🌦45-54 🌧35-44 ⛈25-34 ⚡0-24</div>
     <div class="box d" style="font-size:7.8px;color:#666">
       雪与雾优先于分数区间，同一分数不会命中两种天气<br>
-      周/月天气按天气综合分平均值映射，不应用雾与雪</div>
+      周与月的天气按天气分平均值映射，不出现雾与雪</div>
     <div class="lbl">情绪色系</div>
     <div class="box" style="font-size:7.6px;padding:3px">
       暖黄·粉红·浅绿·浅蓝·橙红·灰褐 6 色系<br>
       色相表类型，明度表情绪分 <span class="ic">查看全表 ›</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>封面综合关系分公式（亲密度×0.6 + 情绪分×0.4）</li><li>L1-L5 等级区间表</li><li>封面选图规则：等级定主池、D/E 档合成池内变体 V1-V4、子池内日期哈希轮换</li><li>天气综合分公式（总分×0.5 + 情绪分×0.3 + 亲密度×0.2）与权重含义</li><li>日天气判定优先级表（含雾与雪触发条件）</li><li>雪雾优先级与周期天气说明</li><li>情绪色系概览与查看全表入口</li></ul><h4>用户可执行操作</h4><ul><li>阅读规则</li><li>点击「查看全表」</li><li>返回</li></ul><h4>操作后去向</h4><ul><li>查看色系全表 <span class="to">→ E3 情绪色系映射速查</span></li><li>返回 <span class="to">→ H1 设置首页</span></li></ul><div class="tbd"><b>规则</b>雪的可执行阈值：消息总条数 &lt; 10 且情绪分 ≥ 50。</div><div class="tbd"><b>规则</b>雾的可执行阈值：置信度 &lt;40（AI 输出新增 confidence 字段）。</div><div class="tbd"><b>规则</b>按优先级依次判定，前一条命中即停止，消除分数区间重叠冲突。</div><div class="tbd"><b>规则</b>本页同时展示封面规则与天气规则。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>关系分构成说明与 5 档区间表</li><li>封面选图说明：等级定基调、亲密与情绪的偏向定同档内取向、同一天固定同一张</li><li>天气分构成说明与三项权重的主次顺序</li><li>日天气判定优先级表（含雾与雪的触发情形）</li><li>雪雾优先级与周期天气说明</li><li>情绪色系概览与查看全表入口</li></ul><h4>用户可执行操作</h4><ul><li>阅读规则</li><li>点击「查看全表」</li><li>返回</li></ul><h4>操作后去向</h4><ul><li>查看色系全表 <span class="to">→ E3 情绪色系映射速查</span></li><li>返回 <span class="to">→ H1 设置首页</span></li></ul><div class="tbd"><b>规则</b>界面用自然语言陈述规则；可执行口径为综合关系分 = 亲密度×0.6 + 情绪分×0.4，天气综合分 = 总分×0.5 + 情绪分×0.3 + 亲密度×0.2，封面等级 L1-L5 对应 5 档区间，池内变体 V1-V4 由亲密度档与情绪档差值合成。</div><div class="tbd"><b>规则</b>雪的可执行阈值：消息总条数 &lt; 10 且情绪分 ≥ 50，界面表述为「当天消息很少且情绪平稳」。</div><div class="tbd"><b>规则</b>雾的可执行阈值：置信度 &lt;40，界面表述为「评估依据不足」。</div><div class="tbd"><b>规则</b>按优先级依次判定，前一条命中即停止，消除分数区间重叠冲突。</div><div class="tbd"><b>规则</b>本页同时展示封面规则与天气规则。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -1548,15 +1583,15 @@ table.tb th{background:#ededed}
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>关于</span><span class="ic">←</span></div><div class="body"><div class="ctr" style="flex:0 0 auto;padding:6px 0">
       <div class="img" style="width:44px;height:44px">LOGO</div>
       <div style="font-size:10px;font-weight:700">LingLing</div>
-      <div style="font-size:8.5px;color:#666">appVersion 1.1.0</div></div>
+      <div style="font-size:8.5px;color:#666">版本 1.1.0</div></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
-      <span>数据库结构版本</span><span class="mono">schema 1</span></div>
+      <span>数据库结构版本</span><span class="mono">1</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
-      <span>规则版本</span><span class="mono">rule 1</span></div>
+      <span>规则版本</span><span class="mono">1</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
-      <span>AI 提示词版本</span><span class="mono">prompt v2</span></div>
+      <span>AI 提示词版本</span><span class="mono">v2</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
-      <span>封面资源池版本</span><span class="mono">pool-2026.11</span></div>
+      <span>封面资源池版本</span><span class="mono">2026.11</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;line-height:1.7">
       <b>资源来源</b><br>
       封面采用原创角色或已授权 IP 资源</div>
@@ -1566,13 +1601,13 @@ table.tb th{background:#ededed}
       评估由 AI 服务生成</div>
     <div class="box" style="font-size:8.5px;padding:3px;line-height:1.7">
       <b>本地存储位置</b><br>
-      <span class="mono" style="font-size:7.5px">应用沙盒 /Documents/relation.db</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>应用名称与 appVersion</li><li>schemaVersion、ruleVersion、promptVersion、coverPoolVersion 同屏展示</li><li>封面资源来源说明</li><li>数据来源说明</li><li>本地数据存储位置说明</li></ul><h4>用户可执行操作</h4><ul><li>阅读</li><li>返回</li></ul><h4>操作后去向</h4><ul><li>返回 <span class="to">→ H1 设置首页</span></li></ul><div class="tbd"><b>规则</b>五条版本轴同屏展示，一张截图即可读全排查所需的版本信息。</div></div>
+      <span style="font-size:7.8px">应用沙盒内的 Documents 目录</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>应用名称与应用版本</li><li>数据库结构、规则、AI 提示词、封面资源池四条版本与应用版本同屏展示</li><li>封面资源来源说明</li><li>数据来源说明</li><li>本地数据存储位置说明</li></ul><h4>用户可执行操作</h4><ul><li>阅读</li><li>返回</li></ul><h4>操作后去向</h4><ul><li>返回 <span class="to">→ H1 设置首页</span></li></ul><div class="tbd"><b>规则</b>五条版本轴同屏展示，一张截图即可读全排查所需的版本信息。</div><div class="tbd"><b>规则</b>界面只呈现版本数值，字段名 appVersion、schemaVersion、ruleVersion、promptVersion、coverPoolVersion 留在实现层，五者各自独立取值互不换算。</div></div>
   </div>
 </div>
 <div class="screen">
   <div class="sc-head"><span class="sid">H8</span><h3>失败日期列表</h3>
-  <span class="pos">流程位置：H1 点击「查看失败日期」· 与 A8 同组件</span></div>
+  <span class="pos">流程位置：H1 点击「查看失败日期」· 与 A10 同组件</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>失败日期</span><span class="ic">←</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
       失败 3 天 · 上次尝试 11-13 23:00</div>
@@ -1588,8 +1623,8 @@ table.tb th{background:#ededed}
     </div>
     <div class="btn pri" style="width:100%">重试全部失败项</div>
     <div class="box d" style="font-size:8px;color:#777">
-      与 A8 部分成功页使用同一组件</div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>失败天数与上次尝试时间</li><li>失败日期列表（日期 + 失败原因 + 单日重试按钮）</li><li>「重试全部失败项」按钮</li></ul><h4>用户可执行操作</h4><ul><li>单日重试</li><li>批量重试</li><li>返回设置</li></ul><h4>操作后去向</h4><ul><li>重试成功则移除该行；全部成功 <span class="to">→ H1 设置首页（状态更新）</span></li><li>返回 <span class="to">→ H1 设置首页</span></li></ul><div class="tbd"><b>规则</b>与 A8 使用同一组件，保证两处重试粒度一致。</div></div>
+      与 A10 部分成功页使用同一组件</div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>失败天数与上次尝试时间</li><li>失败日期列表（日期 + 失败原因 + 单日重试按钮）</li><li>「重试全部失败项」按钮</li></ul><h4>用户可执行操作</h4><ul><li>单日重试</li><li>批量重试</li><li>返回设置</li></ul><h4>操作后去向</h4><ul><li>重试成功则移除该行；全部成功 <span class="to">→ H1 设置首页（状态更新）</span></li><li>返回 <span class="to">→ H1 设置首页</span></li></ul><div class="tbd"><b>规则</b>与 A10 使用同一组件，保证两处重试粒度一致。</div></div>
   </div>
 </div>
 </div>
@@ -1601,24 +1636,35 @@ table.tb th{background:#ededed}
 <table class="tb">
 <tr><th style="width:130px">规则项</th><th>规则内容</th></tr>
 <tr><td>启动页</td><td>存在。配置加载超时上限 8 秒，超时文案「配置加载超时，请检查应用配置文件后重新启动」+「重新加载」按钮（重新计时）</td></tr>
-<tr><td>登录流程</td><td>鉴权凭据由配置文件提供，配置有效即直接进入同步流程</td></tr>
+<tr><td>登录流程</td><td>鉴权凭据由配置文件提供，配置有效后进入密码门禁</td></tr>
+<tr><td>密码门禁</td><td>配置加载成功后进入 A2 密码门禁，密码正确进入同步流程，密码错误显示「密码错误」并清空输入框，门禁页不展示任何数据内容</td></tr>
+<tr><td>免输入有效期</td><td>校验通过后 10 分钟内重新进入直接放行，有效期按单调时钟计时，修改设备系统时间不延长有效期；退到后台不清除有效期，设置页点击「锁定」立即清除</td></tr>
+<tr><td>门禁错误锁定</td><td>连续错误 5 次锁定 60 秒，期间输入框禁用并显示剩余秒数；锁定状态与错误次数保存在本地，重启应用后继续生效，锁定结束后再次输错立即重新锁定</td></tr>
+<tr><td>密码来源</td><td>后端下发加盐哈希与盐值，客户端在本地比对哈希，断网时门禁照常工作；每次成功同步刷新缓存的哈希与盐值，后台改密码后各端在下一次同步后生效</td></tr>
 <tr><td>配置录入</td><td>配置由代码或配置文件维护，待配置页为只读提示页</td></tr>
 <tr><td>Token 更新</td><td>Token 由配置文件维护，鉴权失败页操作限于重试同步与离线查看</td></tr>
 <tr><td>取消同步</td><td>提供「取消同步」。停止新请求、中断传输中请求，已落盘日文件保留；取消后可「继续同步」断点续传</td></tr>
 <tr><td>同步失败形态</td><td>整页失败态，展示失败原因分类与最近成功同步时间</td></tr>
-<tr><td>失败日期</td><td>向用户暴露失败日期列表，重试粒度支持单日 + 批量；设置页 H6 与 A8 同组件</td></tr>
+<tr><td>失败日期</td><td>向用户暴露失败日期列表，重试粒度支持单日 + 批量；设置页 H8 与 A10 同组件</td></tr>
 <tr><td>手动同步按钮</td><td>时间墙空状态手动同步入口位于设置页「立即同步」</td></tr>
+<tr><td>数据归属</td><td>后端持有权威数据，客户端缓存用于展示与离线查看；各端拉取同一份数据，同步时远端版本覆盖本地缓存</td></tr>
+<tr><td>编辑回写</td><td>用户编辑总结、备注、收藏、高光、喜好、礼物、偏好后立即写本地缓存并入回写队列，界面即时反映结果；联网时队列按入队顺序自动提交，无需手动触发</td></tr>
+<tr><td>离线编辑标识</td><td>离线编辑在界面显示「待同步」标识，提交成功后标识消失</td></tr>
+<tr><td>回写重试</td><td>回写失败按退避重试上限 5 次，耗尽后设置页展示「待同步 N 条」与「立即重试」；队列为空时该行展示「全部已同步」</td></tr>
+<tr><td>多端编辑冲突</td><td>同一条记录的多次本地编辑在队列中合并为最后一次结果提交一次；多端编辑时后端按 updatedAt 保留较新者，本地编辑被覆盖时提示「该条内容已在其他设备上更新，已显示最新版本」</td></tr>
 <tr><td>年度天气</td><td>年视图不展示年度关系天气</td></tr>
 <tr><td>年→月导航</td><td>点击年份进入 12 个月宫格选择页（3 列 × 4 行，无记录置灰），再点月份进入月视图</td></tr>
-<tr><td>卡片手势分工</td><td>点击卡片主体切换三态；卡片右下角独立箭头进入日详情</td></tr>
+<tr><td>卡片手势分工</td><td>点击卡片主体在封面态与一句话总结态之间切换该张卡片；卡片右下角独立箭头进入日详情</td></tr>
 <tr><td>月份切换</td><td>顶部切换器 ◀ 年月 ▶，点击年月文字返回月份选择页</td></tr>
-<tr><td>卡片墙列数</td><td>2 列，卡片面积加大以容纳三态内容</td></tr>
+<tr><td>封面态信息条</td><td>左下角一条信息条，内容为日期、天气图标、天气分数，置于半透明暗色底衬之上以保证封面图上的可读性</td></tr>
+<tr><td>总结态信息行</td><td>顶部一行展示日期、天气图标、情绪图标，右上角展示来源标识「已编辑」或「AI」</td></tr>
+<tr><td>卡片墙列数</td><td>2 列，卡片面积加大以容纳总结态的 120 字</td></tr>
 <tr><td>未同步日呈现</td><td>月视图置灰 + 「未同步」占位；点箭头进 D7b，提供「同步这一天」</td></tr>
-<tr><td>卡片三态作用域</td><td>每张卡片独立切换，互不影响。进入月视图时按 UserPreference.cardDefaultState 初始化；单张切换结果为视图层临时状态</td></tr>
+<tr><td>卡片两态作用域</td><td>封面态 ⇄ 一句话总结态。每张卡片独立切换，点击一张只改变这张，同屏可同时存在两种状态，界面不提供全部切换入口。进入月视图时按显示偏好的默认卡片状态初始化，切换结果随月视图生命周期存在</td></tr>
 <tr><td>总结来源标识</td><td>用户编辑过显示「已编辑」，未编辑显示「AI」</td></tr>
 <tr><td>总结为空文案</td><td>评估未完成「今天还没有总结」／评估失败「总结生成失败」／未同步「这天还没有同步」</td></tr>
 <tr><td>长按菜单形态</td><td>底部动作面板，含收藏、编辑总结、添加备注；重新评估入口位于日详情</td></tr>
-<tr><td>用户总结字数</td><td>上限 50 字，与 AI 输出同限制</td></tr>
+<tr><td>用户总结字数</td><td>上限 120 字，与 AI 输出同限制。卡片宽 179pt、可用高 193pt，13pt 字号下可排 10 行每行约 12 字</td></tr>
 <tr><td>恢复为 AI 总结</td><td>提供。保存后清空 userSummary，来源标识回「AI」；AI 原始总结为空时按钮置灰</td></tr>
 <tr><td>未保存退出</td><td>总结与备注均需二次确认</td></tr>
 <tr><td>备注标记与字数</td><td>备注非空时日卡片显示 📝 标记；字数上限 200 字</td></tr>
@@ -1687,7 +1733,7 @@ table.tb th{background:#ededed}
 <tr><td>周定位态</td><td>趋势月粒度数据点跳转该周起始日所属月份的月视图，该周 7 张卡片描边高亮 + 周摘要行 +「显示全月」</td></tr>
 <tr><td>高光唯一性</td><td>同一日期最多一条有效高光（deleted=false），以日期为唯一键。重评后不再达标则置 deleted，类型变化则更新不新增</td></tr>
 <tr><td>删除级联</td><td>删除礼物后重算来源喜好 giftAdded；删除自定义分类同步清理 FilterState 中该分类条件；跳转定位前清除目标列表筛选</td></tr>
-<tr><td>未同步日卡片</td><td>不参与三态循环，卡片主体为占位区；长按面板的收藏、编辑总结、添加备注均可用；已有用户总结时占位区展示该总结</td></tr>
+<tr><td>未同步日卡片</td><td>卡片主体为占位区，两态切换不适用；长按面板的收藏、编辑总结、添加备注均可用；已有用户总结时占位区展示该总结</td></tr>
 <tr><td>规则说明页</td><td>封面规则与天气规则合并展示，并链到情绪色系全表</td></tr>
 <tr><td>关于页内容</td><td>版本号、AI 提示词版本、封面资源池版本、资源来源、数据来源、本地存储位置</td></tr>
 </table>
@@ -1708,8 +1754,8 @@ table.tb th{background:#ededed}
 </table>
 </div>
 <footer>
-<p><b>屏幕统计</b>：A 启动与同步 8 屏 · B 时间墙 5 屏 · C 日卡片 8 屏 · D 日详情 9 屏 ·
-E 趋势 4 屏 · F 喜好与礼物 14 屏 · G 回忆 4 屏 · H 设置 8 屏 ——<b>共 60 屏</b>。</p>
+<p><b>屏幕统计</b>：A 启动与同步 10 屏 · B 时间墙 5 屏 · C 日卡片 7 屏 · D 日详情 9 屏 ·
+E 趋势 4 屏 · F 喜好与礼物 14 屏 · G 回忆 4 屏 · H 设置 8 屏 ——<b>共 61 屏</b>。</p>
 <p><b>手机壳内外的分工</b>：手机壳内＝最终界面呈现内容；手机壳外的「关键元素 / 用户可执行操作 / 操作后去向 / 规则」＝给开发看的实现说明，不绘制到界面上。</p>
 <p>配套文档：《LingLing 需求描述文档》。两份交付物中的阈值、文案、字段、优先级规则一一对应，需求文档全 16 章无未定项。</p>
 </footer>

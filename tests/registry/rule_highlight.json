@@ -2,13 +2,23 @@
  {
   "id": "SYS-RULE-020",
   "title": "高光触发条件为总分不低于 85 且情绪分不低于 70，或总分不低于 90",
-  "req": ["REQ-16-17"],
-  "reqSection": ["8.1"],
-  "screens": ["G1"],
+  "req": [
+   "REQ-16-17"
+  ],
+  "reqSection": [
+   "8.1"
+  ],
+  "screens": [
+   "G1"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一组总分与情绪分"],
-  "when": ["判定是否触发高光"],
+  "given": [
+   "一组总分与情绪分"
+  ],
+  "when": [
+   "判定是否触发高光"
+  ],
   "then": [
    "总分 85、情绪分 70 触发",
    "总分 85、情绪分 69 不触发",
@@ -18,12 +28,48 @@
   "oracle": {
    "fn": "highlight_triggered",
    "cases": [
-    {"args": [85, 70], "expect": true},
-    {"args": [85, 69], "expect": false},
-    {"args": [84, 70], "expect": false},
-    {"args": [90, 0], "expect": true},
-    {"args": [89, 69], "expect": false},
-    {"args": [100, 100], "expect": true}
+    {
+     "args": [
+      85,
+      70
+     ],
+     "expect": true
+    },
+    {
+     "args": [
+      85,
+      69
+     ],
+     "expect": false
+    },
+    {
+     "args": [
+      84,
+      70
+     ],
+     "expect": false
+    },
+    {
+     "args": [
+      90,
+      0
+     ],
+     "expect": true
+    },
+    {
+     "args": [
+      89,
+      69
+     ],
+     "expect": false
+    },
+    {
+     "args": [
+      100,
+      100
+     ],
+     "expect": true
+    }
    ]
   },
   "testId": "packages/ling_core/test/highlight_test.dart::高光触发条件"
@@ -31,13 +77,24 @@
  {
   "id": "SYS-RULE-021",
   "title": "高光类型按 5 条优先级判定，前一条命中即停止",
-  "req": ["REQ-16-17"],
-  "reqSection": ["8.1"],
-  "screens": ["G1", "G3"],
+  "req": [
+   "REQ-16-17"
+  ],
+  "reqSection": [
+   "8.1"
+  ],
+  "screens": [
+   "G1",
+   "G3"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["已触发高光的一组总分、情绪分、亲密度与有趣对话条数"],
-  "when": ["判定高光类型"],
+  "given": [
+   "已触发高光的一组总分、情绪分、亲密度与有趣对话条数"
+  ],
+  "when": [
+   "判定高光类型"
+  ],
   "then": [
    "综合高光要求总分 ≥ 90 且情绪分 ≥ 85 且亲密度 ≥ 85，三项缺一即落到后续优先级",
    "高亲密要求亲密度 ≥ 90，高情绪要求情绪分 ≥ 90",
@@ -48,16 +105,96 @@
   "oracle": {
    "fn": "highlight_type",
    "cases": [
-    {"args": [90, 85, 85, 0], "expect": "OVERALL"},
-    {"args": [100, 100, 100, 0], "expect": "OVERALL"},
-    {"args": [90, 84, 85, 0], "expect": "HIGH_SCORE"},
-    {"args": [90, 85, 84, 0], "expect": "HIGH_SCORE"},
-    {"args": [85, 70, 90, 0], "expect": "HIGH_INTIMACY"},
-    {"args": [85, 90, 80, 0], "expect": "HIGH_EMOTION"},
-    {"args": [85, 70, 80, 2], "expect": "FUN"},
-    {"args": [85, 70, 80, 1], "expect": "HIGH_SCORE"},
-    {"args": [90, 0, 0, 0], "expect": "HIGH_SCORE"},
-    {"args": [89, 69, 50, 5], "expect": null}
+    {
+     "args": [
+      90,
+      85,
+      85,
+      0
+     ],
+     "expect": "OVERALL"
+    },
+    {
+     "args": [
+      100,
+      100,
+      100,
+      0
+     ],
+     "expect": "OVERALL"
+    },
+    {
+     "args": [
+      90,
+      84,
+      85,
+      0
+     ],
+     "expect": "HIGH_SCORE"
+    },
+    {
+     "args": [
+      90,
+      85,
+      84,
+      0
+     ],
+     "expect": "HIGH_SCORE"
+    },
+    {
+     "args": [
+      85,
+      70,
+      90,
+      0
+     ],
+     "expect": "HIGH_INTIMACY"
+    },
+    {
+     "args": [
+      85,
+      90,
+      80,
+      0
+     ],
+     "expect": "HIGH_EMOTION"
+    },
+    {
+     "args": [
+      85,
+      70,
+      80,
+      2
+     ],
+     "expect": "FUN"
+    },
+    {
+     "args": [
+      85,
+      70,
+      80,
+      1
+     ],
+     "expect": "HIGH_SCORE"
+    },
+    {
+     "args": [
+      90,
+      0,
+      0,
+      0
+     ],
+     "expect": "HIGH_SCORE"
+    },
+    {
+     "args": [
+      89,
+      69,
+      50,
+      5
+     ],
+     "expect": null
+    }
    ]
   },
   "testId": "packages/ling_core/test/highlight_test.dart::高光类型优先级"
@@ -65,13 +202,23 @@
  {
   "id": "SYS-G-001",
   "title": "高光列表按日期倒序展示并显示类型标识",
-  "req": ["REQ-16-17"],
-  "reqSection": ["8.2"],
-  "screens": ["G1"],
+  "req": [
+   "REQ-16-17"
+  ],
+  "reqSection": [
+   "8.2"
+  ],
+  "screens": [
+   "G1"
+  ],
   "layer": "widget",
   "priority": "P0",
-  "given": ["存在多个不同日期、不同类型的高光记录"],
-  "when": ["进入回忆页高光列表"],
+  "given": [
+   "存在多个不同日期、不同类型的高光记录"
+  ],
+  "when": [
+   "进入回忆页高光列表"
+  ],
   "then": [
    "条目按日期倒序排列",
    "每条显示日期、高光类型标识与一句话总结",
@@ -82,13 +229,23 @@
  {
   "id": "SYS-G-002",
   "title": "高光列表按类型筛选后仅保留命中类型",
-  "req": ["REQ-16-17"],
-  "reqSection": ["8.2"],
-  "screens": ["G3"],
+  "req": [
+   "REQ-16-17"
+  ],
+  "reqSection": [
+   "8.2"
+  ],
+  "screens": [
+   "G3"
+  ],
   "layer": "widget",
   "priority": "P1",
-  "given": ["高光列表含综合高光、高亲密、高情绪、有趣对话、高总分五种类型"],
-  "when": ["选择高亲密与高情绪两个类型"],
+  "given": [
+   "高光列表含综合高光、高亲密、高情绪、有趣对话、高总分五种类型"
+  ],
+  "when": [
+   "选择高亲密与高情绪两个类型"
+  ],
   "then": [
    "列表仅保留这两种类型的条目",
    "筛选条显示已选类型数量",
@@ -99,13 +256,24 @@
  {
   "id": "SYS-G-003",
   "title": "手动标记高光写入记录并在列表中可见",
-  "req": ["REQ-16-17"],
-  "reqSection": ["8.2"],
-  "screens": ["D1", "G1"],
+  "req": [
+   "REQ-16-17"
+  ],
+  "reqSection": [
+   "8.2"
+  ],
+  "screens": [
+   "D1",
+   "G1"
+  ],
   "layer": "integration",
   "priority": "P0",
-  "given": ["某日评估成功但未自动触发高光"],
-  "when": ["在日详情页手动标记为高光"],
+  "given": [
+   "某日评估成功但未自动触发高光"
+  ],
+  "when": [
+   "在日详情页手动标记为高光"
+  ],
   "then": [
    "该日出现在高光列表中",
    "记录标明来源为手动标记",
@@ -116,13 +284,24 @@
  {
   "id": "SYS-G-004",
   "title": "长按删除高光有二次确认，取消后记录保留",
-  "req": ["REQ-16-17"],
-  "reqSection": ["8.2"],
-  "screens": ["G1", "G2"],
+  "req": [
+   "REQ-16-17"
+  ],
+  "reqSection": [
+   "8.2"
+  ],
+  "screens": [
+   "G1",
+   "G2"
+  ],
   "layer": "widget",
   "priority": "P1",
-  "given": ["高光列表中存在一条记录"],
-  "when": ["长按该条目并在确认弹窗中选择取消，再次长按并确认删除"],
+  "given": [
+   "高光列表中存在一条记录"
+  ],
+  "when": [
+   "长按该条目并在确认弹窗中选择取消，再次长按并确认删除"
+  ],
   "then": [
    "取消后记录保留在列表中",
    "确认后记录从列表移除",
@@ -133,13 +312,23 @@
  {
   "id": "SYS-G-005",
   "title": "无高光时展示空状态并说明触发条件",
-  "req": ["REQ-16-17"],
-  "reqSection": ["8.2"],
-  "screens": ["G4"],
+  "req": [
+   "REQ-16-17"
+  ],
+  "reqSection": [
+   "8.2"
+  ],
+  "screens": [
+   "G4"
+  ],
   "layer": "widget",
   "priority": "P2",
-  "given": ["高光记录数为 0"],
-  "when": ["进入回忆页"],
+  "given": [
+   "高光记录数为 0"
+  ],
+  "when": [
+   "进入回忆页"
+  ],
   "then": [
    "展示空状态插图与引导文案",
    "文案说明高光由评估分数自动触发，也可在日详情手动标记",

@@ -4,55 +4,55 @@
 每条需求验收标准至少对应一条用例，每条用例对应一个可定位的测试标识。
 `tests/validate.py` 在 CI 中强制这两条性质，覆盖缺口会阻断合并。
 
-需求验收标准 39 条，用例 141 条，测试标识 141 个。
+需求验收标准 50 条，用例 153 条，测试标识 153 个。
 
 ## 需求 → 用例 → 屏幕 → 测试
 
 | 需求编号 | 用例 ID | 优先级 | 层 | 屏幕 | 用例标题 | 测试标识 |
 | --- | --- | --- | --- | --- | --- | --- |
 | REQ-16-01 | SYS-A-001 | P0 | widget | A1 | 启动页在 8 秒内完成配置加载后按自动同步开关分流 | `packages/ling_app/test/widget/splash_test.dart::配置加载成功分流` |
-| REQ-16-01 | SYS-A-002 | P0 | widget | A1, A2 | 配置加载超过 8 秒展示超时态并支持重新计时 | `packages/ling_app/test/widget/splash_test.dart::配置加载超时` |
+| REQ-16-01 | SYS-A-002 | P0 | widget | A1, A4 | 配置加载超过 8 秒展示超时态并支持重新计时 | `packages/ling_app/test/widget/splash_test.dart::配置加载超时` |
 | REQ-16-01 | SYS-BACKEND-014 | P0 | contract | — | OpenAPI 契约与后端实现双向一致 | `backend/tests/test_contract.py::双向契约一致` |
 | REQ-16-01 | SYS-PERF-001 | P0 | perf | A1, B3, D1, E1 | 启动配置加载、月视图、日详情、趋势页满足性能预算 | `packages/ling_app/test/perf/budget_test.dart::性能预算全项` |
-| REQ-16-02 | SYS-A-003 | P0 | widget | A3 | 配置缺失进入待配置态，操作限于重新加载与查看说明 | `packages/ling_app/test/widget/pending_config_test.dart::待配置只读提示` |
-| REQ-16-02 | SYS-A-004 | P0 | widget | A4 | 同步返回 401 或 403 进入鉴权失败态并提供离线查看 | `packages/ling_app/test/widget/auth_failed_test.dart::鉴权失败提示与离线查看` |
-| REQ-16-02 | SYS-A-008 | P0 | widget | A7 | 同步失败展示原因分类与最近同步时间 | `packages/ling_app/test/widget/sync_failed_test.dart::失败原因分类` |
-| REQ-16-03 | SYS-A-005 | P0 | widget | A5 | 同步中展示 5 个阶段与批量进度且不阻塞浏览 | `packages/ling_app/test/widget/syncing_test.dart::同步阶段与进度` |
-| REQ-16-03 | SYS-A-006 | P0 | integration | A5, A6 | 取消同步保留已落盘日期并清空待执行评估队列 | `packages/ling_app/integration_test/sync_cancel_test.dart::取消同步落盘与队列` |
-| REQ-16-03 | SYS-A-007 | P0 | integration | A6 | 继续同步从未完成日期断点续传并重新入队评估 | `packages/ling_app/integration_test/sync_cancel_test.dart::断点续传` |
+| REQ-16-02 | SYS-A-003 | P0 | widget | A5 | 配置缺失进入待配置态，操作限于重新加载与查看说明 | `packages/ling_app/test/widget/pending_config_test.dart::待配置只读提示` |
+| REQ-16-02 | SYS-A-004 | P0 | widget | A6 | 同步返回 401 或 403 进入鉴权失败态并提供离线查看 | `packages/ling_app/test/widget/auth_failed_test.dart::鉴权失败提示与离线查看` |
+| REQ-16-02 | SYS-A-008 | P0 | widget | A9 | 同步失败展示原因分类与最近同步时间 | `packages/ling_app/test/widget/sync_failed_test.dart::失败原因分类` |
+| REQ-16-03 | SYS-A-005 | P0 | widget | A7 | 同步中展示 5 个阶段与批量进度且不阻塞浏览 | `packages/ling_app/test/widget/syncing_test.dart::同步阶段与进度` |
+| REQ-16-03 | SYS-A-006 | P0 | integration | A7, A8 | 取消同步保留已落盘日期并清空待执行评估队列 | `packages/ling_app/integration_test/sync_cancel_test.dart::取消同步落盘与队列` |
+| REQ-16-03 | SYS-A-007 | P0 | integration | A8 | 继续同步从未完成日期断点续传并重新入队评估 | `packages/ling_app/integration_test/sync_cancel_test.dart::断点续传` |
 | REQ-16-03 | SYS-A-010 | P1 | widget | B3, H1 | 后台同步保持当前页面并以轻提示呈现 | `packages/ling_app/test/widget/background_sync_test.dart::后台同步轻提示` |
-| REQ-16-03 | SYS-A-011 | P0 | integration | — | 聊天文件以远端为权威，用户数据同步不覆盖 | `packages/ling_app/integration_test/sync_conflict_test.dart::用户数据不被覆盖` |
+| REQ-16-03 | SYS-A-011 | P0 | integration | — | 同步以后端版本为权威覆盖本地缓存，本地未提交编辑保留在回写队列 | `packages/ling_app/integration_test/sync_conflict_test.dart::后端权威与回写保留` |
 | REQ-16-03 | SYS-BACKEND-014 | P0 | contract | — | OpenAPI 契约与后端实现双向一致 | `backend/tests/test_contract.py::双向契约一致` |
-| REQ-16-03 | SYS-PERF-002 | P1 | perf | A5 | 全量同步峰值内存不超过预算 | `packages/ling_app/test/perf/sync_memory_test.dart::同步内存预算` |
-| REQ-16-04 | SYS-A-009 | P0 | integration | A8 | 部分成功展示失败日期列表并支持单日与批量重试 | `packages/ling_app/integration_test/partial_success_test.dart::单日与批量重试` |
-| REQ-16-04 | SYS-A-012 | P1 | backend | A8 | 清单与日文件按约定格式解析，字段缺失时该日期标记失败 | `backend/tests/test_importer.py::文件格式解析与容错` |
+| REQ-16-03 | SYS-PERF-002 | P1 | perf | A7 | 全量同步峰值内存不超过预算 | `packages/ling_app/test/perf/sync_memory_test.dart::同步内存预算` |
+| REQ-16-04 | SYS-A-009 | P0 | integration | A10 | 部分成功展示失败日期列表并支持单日与批量重试 | `packages/ling_app/integration_test/partial_success_test.dart::单日与批量重试` |
+| REQ-16-04 | SYS-A-012 | P1 | backend | A10 | 清单与日文件按约定格式解析，字段缺失时该日期标记失败 | `backend/tests/test_importer.py::文件格式解析与容错` |
 | REQ-16-04 | SYS-D-016 | P1 | integration | D7b, D1 | 同步这一天仅拉取该日期并刷新页面状态 | `packages/ling_app/integration_test/single_day_sync_test.dart::单日同步` |
 | REQ-16-04 | SYS-H-010 | P0 | integration | H8, H1 | 失败日期列表支持单日与批量重试并在清空后隐藏入口 | `packages/ling_app/integration_test/failed_dates_test.dart::失败列表重试与清空` |
 | REQ-16-05 | SYS-B-001 | P0 | integration | B1, B2, B3, D1 | 时间墙层级为年视图到月份选择页到月视图到日详情 | `packages/ling_app/integration_test/timewall_nav_test.dart::时间墙层级下钻` |
 | REQ-16-05 | SYS-B-002 | P0 | widget | B1 | 年份卡片展示 5 项摘要且均分口径仅含已评估日期 | `packages/ling_app/test/widget/year_view_test.dart::年份卡片摘要` |
 | REQ-16-05 | SYS-B-004 | P0 | widget | B2 | 月份选择页为 12 格宫格，无记录月份为禁用态 | `packages/ling_app/test/widget/month_picker_test.dart::月份宫格状态` |
 | REQ-16-06 | SYS-B-005 | P0 | widget | B3 | 月视图日卡片 2 列排列且顶部切换器可切换月份 | `packages/ling_app/test/widget/month_view_test.dart::月视图布局与切换` |
-| REQ-16-06 | SYS-B-006 | P0 | widget | B3, C1, C2, C3, D1 | 卡片主体点击切换三态，右下角箭头进入日详情 | `packages/ling_app/test/widget/day_card_test.dart::卡片点击区域分工` |
-| REQ-16-06 | SYS-B-010 | P0 | widget | C1, C2, C3 | 三态各自展示约定的字段与角标 | `packages/ling_app/test/widget/day_card_test.dart::三态字段与角标` |
-| REQ-16-06 | SYS-B-013 | P0 | widget | C5, C6, D7b | 未同步日卡片为禁用态，不参与三态循环但可长按 | `packages/ling_app/test/widget/day_card_test.dart::未同步卡片行为` |
+| REQ-16-06 | SYS-B-006 | P0 | widget | B3, C1, C2, D1 | 卡片主体点击在封面态与总结态之间切换，右下角箭头进入日详情 | `packages/ling_app/test/widget/day_card_test.dart::卡片点击区域分工` |
+| REQ-16-06 | SYS-B-010 | P0 | widget | C1, C2 | 两态各自展示约定的字段与角标 | `packages/ling_app/test/widget/day_card_test.dart::两态字段与角标` |
+| REQ-16-06 | SYS-B-013 | P0 | widget | C4, C5, D7b | 未同步日卡片为占位态，两态切换不适用但可长按 | `packages/ling_app/test/widget/day_card_test.dart::未同步卡片行为` |
 | REQ-16-06 | SYS-B-015 | P1 | perf | B3 | 月视图在 500 毫秒内完成首帧，滚动保持 16 毫秒帧预算 | `packages/ling_app/test/perf/month_view_perf_test.dart::月视图渲染预算` |
 | REQ-16-06 | SYS-PERF-001 | P0 | perf | A1, B3, D1, E1 | 启动配置加载、月视图、日详情、趋势页满足性能预算 | `packages/ling_app/test/perf/budget_test.dart::性能预算全项` |
-| REQ-16-07 | SYS-B-007 | P0 | widget | B3, C1, C2, C3 | 卡片三态按张独立切换，切换单张不影响同屏其他卡片 | `packages/ling_app/test/widget/day_card_test.dart::三态按张独立` |
+| REQ-16-07 | SYS-B-007 | P0 | widget | B3, C1, C2 | 卡片两态按张独立切换，切换单张不影响同屏其他卡片 | `packages/ling_app/test/widget/day_card_test.dart::两态按张独立` |
 | REQ-16-07 | SYS-B-008 | P0 | integration | B3, H4 | 进入月视图按设置页默认卡片状态初始化，离开后不持久化 | `packages/ling_app/integration_test/card_state_test.dart::默认状态初始化` |
-| REQ-16-08 | SYS-B-011 | P0 | widget | C3, C4 | 总结来源标识区分已编辑与 AI，空总结按两种情形取文案 | `packages/ling_app/test/widget/day_card_test.dart::总结来源与空文案` |
+| REQ-16-08 | SYS-B-011 | P0 | widget | C2, C3 | 总结来源标识区分已编辑与 AI，空总结按两种情形取文案 | `packages/ling_app/test/widget/day_card_test.dart::总结来源与空文案` |
 | REQ-16-08 | SYS-B-012 | P1 | widget | C1, D5 | 待重评卡片按上次成功结果展示并增加待重评标识 | `packages/ling_app/test/widget/day_card_test.dart::待重评卡片展示` |
-| REQ-16-08 | SYS-B-014 | P2 | widget | C5 | 未同步日已有用户总结时占位区展示该总结 | `packages/ling_app/test/widget/day_card_test.dart::未同步日用户总结` |
-| REQ-16-08 | SYS-C-008 | P0 | widget | C4 | 评估缺失卡片展示降级内容并提供操作提示 | `packages/ling_app/test/widget/day_card_test.dart::评估缺失降级` |
+| REQ-16-08 | SYS-B-014 | P2 | widget | C4 | 未同步日已有用户总结时占位区展示该总结 | `packages/ling_app/test/widget/day_card_test.dart::未同步日用户总结` |
+| REQ-16-08 | SYS-C-008 | P0 | widget | C3 | 评估缺失卡片展示降级内容并提供操作提示 | `packages/ling_app/test/widget/day_card_test.dart::评估缺失降级` |
 | REQ-16-08 | SYS-D-012 | P1 | widget | D3 | 评估中展示加载态且对话流保持可读 | `packages/ling_app/test/widget/day_detail_test.dart::评估中加载态` |
 | REQ-16-08 | SYS-D-013 | P0 | widget | D4 | 评估失败展示失败状态与重试入口 | `packages/ling_app/test/widget/day_detail_test.dart::评估失败重试` |
-| REQ-16-09 | SYS-C-001 | P0 | widget | C6 | 长按动作面板含收藏、编辑总结、添加备注与取消 | `packages/ling_app/test/widget/day_card_actions_test.dart::动作面板项目` |
-| REQ-16-09 | SYS-C-002 | P1 | integration | C6, C1 | 收藏切换后关闭面板并刷新卡片标记 | `packages/ling_app/integration_test/favorite_test.dart::收藏切换与持久化` |
+| REQ-16-09 | SYS-C-001 | P0 | widget | C5 | 长按动作面板含收藏、编辑总结、添加备注与取消 | `packages/ling_app/test/widget/day_card_actions_test.dart::动作面板项目` |
+| REQ-16-09 | SYS-C-002 | P1 | integration | C5, C1 | 收藏切换后关闭面板并刷新卡片标记 | `packages/ling_app/integration_test/favorite_test.dart::收藏切换与持久化` |
 | REQ-16-09 | SYS-D-011 | P0 | integration | D1, D3 | 重新评估覆盖 AI 结果并刷新版本与元数据字段 | `packages/ling_app/integration_test/re_evaluate_test.dart::重新评估字段刷新` |
-| REQ-16-10 | SYS-C-003 | P0 | widget | C7 | 编辑总结上限 50 字，超出后保存按钮为禁用态 | `packages/ling_app/test/widget/summary_edit_test.dart::总结字数上限` |
-| REQ-16-10 | SYS-C-004 | P0 | integration | C7, C3 | 恢复为 AI 总结清空用户总结字段并还原来源标识 | `packages/ling_app/integration_test/summary_edit_test.dart::恢复为 AI 总结` |
-| REQ-16-10 | SYS-C-005 | P1 | widget | C7 | 总结未保存退出有二次确认 | `packages/ling_app/test/widget/summary_edit_test.dart::未保存二次确认` |
-| REQ-16-10 | SYS-C-006 | P1 | integration | C4, C7 | 无评估的日期允许编辑总结并在卡片上展示 | `packages/ling_app/integration_test/summary_edit_test.dart::无评估日编辑总结` |
-| REQ-16-11 | SYS-C-007 | P0 | integration | C8, C1 | 备注上限 200 字且非空时卡片显示备注图标 | `packages/ling_app/integration_test/note_edit_test.dart::备注字数与标记` |
+| REQ-16-10 | SYS-C-003 | P0 | widget | C6 | 编辑总结上限 120 字，超出后保存按钮为禁用态 | `packages/ling_app/test/widget/summary_edit_test.dart::总结字数上限` |
+| REQ-16-10 | SYS-C-004 | P0 | integration | C6, C2 | 恢复为 AI 总结清空用户总结字段并还原来源标识 | `packages/ling_app/integration_test/summary_edit_test.dart::恢复为 AI 总结` |
+| REQ-16-10 | SYS-C-005 | P1 | widget | C6 | 总结未保存退出有二次确认 | `packages/ling_app/test/widget/summary_edit_test.dart::未保存二次确认` |
+| REQ-16-10 | SYS-C-006 | P1 | integration | C3, C6 | 无评估的日期允许编辑总结并在卡片上展示 | `packages/ling_app/integration_test/summary_edit_test.dart::无评估日编辑总结` |
+| REQ-16-11 | SYS-C-007 | P0 | integration | C7, C1 | 备注上限 200 字且非空时卡片显示备注图标 | `packages/ling_app/integration_test/note_edit_test.dart::备注字数与标记` |
 | REQ-16-12 | SYS-D-001 | P0 | widget | D2 | 互动统计按需求顺序呈现 12 项且占比项使用堆叠条 | `packages/ling_app/test/widget/day_stats_test.dart::互动统计 12 项顺序` |
 | REQ-16-12 | SYS-D-002 | P1 | widget | D2, D7a | 消息条数为 0 时 12 项统计全部显示占位符 | `packages/ling_app/test/widget/day_stats_test.dart::零消息统计占位` |
 | REQ-16-12 | SYS-D-003 | P1 | service | D1, D2 | 系统消息不计入任何统计项与对话段判定 | `packages/ling_app/test/service/stats_service_test.dart::系统消息排除` |
@@ -72,7 +72,7 @@
 | REQ-16-14 | SYS-RULE-045 | P0 | rule | — | 四舍五入在 0.5 边界向上进位，与语言内置银行家舍入区分 | `packages/ling_core/test/stats_test.dart::四舍五入口径` |
 | REQ-16-15 | SYS-D-014 | P1 | widget | D5 | 待重评展示状态提示并沿用上次成功结果 | `packages/ling_app/test/widget/day_detail_test.dart::待重评状态提示` |
 | REQ-16-15 | SYS-RULE-003 | P0 | rule | — | 天气综合分区间映射在每个区间端点取到唯一天气 | `packages/ling_core/test/weather_test.dart::天气区间端点` |
-| REQ-16-15 | SYS-RULE-004 | P0 | rule | C4, C5, D7a, D7b, D8 | 日天气优先级 1 待评估覆盖未同步、零消息与未完成评估三种情形 | `packages/ling_core/test/weather_test.dart::待评估优先级` |
+| REQ-16-15 | SYS-RULE-004 | P0 | rule | C3, C4, D7a, D7b, D8 | 日天气优先级 1 待评估覆盖未同步、零消息与未完成评估三种情形 | `packages/ling_core/test/weather_test.dart::待评估优先级` |
 | REQ-16-15 | SYS-RULE-005 | P0 | rule | D6 | 置信度低于 40 时日天气为雾并遮蔽综合分区间 | `packages/ling_core/test/weather_test.dart::雾优先级` |
 | REQ-16-15 | SYS-RULE-006 | P0 | rule | — | 消息少于 10 条且情绪分不低于 50 时日天气为雪并遮蔽综合分区间 | `packages/ling_core/test/weather_test.dart::雪优先级` |
 | REQ-16-15 | SYS-RULE-008 | P1 | rule | D5 | STALE 日期沿用上次成功评估的分数参与天气判定 | `packages/ling_core/test/weather_test.dart::STALE 沿用上次结果` |
@@ -142,12 +142,12 @@
 | REQ-16-33 | SYS-RULE-015 | P0 | rule | H6 | 穷举全部整数输入得到 18 个可达子池，不可达子池恰为 L1V4 与 L5V1 | `packages/ling_core/test/cover_test.dart::子池可达性穷举` |
 | REQ-16-33 | SYS-RULE-016 | P0 | rule | B3, C1 | 同一日期在同一档位组合下稳定取到同一张封面图 | `packages/ling_core/test/cover_test.dart::日期哈希稳定选图` |
 | REQ-16-33 | SYS-RULE-017 | P0 | rule | — | FNV-1a 哈希对固定输入给出固定值，Dart 与 Python 结果一致 | `packages/ling_core/test/cover_test.dart::稳定哈希跨语言一致` |
-| REQ-16-34 | SYS-BACKEND-001 | P0 | backend | A5, C4 | 单次同步超过 300 个日期时仅前 300 个进入队列，其余保持待评估 | `backend/tests/test_queue.py::单次上限 300` |
+| REQ-16-34 | SYS-BACKEND-001 | P0 | backend | A7, C3 | 单次同步超过 300 个日期时仅前 300 个进入队列，其余保持待评估 | `backend/tests/test_queue.py::单次上限 300` |
 | REQ-16-34 | SYS-BACKEND-002 | P0 | backend | — | 评估并发数为 3 且配置项取值限制在 1-5 | `backend/tests/test_queue.py::并发上限` |
-| REQ-16-34 | SYS-BACKEND-003 | P0 | integration | C4, D3 | 待评估日期进入日详情时触发单日评估并优先于队列剩余任务 | `packages/ling_app/integration_test/eval_priority_test.dart::单日评估抢占` |
+| REQ-16-34 | SYS-BACKEND-003 | P0 | integration | C3, D3 | 待评估日期进入日详情时触发单日评估并优先于队列剩余任务 | `packages/ling_app/integration_test/eval_priority_test.dart::单日评估抢占` |
 | REQ-16-34 | SYS-BACKEND-004 | P0 | backend | D4, H8 | 队列任务失败按配置重试，耗尽后置为失败且队列继续 | `backend/tests/test_queue.py::失败重试与队列续行` |
 | REQ-16-34 | SYS-BACKEND-008 | P0 | backend | D7a | 消息条数为 0 的日期不调用 AI 且不计入任何聚合 | `backend/tests/test_queue.py::零消息跳过评估` |
-| REQ-16-34 | SYS-RULE-053 | P0 | backend | A5, H1 | 评估队列按日期倒序排序并在 300 条上限处截断 | `backend/tests/test_queue.py::队列排序与截断` |
+| REQ-16-34 | SYS-RULE-053 | P0 | backend | A7, H1 | 评估队列按日期倒序排序并在 300 条上限处截断 | `backend/tests/test_queue.py::队列排序与截断` |
 | REQ-16-35 | SYS-BACKEND-006 | P0 | backend | — | 评估缓存键由日期、文件哈希、提示词版本三者构成 | `backend/tests/test_store.py::缓存键命中与失效` |
 | REQ-16-35 | SYS-BACKEND-007 | P0 | integration | D5 | 提示词版本变更只对新同步日期生效，历史日期保留原结果 | `packages/ling_app/integration_test/prompt_version_test.dart::提示词版本生效范围` |
 | REQ-16-35 | SYS-D-011 | P0 | integration | D1, D3 | 重新评估覆盖 AI 结果并刷新版本与元数据字段 | `packages/ling_app/integration_test/re_evaluate_test.dart::重新评估字段刷新` |
@@ -159,36 +159,49 @@
 | REQ-16-36 | SYS-RULE-051 | P0 | backend | — | 验证码只替换与验证码字样相邻的数字，普通数字保留原文 | `backend/tests/test_mask.py::验证码上下文识别` |
 | REQ-16-36 | SYS-RULE-052 | P1 | backend | — | 详细地址识别省市区与门牌号组合 | `backend/tests/test_mask.py::详细地址识别` |
 | REQ-16-37 | SYS-D-004 | P0 | integration | D1, D2 | 日期归属以后端切分时区为权威，设备时区变化不改变统计 | `packages/ling_app/integration_test/timezone_test.dart::时区基准权威性` |
-| REQ-16-38 | SYS-BACKEND-009 | P0 | integration | D8, C4 | 当天为进行中日期，保持待评估并在次日进入队列 | `packages/ling_app/integration_test/today_test.dart::进行中日期处理` |
+| REQ-16-38 | SYS-BACKEND-009 | P0 | integration | D8, C3 | 当天为进行中日期，保持待评估并在次日进入队列 | `packages/ling_app/integration_test/today_test.dart::进行中日期处理` |
 | REQ-16-38 | SYS-D-017 | P0 | widget | D8 | 当天进行中展示状态提示且统计实时计算 | `packages/ling_app/test/widget/day_detail_test.dart::当天进行中提示` |
 | REQ-16-39 | SYS-F-006 | P0 | integration | F1, F5 | 共同喜好为标记字段，5 种状态通过筛选查看 | `packages/ling_app/integration_test/common_status_test.dart::共同喜好状态语义` |
+| REQ-16-40 | SYS-A-013 | P0 | widget | A1, A2 | 配置加载成功后进入密码门禁，正确放行错误清空输入框 | `packages/ling_app/test/widget/gate_test.dart::门禁校验与错误提示` |
+| REQ-16-41 | SYS-A-014 | P0 | service | A2 | 免输入有效期 10 分钟按单调时钟计时，改系统时间不延长 | `packages/ling_app/test/service/gate_service_test.dart::免输入有效期与单调时钟` |
+| REQ-16-42 | SYS-A-015 | P0 | integration | A2, A3 | 连续错误 5 次锁定 60 秒且跨重启继续生效 | `packages/ling_app/integration_test/gate_lockout_test.dart::错误锁定与跨重启` |
+| REQ-16-43 | SYS-A-016 | P0 | integration | A2 | 密码哈希由后端下发并在每次成功同步后刷新，本地比对不依赖网络 | `packages/ling_app/integration_test/gate_credential_test.dart::哈希下发与刷新` |
+| REQ-16-43 | SYS-BACKEND-016 | P0 | backend | — | 访问密码只下发加盐哈希，改密码脚本刷新哈希与盐值 | `backend/tests/test_gate.py::密码哈希下发与改密脚本` |
+| REQ-16-44 | SYS-A-017 | P1 | integration | H1, A2 | 设置页锁定立即清除免输入有效期并返回门禁页 | `packages/ling_app/integration_test/gate_lock_test.dart::设置页锁定` |
+| REQ-16-45 | SYS-A-018 | P0 | integration | C6, C7, F4, G2, H4 | 用户编辑立即生效于界面并入回写队列 | `packages/ling_app/integration_test/writeback_test.dart::编辑入队与提交` |
+| REQ-16-46 | SYS-A-019 | P0 | integration | C6, H1 | 离线编辑显示待同步标识并在联网后自动提交 | `packages/ling_app/integration_test/writeback_test.dart::离线编辑与自动提交` |
+| REQ-16-47 | SYS-A-020 | P0 | integration | H1 | 回写失败退避重试上限 5 次，耗尽后设置页提供立即重试 | `packages/ling_app/integration_test/writeback_retry_test.dart::退避重试与立即重试` |
+| REQ-16-48 | SYS-A-021 | P1 | service | — | 同一条记录的多次编辑在队列中合并为最后一次结果 | `packages/ling_app/test/service/writeback_queue_test.dart::同记录编辑合并` |
+| REQ-16-49 | SYS-A-022 | P0 | integration | D1, C6 | 同步以远端版本覆盖本地缓存并在覆盖本地编辑时提示 | `packages/ling_app/integration_test/writeback_conflict_test.dart::远端覆盖与提示` |
+| REQ-16-50 | SYS-BACKEND-015 | P0 | backend | — | 同一条记录被多端编辑时后端按更新时刻保留较新者 | `backend/tests/test_writeback.py::多端编辑按更新时刻取较新` |
 
 ## 屏幕 → 用例
 
 | 屏幕 | 用例 ID |
 | --- | --- |
-| A1 | SYS-A-001, SYS-A-002, SYS-PERF-001 |
-| A2 | SYS-A-002 |
-| A3 | SYS-A-003 |
-| A4 | SYS-A-004 |
-| A5 | SYS-A-005, SYS-A-006, SYS-BACKEND-001, SYS-PERF-002, SYS-RULE-053 |
-| A6 | SYS-A-006, SYS-A-007 |
-| A7 | SYS-A-008 |
-| A8 | SYS-A-009, SYS-A-012 |
+| A1 | SYS-A-001, SYS-A-002, SYS-A-013, SYS-PERF-001 |
+| A2 | SYS-A-013, SYS-A-014, SYS-A-015, SYS-A-016, SYS-A-017 |
+| A3 | SYS-A-015 |
+| A4 | SYS-A-002 |
+| A5 | SYS-A-003 |
+| A6 | SYS-A-004 |
+| A7 | SYS-A-005, SYS-A-006, SYS-BACKEND-001, SYS-PERF-002, SYS-RULE-053 |
+| A8 | SYS-A-006, SYS-A-007 |
+| A9 | SYS-A-008 |
+| A10 | SYS-A-009, SYS-A-012 |
 | B0 | SYS-B-003, SYS-H-002 |
 | B1 | SYS-B-001, SYS-B-002, SYS-RULE-007 |
 | B2 | SYS-B-001, SYS-B-004, SYS-RULE-007 |
 | B3 | SYS-A-010, SYS-B-001, SYS-B-005, SYS-B-006, SYS-B-007, SYS-B-008, SYS-B-015, SYS-E-003, SYS-H-004, SYS-H-005, SYS-PERF-001, SYS-RULE-007, SYS-RULE-016 |
 | B4 | SYS-B-009, SYS-E-003 |
 | C1 | SYS-B-006, SYS-B-007, SYS-B-010, SYS-B-012, SYS-C-002, SYS-C-007, SYS-COVER-001, SYS-COVER-002, SYS-RULE-010, SYS-RULE-011, SYS-RULE-014, SYS-RULE-016 |
-| C2 | SYS-B-006, SYS-B-007, SYS-B-010 |
-| C3 | SYS-B-006, SYS-B-007, SYS-B-010, SYS-B-011, SYS-C-004 |
-| C4 | SYS-B-011, SYS-BACKEND-001, SYS-BACKEND-003, SYS-BACKEND-009, SYS-C-006, SYS-C-008, SYS-RULE-004 |
-| C5 | SYS-B-013, SYS-B-014, SYS-RULE-004 |
-| C6 | SYS-B-013, SYS-C-001, SYS-C-002 |
-| C7 | SYS-C-003, SYS-C-004, SYS-C-005, SYS-C-006 |
-| C8 | SYS-C-007 |
-| D1 | SYS-B-001, SYS-B-006, SYS-BACKEND-010, SYS-BACKEND-012, SYS-D-003, SYS-D-004, SYS-D-010, SYS-D-011, SYS-D-016, SYS-D-018, SYS-E-003, SYS-G-003, SYS-PERF-001 |
+| C2 | SYS-B-006, SYS-B-007, SYS-B-010, SYS-B-011, SYS-C-004 |
+| C3 | SYS-B-011, SYS-BACKEND-001, SYS-BACKEND-003, SYS-BACKEND-009, SYS-C-006, SYS-C-008, SYS-RULE-004 |
+| C4 | SYS-B-013, SYS-B-014, SYS-RULE-004 |
+| C5 | SYS-B-013, SYS-C-001, SYS-C-002 |
+| C6 | SYS-A-018, SYS-A-019, SYS-A-022, SYS-C-003, SYS-C-004, SYS-C-005, SYS-C-006 |
+| C7 | SYS-A-018, SYS-C-007 |
+| D1 | SYS-A-022, SYS-B-001, SYS-B-006, SYS-BACKEND-010, SYS-BACKEND-012, SYS-D-003, SYS-D-004, SYS-D-010, SYS-D-011, SYS-D-016, SYS-D-018, SYS-E-003, SYS-G-003, SYS-PERF-001 |
 | D2 | SYS-D-001, SYS-D-002, SYS-D-003, SYS-D-004, SYS-H-005, SYS-RULE-040, SYS-RULE-041, SYS-RULE-042 |
 | D3 | SYS-BACKEND-003, SYS-D-011, SYS-D-012 |
 | D4 | SYS-BACKEND-004, SYS-BACKEND-005, SYS-D-013 |
@@ -204,7 +217,7 @@
 | F1 | SYS-F-001, SYS-F-006, SYS-F-024, SYS-F-028 |
 | F2 | SYS-F-002, SYS-F-003 |
 | F3 | SYS-F-004, SYS-F-005 |
-| F4 | SYS-F-007, SYS-F-008 |
+| F4 | SYS-A-018, SYS-F-007, SYS-F-008 |
 | F5 | SYS-F-005, SYS-F-006, SYS-F-009, SYS-F-010 |
 | F6 | SYS-F-008 |
 | F7 | SYS-F-011 |
@@ -216,13 +229,13 @@
 | F13 | SYS-F-023 |
 | F14 | SYS-F-027 |
 | G1 | SYS-G-001, SYS-G-003, SYS-G-004, SYS-RULE-020, SYS-RULE-021 |
-| G2 | SYS-G-004 |
+| G2 | SYS-A-018, SYS-G-004 |
 | G3 | SYS-G-002, SYS-RULE-021 |
 | G4 | SYS-G-005 |
-| H1 | SYS-A-010, SYS-H-001, SYS-H-002, SYS-H-010, SYS-RULE-053 |
+| H1 | SYS-A-010, SYS-A-017, SYS-A-019, SYS-A-020, SYS-H-001, SYS-H-002, SYS-H-010, SYS-RULE-053 |
 | H2 | SYS-COVER-001, SYS-H-003, SYS-H-004, SYS-H-006 |
 | H3 | SYS-COVER-001, SYS-H-004, SYS-H-011 |
-| H4 | SYS-B-008, SYS-H-005, SYS-H-006 |
+| H4 | SYS-A-018, SYS-B-008, SYS-H-005, SYS-H-006 |
 | H5 | SYS-H-007 |
 | H6 | SYS-H-008, SYS-RULE-011, SYS-RULE-012, SYS-RULE-013, SYS-RULE-014, SYS-RULE-015 |
 | H7 | SYS-H-009 |
@@ -232,13 +245,13 @@
 
 | 层 | 用例数 | P0 | P1 | P2 |
 | --- | --- | --- | --- | --- |
-| widget | 56 | 33 | 15 | 8 |
-| integration | 31 | 24 | 7 | 0 |
+| widget | 57 | 34 | 15 | 8 |
+| integration | 38 | 30 | 8 | 0 |
 | rule | 27 | 25 | 2 | 0 |
-| backend | 14 | 10 | 4 | 0 |
+| backend | 16 | 12 | 4 | 0 |
+| service | 4 | 1 | 3 | 0 |
 | perf | 4 | 1 | 3 | 0 |
 | dao | 4 | 4 | 0 | 0 |
-| service | 2 | 0 | 2 | 0 |
 | golden | 2 | 1 | 0 | 1 |
 | contract | 1 | 1 | 0 | 0 |
-| **合计** | **141** | **99** | **33** | **9** |
+| **合计** | **153** | **109** | **35** | **9** |

@@ -6,7 +6,6 @@
    "cnName": "卡片状态",
    "members": [
     "COVER",
-    "DATE",
     "SUMMARY"
    ]
   },
@@ -375,6 +374,27 @@
     "V2",
     "V3",
     "V4"
+   ]
+  },
+  "WriteBackEntity": {
+   "section": "14.29",
+   "cnName": "回写实体",
+   "members": [
+    "DAY_CARD_USER_DATA",
+    "HIGHLIGHT_MEMORY",
+    "PREFERENCE_ITEM",
+    "PREFERENCE_CATEGORY_CUSTOM",
+    "GIFT_ITEM",
+    "USER_PREFERENCE"
+   ]
+  },
+  "GateStatus": {
+   "section": "14.30",
+   "cnName": "门禁状态",
+   "members": [
+    "LOCKED",
+    "UNLOCKED",
+    "THROTTLED"
    ]
   }
  }

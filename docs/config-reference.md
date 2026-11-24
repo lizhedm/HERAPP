@@ -60,6 +60,9 @@
 | `thresholds.funMomentCountAtLeast` | int | 2 | 1-3 | 即时 | 8.1 |
 | `thresholds.summaryMaxChars` | int | 50 | 10-200 | 即时 | 4.8、6.2 |
 | `thresholds.highlightCandidateMax` | int | 3 | 1-10 | 下次同步 | 6.2 |
+| `thresholds.gateGraceMinutes` | int | 10 | 1-120 | 即时 | 3.10 |
+| `thresholds.gateMaxAttempts` | int | 5 | 3-10 | 即时 | 3.10 |
+| `thresholds.gateLockoutSeconds` | int | 60 | 30-600 | 即时 | 3.10 |
 
 ### coverPools 封面资源池
 
@@ -69,16 +72,27 @@
 | `coverPools.version` | string | `pool-2026.11` | 非空字符串，展示于关于页 | 启动 | 10.3、12.6 |
 | `coverPools.fallbackAsset` | string | `assets/cover/placeholder.png` | 仓库内相对路径 | 启动 | 10.3 |
 
+### gate 访问密码
+
+`gate.password` 作用域为后端：由 `ops/set_password.py` 写入后端库，客户端配置文件中不存在该键。其余三项作用域为客户端。
+
+| 键名 | 类型 | 默认值 | 取值范围 | 生效时机 | 需求 |
+| --- | --- | --- | --- | --- | --- |
+| `gate.password` | string | `QWEasdZXC@2026` | 长度不少于 8 位且含字母与数字 | 下次同步 | 3.10 |
+| `gate.hashAlgo` | string | `argon2id` | 固定值 | 启动 | 3.10 |
+| `gate.defaultPasswordHash` | string | 无，必填 | argon2id 哈希串 | 启动 | 3.10 |
+| `gate.defaultSalt` | string | 无，必填 | base64 编码的 16 字节盐值 | 启动 | 3.10 |
+
 ---
 
 ## UserPreference 用户可写偏好
 
-保存在本地数据库，由设置页写入。同步与配置文件重载保留本结构，与需求 3.8 的用户数据独立保存同口径。
+保存在本地缓存库，由设置页写入，随回写队列提交后端，因此主题与显示偏好在各端一致。
 
 | 键名 | 类型 | 默认值 | 取值范围 | 生效时机 | 需求 |
 | --- | --- | --- | --- | --- | --- |
 | `theme` | Theme | `PAPER_CALENDAR` | 需求 14.26 的 4 个取值 | 即时 | 12.2、13 |
-| `cardDefaultState` | CardState | `COVER` | 需求 14.1 的 3 个取值 | 下次进入月视图 | 12.4、13 |
+| `cardDefaultState` | CardState | `COVER` | 需求 14.1 的 2 个取值 | 下次进入月视图 | 12.4、13 |
 | `trendMetric` | TrendMetric | `OVERALL_SCORE` | 需求 14.24 的 3 个取值 | 下次进入趋势页 | 12.4、13 |
 | `trendGranularity` | TrendGranularity | `MONTH` | 需求 14.25 的 3 个取值 | 下次进入趋势页 | 12.4、13 |
 | `curveOverlay` | bool | false | — | 下次进入趋势页 | 12.4、13 |
@@ -86,7 +100,7 @@
 | `updatedAt` | datetime | 写入时间 | — | 即时 | 13 |
 
 `cardDefaultState` 作用于进入月视图时的卡片初始化。单张卡片切换后的当前状态为视图层临时状态，
-随月视图生命周期存在，不写回本结构。
+随月视图生命周期存在，不写回本结构也不参与回写。
 
 ---
 
@@ -94,3 +108,7 @@
 
 `sync.token` 与 `ai.apiKey` 两项的值存入系统安全存储，配置文件中只保留占位符。
 两项均不写入日志、不进入崩溃上报、不出现在界面展示。需求 11 与技术方案 9.2 规定其轮换方式。
+
+`gate.password` 的明文只存在于执行 `ops/set_password.py` 时的命令行入参，脚本写入后端库的是
+argon2id 哈希与盐值。`/v1/gate` 只下发哈希与盐值，客户端取到后存入系统安全存储。
+明文不落盘、不进日志、不出现在任何接口响应中。

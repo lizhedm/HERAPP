@@ -2,13 +2,23 @@
  {
   "id": "SYS-RULE-040",
   "title": "字数口径为 TEXT 类型内容的 Unicode 码点数且不含首尾空白",
-  "req": ["REQ-16-12"],
-  "reqSection": ["6.1"],
-  "screens": ["D2"],
+  "req": [
+   "REQ-16-12"
+  ],
+  "reqSection": [
+   "6.1"
+  ],
+  "screens": [
+   "D2"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一条消息的文本内容"],
-  "when": ["计算字数"],
+  "given": [
+   "一条消息的文本内容"
+  ],
+  "when": [
+   "计算字数"
+  ],
   "then": [
    "按 Unicode 码点计数，中英文混排各计 1",
    "首尾空白不计入，内部空白计入",
@@ -18,11 +28,36 @@
   "oracle": {
    "fn": "text_length",
    "cases": [
-    {"args": ["  hello 世界  "], "expect": 8},
-    {"args": [""], "expect": 0},
-    {"args": ["   "], "expect": 0},
-    {"args": ["你好"], "expect": 2},
-    {"args": ["a b"], "expect": 3}
+    {
+     "args": [
+      "  hello 世界  "
+     ],
+     "expect": 8
+    },
+    {
+     "args": [
+      ""
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      "   "
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      "你好"
+     ],
+     "expect": 2
+    },
+    {
+     "args": [
+      "a b"
+     ],
+     "expect": 3
+    }
    ]
   },
   "testId": "packages/ling_core/test/stats_test.dart::字数口径"
@@ -30,13 +65,23 @@
  {
   "id": "SYS-RULE-041",
   "title": "连续对话段按 30 分钟间隔切分，恰好 30 分钟归入同一段",
-  "req": ["REQ-16-12"],
-  "reqSection": ["6.1"],
-  "screens": ["D2"],
+  "req": [
+   "REQ-16-12"
+  ],
+  "reqSection": [
+   "6.1"
+  ],
+  "screens": [
+   "D2"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一组按时区换算后的消息时间戳，单位为秒"],
-  "when": ["计算连续对话段数"],
+  "given": [
+   "一组按时区换算后的消息时间戳，单位为秒"
+  ],
+  "when": [
+   "计算连续对话段数"
+  ],
   "then": [
    "相邻两条消息间隔超过 30 分钟视为新段",
    "间隔恰为 1800 秒归入同一段，1801 秒切出新段",
@@ -45,12 +90,62 @@
   "oracle": {
    "fn": "segment_count",
    "cases": [
-    {"args": [[]], "expect": 0},
-    {"args": [[5]], "expect": 1},
-    {"args": [[0, 1800]], "expect": 1},
-    {"args": [[0, 1801]], "expect": 2},
-    {"args": [[0, 600, 1200, 3000, 3001, 5000]], "expect": 2},
-    {"args": [[0, 2000, 4000, 6000]], "expect": 4}
+    {
+     "args": [
+      []
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ]
+     ],
+     "expect": 1
+    },
+    {
+     "args": [
+      [
+       0,
+       1800
+      ]
+     ],
+     "expect": 1
+    },
+    {
+     "args": [
+      [
+       0,
+       1801
+      ]
+     ],
+     "expect": 2
+    },
+    {
+     "args": [
+      [
+       0,
+       600,
+       1200,
+       3000,
+       3001,
+       5000
+      ]
+     ],
+     "expect": 2
+    },
+    {
+     "args": [
+      [
+       0,
+       2000,
+       4000,
+       6000
+      ]
+     ],
+     "expect": 4
+    }
    ]
   },
   "testId": "packages/ling_core/test/stats_test.dart::对话段切分"
@@ -58,13 +153,23 @@
  {
   "id": "SYS-RULE-042",
   "title": "最长连续对话条数取各段条数的最大值",
-  "req": ["REQ-16-12"],
-  "reqSection": ["6.1"],
-  "screens": ["D2"],
+  "req": [
+   "REQ-16-12"
+  ],
+  "reqSection": [
+   "6.1"
+  ],
+  "screens": [
+   "D2"
+  ],
   "layer": "rule",
   "priority": "P1",
-  "given": ["一组消息时间戳，含长短不一的多个对话段"],
-  "when": ["计算最长连续对话条数"],
+  "given": [
+   "一组消息时间戳，含长短不一的多个对话段"
+  ],
+  "when": [
+   "计算最长连续对话条数"
+  ],
   "then": [
    "结果为条数最多的那一段的消息条数",
    "消息数为 0 时结果为 0，单条消息结果为 1",
@@ -73,11 +178,57 @@
   "oracle": {
    "fn": "longest_segment",
    "cases": [
-    {"args": [[]], "expect": 0},
-    {"args": [[5]], "expect": 1},
-    {"args": [[0, 600, 1200, 3000, 3001, 5000]], "expect": 5},
-    {"args": [[5000, 3001, 3000, 1200, 600, 0]], "expect": 5},
-    {"args": [[0, 2000, 4000, 6000]], "expect": 1}
+    {
+     "args": [
+      []
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ]
+     ],
+     "expect": 1
+    },
+    {
+     "args": [
+      [
+       0,
+       600,
+       1200,
+       3000,
+       3001,
+       5000
+      ]
+     ],
+     "expect": 5
+    },
+    {
+     "args": [
+      [
+       5000,
+       3001,
+       3000,
+       1200,
+       600,
+       0
+      ]
+     ],
+     "expect": 5
+    },
+    {
+     "args": [
+      [
+       0,
+       2000,
+       4000,
+       6000
+      ]
+     ],
+     "expect": 1
+    }
    ]
   },
   "testId": "packages/ling_core/test/stats_test.dart::最长连续对话"
@@ -85,13 +236,24 @@
  {
   "id": "SYS-RULE-043",
   "title": "周期键按 ISO 8601 计算，周一为周首且跨年周归属正确",
-  "req": ["REQ-16-18"],
-  "reqSection": ["9.2"],
-  "screens": ["E1", "E2"],
+  "req": [
+   "REQ-16-18"
+  ],
+  "reqSection": [
+   "9.2"
+  ],
+  "screens": [
+   "E1",
+   "E2"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一个日期与周、月、年三种粒度"],
-  "when": ["计算周期键"],
+  "given": [
+   "一个日期与周、月、年三种粒度"
+  ],
+  "when": [
+   "计算周期键"
+  ],
   "then": [
    "周粒度返回 ISO 年与 ISO 周号，周一为周首",
    "跨年边界的日期归入 ISO 日历所属的那一周，年份取 ISO 年",
@@ -100,11 +262,41 @@
   "oracle": {
    "fn": "period_key",
    "cases": [
-    {"args": ["2026-11-24", "WEEK"], "expect": "2026-W48"},
-    {"args": ["2026-01-01", "WEEK"], "expect": "2026-W01"},
-    {"args": ["2026-12-31", "WEEK"], "expect": "2026-W53"},
-    {"args": ["2026-11-24", "MONTH"], "expect": "2026-11"},
-    {"args": ["2026-11-24", "YEAR"], "expect": "2026"}
+    {
+     "args": [
+      "2026-11-24",
+      "WEEK"
+     ],
+     "expect": "2026-W48"
+    },
+    {
+     "args": [
+      "2026-01-01",
+      "WEEK"
+     ],
+     "expect": "2026-W01"
+    },
+    {
+     "args": [
+      "2026-12-31",
+      "WEEK"
+     ],
+     "expect": "2026-W53"
+    },
+    {
+     "args": [
+      "2026-11-24",
+      "MONTH"
+     ],
+     "expect": "2026-11"
+    },
+    {
+     "args": [
+      "2026-11-24",
+      "YEAR"
+     ],
+     "expect": "2026"
+    }
    ]
   },
   "testId": "packages/ling_core/test/stats_test.dart::周期键计算"
@@ -112,13 +304,23 @@
  {
   "id": "SYS-RULE-044",
   "title": "趋势聚合取已评估日期的算术平均并四舍五入，空周期缺失",
-  "req": ["REQ-16-18"],
-  "reqSection": ["9.2"],
-  "screens": ["E1"],
+  "req": [
+   "REQ-16-18"
+  ],
+  "reqSection": [
+   "9.2"
+  ],
+  "screens": [
+   "E1"
+  ],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一个周期内评估成功与待重评日期的分数"],
-  "when": ["计算该周期的聚合值"],
+  "given": [
+   "一个周期内评估成功与待重评日期的分数"
+  ],
+  "when": [
+   "计算该周期的聚合值"
+  ],
   "then": [
    "结果为算术平均并四舍五入取整",
    "已评估日期数为 0 时结果缺失，曲线在该点断开",
@@ -127,11 +329,47 @@
   "oracle": {
    "fn": "trend_average",
    "cases": [
-    {"args": [[]], "expect": null},
-    {"args": [[85]], "expect": 85},
-    {"args": [[80, 90]], "expect": 85},
-    {"args": [[86, 87]], "expect": 87},
-    {"args": [[0, 100]], "expect": 50}
+    {
+     "args": [
+      []
+     ],
+     "expect": null
+    },
+    {
+     "args": [
+      [
+       85
+      ]
+     ],
+     "expect": 85
+    },
+    {
+     "args": [
+      [
+       80,
+       90
+      ]
+     ],
+     "expect": 85
+    },
+    {
+     "args": [
+      [
+       86,
+       87
+      ]
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      [
+       0,
+       100
+      ]
+     ],
+     "expect": 50
+    }
    ]
   },
   "testId": "packages/ling_core/test/stats_test.dart::趋势聚合"
@@ -139,13 +377,22 @@
  {
   "id": "SYS-RULE-045",
   "title": "四舍五入在 0.5 边界向上进位，与语言内置银行家舍入区分",
-  "req": ["REQ-16-14"],
-  "reqSection": ["7.1", "9.2"],
+  "req": [
+   "REQ-16-14"
+  ],
+  "reqSection": [
+   "7.1",
+   "9.2"
+  ],
   "screens": [],
   "layer": "rule",
   "priority": "P0",
-  "given": ["一组含 0.5 小数的数值"],
-  "when": ["执行需求口径的四舍五入"],
+  "given": [
+   "一组含 0.5 小数的数值"
+  ],
+  "when": [
+   "执行需求口径的四舍五入"
+  ],
   "then": [
    "0.5 向上进位，86.5 得 87 而非 86",
    "Dart 与参考实现对同一输入得出同一结果",
@@ -154,13 +401,48 @@
   "oracle": {
    "fn": "round_half_up",
    "cases": [
-    {"args": [86.5], "expect": 87},
-    {"args": [85.5], "expect": 86},
-    {"args": [0.5], "expect": 1},
-    {"args": [86.4], "expect": 86},
-    {"args": [86.6], "expect": 87},
-    {"args": [0], "expect": 0},
-    {"args": [100], "expect": 100}
+    {
+     "args": [
+      86.5
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      85.5
+     ],
+     "expect": 86
+    },
+    {
+     "args": [
+      0.5
+     ],
+     "expect": 1
+    },
+    {
+     "args": [
+      86.4
+     ],
+     "expect": 86
+    },
+    {
+     "args": [
+      86.6
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      0
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      100
+     ],
+     "expect": 100
+    }
    ]
   },
   "testId": "packages/ling_core/test/stats_test.dart::四舍五入口径"
@@ -168,13 +450,23 @@
  {
   "id": "SYS-D-001",
   "title": "互动统计按需求顺序呈现 12 项且占比项使用堆叠条",
-  "req": ["REQ-16-12"],
-  "reqSection": ["6.1"],
-  "screens": ["D2"],
+  "req": [
+   "REQ-16-12"
+  ],
+  "reqSection": [
+   "6.1"
+  ],
+  "screens": [
+   "D2"
+  ],
   "layer": "widget",
   "priority": "P0",
-  "given": ["某日评估成功且消息条数大于 0"],
-  "when": ["在日详情展开互动统计"],
+  "given": [
+   "某日评估成功且消息条数大于 0"
+  ],
+  "when": [
+   "在日详情展开互动统计"
+  ],
   "then": [
    "12 项按需求 6.1 表格的序号顺序排列",
    "双方条数与字数使用双色水平堆叠条并标注百分比",
@@ -185,13 +477,24 @@
  {
   "id": "SYS-D-002",
   "title": "消息条数为 0 时 12 项统计全部显示占位符",
-  "req": ["REQ-16-12"],
-  "reqSection": ["6.1"],
-  "screens": ["D2", "D7a"],
+  "req": [
+   "REQ-16-12"
+  ],
+  "reqSection": [
+   "6.1"
+  ],
+  "screens": [
+   "D2",
+   "D7a"
+  ],
   "layer": "widget",
   "priority": "P1",
-  "given": ["某日已同步但消息条数为 0"],
-  "when": ["展开互动统计"],
+  "given": [
+   "某日已同步但消息条数为 0"
+  ],
+  "when": [
+   "展开互动统计"
+  ],
   "then": [
    "12 项全部显示「--」",
    "堆叠条与时间轴不渲染",
@@ -202,13 +505,24 @@
  {
   "id": "SYS-D-003",
   "title": "系统消息不计入任何统计项与对话段判定",
-  "req": ["REQ-16-12"],
-  "reqSection": ["6.1"],
-  "screens": ["D1", "D2"],
+  "req": [
+   "REQ-16-12"
+  ],
+  "reqSection": [
+   "6.1"
+  ],
+  "screens": [
+   "D1",
+   "D2"
+  ],
   "layer": "service",
   "priority": "P1",
-  "given": ["某日消息中混有系统消息"],
-  "when": ["计算 12 项互动统计"],
+  "given": [
+   "某日消息中混有系统消息"
+  ],
+  "when": [
+   "计算 12 项互动统计"
+  ],
   "then": [
    "系统消息不计入条数、字数与占比",
    "系统消息的时间戳不参与连续对话段判定",
@@ -219,13 +533,24 @@
  {
   "id": "SYS-D-004",
   "title": "日期归属以后端切分时区为权威，设备时区变化不改变统计",
-  "req": ["REQ-16-37"],
-  "reqSection": ["6.1"],
-  "screens": ["D1", "D2"],
+  "req": [
+   "REQ-16-37"
+  ],
+  "reqSection": [
+   "6.1"
+  ],
+  "screens": [
+   "D1",
+   "D2"
+  ],
   "layer": "integration",
   "priority": "P0",
-  "given": ["日文件由后端按固定时区切分，设备时区为另一时区"],
-  "when": ["切换设备时区后重新进入日详情"],
+  "given": [
+   "日文件由后端按固定时区切分，设备时区为另一时区"
+  ],
+  "when": [
+   "切换设备时区后重新进入日详情"
+  ],
   "then": [
    "日期归属保持不变，消息仍属于原日文件的日期",
    "首末消息时间、回复间隔与对话段判定结果不变",

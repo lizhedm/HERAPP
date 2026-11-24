@@ -5,7 +5,7 @@
 技术方案 6.3 把「新增枚举值遗漏分支」列为功能增长期的四个混乱根因之一，
 对策是让需求文档 14 章成为枚举的唯一事实来源，代码偏离即构建失败。
 
-本脚本解析 14 章的 28 个枚举，与 packages/ling_core/lib/src/enums.dart 的
+本脚本解析 14 章的 30 个枚举，与 packages/ling_core/lib/src/enums.dart 的
 定义逐一对照。文档新增成员而代码未跟进、代码新增成员而文档未记录，
 两个方向都会报错，使文档与代码无法单边漂移。
 
@@ -103,8 +103,8 @@ def compare(doc: dict, code: dict) -> None:
 
 def main() -> int:
     doc = parse_requirements()
-    if len(doc) != 28:
-        errors.append(f"需求 14 章解析出 {len(doc)} 个枚举，应为 28 个")
+    if len(doc) != 30:
+        errors.append(f"需求 14 章解析出 {len(doc)} 个枚举，应为 30 个")
 
     total = sum(len(v["members"]) for v in doc.values())
     print(f"  需求 14 章 {len(doc)} 个枚举，{total} 个成员")
