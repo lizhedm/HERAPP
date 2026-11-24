@@ -1,0 +1,207 @@
+[
+ {
+  "id": "SYS-A-001",
+  "title": "启动页在 8 秒内完成配置加载后按自动同步开关分流",
+  "req": ["REQ-16-01"],
+  "reqSection": ["3.1"],
+  "screens": ["A1"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["应用冷启动，配置文件有效"],
+  "when": ["启动页读取配置"],
+  "then": [
+   "加载在 8 秒内完成",
+   "启动自动同步开关为开时进入同步流程",
+   "开关为关时直接进入时间墙年视图，同步状态为空闲，设置页同步分组展示上次同步时间"
+  ],
+  "testId": "packages/ling_app/test/widget/splash_test.dart::配置加载成功分流"
+ },
+ {
+  "id": "SYS-A-002",
+  "title": "配置加载超过 8 秒展示超时态并支持重新计时",
+  "req": ["REQ-16-01"],
+  "reqSection": ["3.1"],
+  "screens": ["A1", "A2"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["配置加载被阻塞超过 8 秒"],
+  "when": ["等待超时后点击重新加载"],
+  "then": [
+   "展示超时文案「配置加载超时，请检查应用配置文件后重新启动」与重新加载按钮",
+   "点击重新加载重新开始 8 秒计时",
+   "重新加载成功后按启动自动同步开关继续分流"
+  ],
+  "testId": "packages/ling_app/test/widget/splash_test.dart::配置加载超时"
+ },
+ {
+  "id": "SYS-A-003",
+  "title": "配置缺失进入待配置态，操作限于重新加载与查看说明",
+  "req": ["REQ-16-02"],
+  "reqSection": ["3.2"],
+  "screens": ["A3"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["配置文件缺失或关键字段为空"],
+  "when": ["启动应用"],
+  "then": [
+   "展示只读提示页与文案「未检测到有效配置。请在应用配置文件中填写后端地址与鉴权信息，然后重新启动应用」",
+   "页面提供重新加载配置按钮与查看配置说明入口",
+   "页面不提供配置编辑表单，配置由代码或配置文件维护"
+  ],
+  "testId": "packages/ling_app/test/widget/pending_config_test.dart::待配置只读提示"
+ },
+ {
+  "id": "SYS-A-004",
+  "title": "同步返回 401 或 403 进入鉴权失败态并提供离线查看",
+  "req": ["REQ-16-02"],
+  "reqSection": ["3.3"],
+  "screens": ["A4"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["配置中的 Token 已失效"],
+  "when": ["发起同步请求并收到 401 或 403"],
+  "then": [
+   "展示文案「鉴权失败。配置文件中的 Token 已失效，请更新配置文件后重新启动应用」",
+   "页面提供重试同步与离线查看已同步内容两个操作",
+   "离线查看进入时间墙，已落盘日期正常浏览"
+  ],
+  "testId": "packages/ling_app/test/widget/auth_failed_test.dart::鉴权失败提示与离线查看"
+ },
+ {
+  "id": "SYS-A-005",
+  "title": "同步中展示 5 个阶段与批量进度且不阻塞浏览",
+  "req": ["REQ-16-03"],
+  "reqSection": ["3.4"],
+  "screens": ["A5"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["冷启动自动同步正在执行"],
+  "when": ["观察同步页并切换底部导航"],
+  "then": [
+   "依次展示请求清单、比对版本、拉取日文件、本地统计、AI 评估五个阶段与批量进度",
+   "同步不阻塞浏览，切换导航可查看已同步内容",
+   "AI 评估阶段进度展示为「评估中 N / M」"
+  ],
+  "testId": "packages/ling_app/test/widget/syncing_test.dart::同步阶段与进度"
+ },
+ {
+  "id": "SYS-A-006",
+  "title": "取消同步保留已落盘日期并清空待执行评估队列",
+  "req": ["REQ-16-03"],
+  "reqSection": ["3.4"],
+  "screens": ["A5", "A6"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["同步进行中，部分日文件已完整落盘，评估队列中有待执行任务"],
+  "when": ["点击取消同步"],
+  "then": [
+   "停止发起新的日文件请求，正在传输的请求中断",
+   "已完整落盘的日文件保留并可正常浏览，未完成日期保持未同步",
+   "待执行的评估队列清空，正在执行的单日评估保留至结束，未评估日期保持待评估",
+   "进入已取消态，文案为「同步已取消。已同步 N 天，剩余 M 天未同步」"
+  ],
+  "testId": "packages/ling_app/integration_test/sync_cancel_test.dart::取消同步落盘与队列"
+ },
+ {
+  "id": "SYS-A-007",
+  "title": "继续同步从未完成日期断点续传并重新入队评估",
+  "req": ["REQ-16-03"],
+  "reqSection": ["3.4"],
+  "screens": ["A6"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["处于已取消态，剩余 M 天未同步"],
+  "when": ["点击继续同步"],
+  "then": [
+   "同步从未完成日期开始，已落盘日期不重复拉取",
+   "未评估日期重新入队，按日期倒序与并发 3 执行",
+   "全部完成后进入正常状态"
+  ],
+  "testId": "packages/ling_app/integration_test/sync_cancel_test.dart::断点续传"
+ },
+ {
+  "id": "SYS-A-008",
+  "title": "同步失败展示原因分类与最近同步时间",
+  "req": ["REQ-16-02"],
+  "reqSection": ["3.5"],
+  "screens": ["A7"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["同步因网络不可用、请求超时、服务端错误或重试耗尽而失败"],
+  "when": ["进入同步失败页"],
+  "then": [
+   "展示对应的失败原因分类与最近一次同步时间",
+   "页面提供重试同步与离线查看已同步内容两个操作",
+   "四类原因各展示独立文案"
+  ],
+  "testId": "packages/ling_app/test/widget/sync_failed_test.dart::失败原因分类"
+ },
+ {
+  "id": "SYS-A-009",
+  "title": "部分成功展示失败日期列表并支持单日与批量重试",
+  "req": ["REQ-16-04"],
+  "reqSection": ["3.6"],
+  "screens": ["A8"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["同步部分成功，失败日期列表含 3 条记录"],
+  "when": ["先执行单日重试，再执行重试全部失败项"],
+  "then": [
+   "页面展示成功天数与失败天数摘要，每条失败记录含日期与失败原因",
+   "单日重试仅重新拉取该日期，成功后该条从列表移除",
+   "批量重试重新拉取剩余失败日期，全部成功后进入正常状态"
+  ],
+  "testId": "packages/ling_app/integration_test/partial_success_test.dart::单日与批量重试"
+ },
+ {
+  "id": "SYS-A-010",
+  "title": "后台同步保持当前页面并以轻提示呈现",
+  "req": ["REQ-16-03"],
+  "reqSection": ["3.4"],
+  "screens": ["B3", "H1"],
+  "layer": "widget",
+  "priority": "P1",
+  "given": ["已在月视图浏览，触发定时同步或设置页立即同步"],
+  "when": ["同步执行至完成"],
+  "then": [
+   "保持当前页面，顶部显示一行「正在同步…」轻提示",
+   "不进入整页同步态",
+   "完成后静默刷新当前页面数据"
+  ],
+  "testId": "packages/ling_app/test/widget/background_sync_test.dart::后台同步轻提示"
+ },
+ {
+  "id": "SYS-A-011",
+  "title": "聊天文件以远端为权威，用户数据同步不覆盖",
+  "req": ["REQ-16-03"],
+  "reqSection": ["3.8"],
+  "screens": [],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["某日已有用户总结、备注、收藏，远端该日聊天文件发生变更"],
+  "when": ["执行同步"],
+  "then": [
+   "聊天文件以远端版本覆盖本地",
+   "用户总结、备注、收藏、喜好、礼物独立保存，同步不覆盖",
+   "聊天文件变化触发该日 AI 重评"
+  ],
+  "testId": "packages/ling_app/integration_test/sync_conflict_test.dart::用户数据不被覆盖"
+ },
+ {
+  "id": "SYS-A-012",
+  "title": "清单与日文件按约定格式解析，字段缺失时该日期标记失败",
+  "req": ["REQ-16-04"],
+  "reqSection": ["3.9"],
+  "screens": ["A8"],
+  "layer": "backend",
+  "priority": "P1",
+  "given": ["清单与日文件分别为合法结构与字段缺失的结构"],
+  "when": ["执行解析"],
+  "then": [
+   "合法结构按日期、版本、参与者、消息序列正确解析",
+   "字段缺失的日文件使该日期进入失败列表并记录原因",
+   "单个日期解析失败不中断其余日期的同步"
+  ],
+  "testId": "backend/tests/test_importer.py::文件格式解析与容错"
+ }
+]

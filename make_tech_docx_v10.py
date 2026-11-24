@@ -8,7 +8,7 @@
 import os, re, struct, zipfile, html
 
 SRC = "/Users/zhe/Documents/TophantAIGit/HERAPP/技术方案V1.0.md"
-OUT = "/Users/zhe/Documents/TophantAIGit/HERAPP/个人关系聊天回忆App-技术实现方案V1.0.docx"
+OUT = "/Users/zhe/Documents/TophantAIGit/HERAPP/LingLing-技术实现方案V1.0.docx"
 START_LINE = 1
 
 # ─── 读取最后一轮的文档内容 ──────────────────────────────────────────────────

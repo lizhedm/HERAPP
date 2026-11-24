@@ -12,6 +12,11 @@ __pycache__/
 .venv/
 venv/
 
+# --- 本地校验工具的依赖 ---
+# 工作流 YAML 的本地解析校验依赖 npm 的 yaml 包，属于开发者本机工具，
+# 与应用代码无关。CI 用 actionlint 校验，不依赖此目录。
+node_modules/
+
 # --- 本地配置与密钥 ---
 # 技术方案中的后端 baseUrl / Bearer Token / AI Key 属于本地配置，
 # 一旦出现对应文件，务必保持忽略状态。

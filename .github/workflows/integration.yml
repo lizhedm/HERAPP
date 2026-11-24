@@ -1,0 +1,118 @@
+# 集成流水线（技术方案 7.5）
+#
+# 阶段顺序：启动后端测试实例 → 端到端用例 → 性能预算断言。
+#
+# 触发时机为主干与每日定时，不在提交级。原因是集成测试预算 8 分钟
+# （技术方案 5.1），放进提交级会直接撑破 8 分钟的提交级总时长约束。
+# 每日定时补上的是时间维度：环境漂移、上游依赖变化、日界与时区相关
+# 的缺陷只在跨天运行时暴露，仅靠主干触发会漏掉。
+#
+# DeepSeek 调用替换为录制响应服务（技术方案 5.4），不产生真实费用，
+# 也使评估结果可断言。真实 API 的响应随机，无法作为断言基准。
+#
+# 跑在自托管 Mac Runner 上：集成测试在 macOS 端执行，
+# 该端更新最快、问题排查最便利（技术方案 8.4 的灰度顺序同此理由）。
+
+name: 集成
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - 'backend/**'
+      - '.github/workflows/integration.yml'
+  schedule:
+    # 每日 19:00 UTC，即北京时间次日 03:00，避开开发时段。
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: 端到端与性能预算
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 判定实现状态
+        id: probe
+        run: |
+          if [ -f backend/pyproject.toml ]; then
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "backend=false" >> "$GITHUB_OUTPUT"
+            echo "backend/pyproject.toml 尚未创建，后端测试实例本次不启动" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 安装锁定版本依赖
+        run: |
+          fvm install
+          fvm flutter pub get --directory packages/ling_app
+
+      - name: 安装 uv
+        if: steps.probe.outputs.backend == 'true'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # 测试实例使用独立数据目录与独立端口，不碰生产实例的
+      # ~/LingLing/{days,db,logs,backups}。共用数据目录会让集成测试写坏真实数据。
+      - name: 启动后端测试实例
+        if: steps.probe.outputs.backend == 'true'
+        env:
+          LINGLING_DATA_DIR: ${{ runner.temp }}/lingling-it
+          LINGLING_AI_MODE: recorded
+        run: |
+          mkdir -p "$LINGLING_DATA_DIR"
+          cd backend
+          uv sync --frozen
+          uv run uvicorn app.main:app --host 127.0.0.1 --port 8098 > "${{ runner.temp }}/uvicorn-it.log" 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8098/v1/health > /dev/null 2>&1; then
+              echo "后端测试实例就绪"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "30 秒内后端测试实例未就绪，启动日志："
+          cat "${{ runner.temp }}/uvicorn-it.log"
+          exit 1
+
+      # 同步、评估、取消、断点续传的端到端用例。
+      # 29 个用例文件覆盖技术方案 5.1 列出的集成测试范围。
+      - name: 端到端用例
+        env:
+          LINGLING_BACKEND_URL: http://127.0.0.1:8098
+        run: cd packages/ling_app && fvm flutter test integration_test -d macos
+
+      # 阈值取自 test/performance_budget.json,该文件是技术方案 5.8 的单一出处。
+      # 超出阈值按阻断发布的缺陷处理，因此此步失败即流水线失败。
+      - name: 性能预算断言
+        env:
+          LINGLING_BACKEND_URL: http://127.0.0.1:8098
+          LINGLING_DATASET: stress
+        run: cd packages/ling_app && fvm flutter test test/perf
+
+      # 失败时后端日志是定位端到端问题的主要依据，
+      # 客户端报出的多是超时或连接错误，原因在后端日志里。
+      - name: 上传后端日志
+        if: failure() && steps.probe.outputs.backend == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-backend-log
+          path: ${{ runner.temp }}/uvicorn-it.log
+          if-no-files-found: ignore
+
+      # 测试实例与数据目录在任何结果下都清理，避免残留进程占用 8098 端口
+      # 导致下一次运行启动失败。
+      - name: 清理测试实例
+        if: always()
+        run: |
+          pkill -f "uvicorn app.main:app --host 127.0.0.1 --port 8098" || true
+          rm -rf "${{ runner.temp }}/lingling-it"

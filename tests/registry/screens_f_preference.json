@@ -1,0 +1,347 @@
+[
+ {
+  "id": "SYS-F-001",
+  "title": "喜好默认按星级降序排列，星级相同按更新时间降序",
+  "req": ["REQ-16-20"],
+  "reqSection": ["10.2"],
+  "screens": ["F1"],
+  "layer": "dao",
+  "priority": "P0",
+  "given": ["若干喜好条目，含星级相同但更新时间不同的条目"],
+  "when": ["按默认排序查询喜好列表"],
+  "then": [
+   "按星级从 5 到 1 降序排列",
+   "星级相同的条目按更新时间降序",
+   "喜欢与不喜欢条目统一列表展示，用类型标识区分"
+  ],
+  "testId": "packages/ling_app/test/dao/preference_dao_test.dart::默认排序"
+ },
+ {
+  "id": "SYS-F-002",
+  "title": "喜好条目字段默认值与星级取值范围",
+  "req": ["REQ-16-20"],
+  "reqSection": ["10.2"],
+  "screens": ["F2"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["打开新增喜好表单"],
+  "when": ["观察初始状态"],
+  "then": [
+   "类型默认为喜欢，分类默认为其他，星级默认为 3 星",
+   "星级取值为 1-5 星",
+   "备注上限 200 字，图片与共同喜好标记为可选"
+  ],
+  "testId": "packages/ling_app/test/widget/preference_form_test.dart::表单默认值"
+ },
+ {
+  "id": "SYS-F-003",
+  "title": "喜好名称为空时保存禁用，点击后显示字段级红色提示",
+  "req": ["REQ-16-28"],
+  "reqSection": ["10.3"],
+  "screens": ["F2"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["新增喜好表单，名称为空"],
+  "when": ["点击置灰的保存按钮后开始输入名称"],
+  "then": [
+   "保存按钮为禁用态",
+   "点击后名称输入框下方显示红色提示「请填写喜好名称」且边框变红",
+   "开始输入后提示自动消失、边框恢复，保存按钮变为可用"
+  ],
+  "testId": "packages/ling_app/test/widget/preference_form_test.dart::名称必填校验"
+ },
+ {
+  "id": "SYS-F-004",
+  "title": "内置分类为固定 26 项，编辑与删除只对自定义分类开放",
+  "req": ["REQ-16-21"],
+  "reqSection": ["10.4"],
+  "screens": ["F3"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["进入分类管理页"],
+  "when": ["分别对内置分类与自定义分类尝试编辑与删除"],
+  "then": [
+   "内置分类共 26 项，均可选择",
+   "内置分类不提供编辑与删除操作",
+   "自定义分类可编辑名称、可删除",
+   "分类选择器底部提供新增分类入口"
+  ],
+  "testId": "packages/ling_app/test/widget/category_manage_test.dart::内置与自定义分类权限"
+ },
+ {
+  "id": "SYS-F-005",
+  "title": "删除自定义分类后相关喜好重置为其他并清理筛选条件",
+  "req": ["REQ-16-21"],
+  "reqSection": ["10.4"],
+  "screens": ["F3", "F5"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["某自定义分类下有 3 条喜好，且该分类已被选入喜好筛选条件"],
+  "when": ["删除该自定义分类"],
+  "then": [
+   "3 条喜好的分类重置为其他",
+   "该分类从喜好作用域的筛选状态中移除",
+   "喜好条目本身保留，不随分类删除"
+  ],
+  "testId": "packages/ling_app/integration_test/category_delete_test.dart::删除分类级联处理"
+ },
+ {
+  "id": "SYS-F-006",
+  "title": "共同喜好为标记字段，5 种状态通过筛选查看",
+  "req": ["REQ-16-22", "REQ-16-39"],
+  "reqSection": ["10.5"],
+  "screens": ["F1", "F5"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["喜好条目的类型字段代表 TA 的态度，共同喜好标记代表双方态度的组合关系"],
+  "when": ["按共同喜好状态筛选列表"],
+  "then": [
+   "状态含共同喜欢、共同不喜欢、TA 喜欢我不喜欢、待确认、独立喜好 5 种",
+   "类型为喜欢且共同喜好标记为 TA 喜欢我不喜欢时，表示 TA 喜欢而我不喜欢",
+   "共同喜好通过喜好列表的筛选条件查看，列表本身不单独分组"
+  ],
+  "testId": "packages/ling_app/integration_test/common_status_test.dart::共同喜好状态语义"
+ },
+ {
+  "id": "SYS-F-007",
+  "title": "长按删除喜好有二次确认，关联礼物保留并断开关联",
+  "req": ["REQ-16-20"],
+  "reqSection": ["10.6"],
+  "screens": ["F4", "F12"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["某喜好已生成 2 个关联礼物条目"],
+  "when": ["长按该喜好选择删除并确认"],
+  "then": [
+   "弹出二次确认，文案为「删除后不可恢复，确认删除「XXX」？」",
+   "确认后喜好删除，2 个礼物条目保留且关联喜好 ID 置空",
+   "礼物详情的来源追溯显示「来源喜好已删除」"
+  ],
+  "testId": "packages/ling_app/integration_test/preference_delete_test.dart::删除喜好断开关联"
+ },
+ {
+  "id": "SYS-F-008",
+  "title": "加入礼物清单带入名称含优先级字段并跳转礼物 Tab",
+  "req": ["REQ-16-23"],
+  "reqSection": ["10.7"],
+  "screens": ["F4", "F6", "F8"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["某喜好条目，礼物列表已设置筛选条件"],
+  "when": ["在长按面板选择加入礼物清单，填写表单并保存"],
+  "then": [
+   "表单自动带入喜好名称，含分类、等级、场合、预算档、状态、优先级、计划日期、备注字段",
+   "保存后跳转礼物 Tab 并定位到新建条目",
+   "跳转前清除礼物列表的全部筛选条件并重置筛选状态，确保新建条目可见",
+   "一个喜好可生成多个礼物条目，礼物保留关联喜好 ID"
+  ],
+  "testId": "packages/ling_app/integration_test/add_gift_test.dart::加入礼物清单跳转"
+ },
+ {
+  "id": "SYS-F-009",
+  "title": "喜好筛选 3 项常用默认展开，其余收在更多筛选",
+  "req": ["REQ-16-27"],
+  "reqSection": ["10.8"],
+  "screens": ["F5"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["打开喜好筛选底部浮层"],
+  "when": ["观察默认展开项并展开更多筛选"],
+  "then": [
+   "类型、分类、星级三项默认展开",
+   "共同喜好状态、是否已加入礼物清单、是否有图片收在更多筛选折叠区",
+   "所有维度支持多选，浮层底部提供重置筛选"
+  ],
+  "testId": "packages/ling_app/test/widget/preference_filter_test.dart::筛选分组与展开"
+ },
+ {
+  "id": "SYS-F-010",
+  "title": "筛选条件跨会话保留",
+  "req": ["REQ-16-27"],
+  "reqSection": ["10.8", "11.6"],
+  "screens": ["F5", "F11"],
+  "layer": "integration",
+  "priority": "P1",
+  "given": ["分别在喜好与礼物列表设置多个筛选条件"],
+  "when": ["重启应用后重新进入两个列表"],
+  "then": [
+   "两个列表的筛选条件各自恢复为重启前的选择",
+   "两个作用域的筛选状态互不影响",
+   "点击重置筛选清空该作用域的全部条件"
+  ],
+  "testId": "packages/ling_app/integration_test/filter_state_test.dart::筛选跨会话保留"
+ },
+ {
+  "id": "SYS-F-011",
+  "title": "喜好空状态与无匹配结果为两套文案",
+  "req": ["REQ-16-20"],
+  "reqSection": ["10.9"],
+  "screens": ["F7"],
+  "layer": "widget",
+  "priority": "P2",
+  "given": ["喜好列表为空，以及有数据但筛选后无匹配"],
+  "when": ["分别查看两种情形"],
+  "then": [
+   "列表为空展示「还没有记录喜好」与「添加第一条喜好」按钮",
+   "筛选无匹配展示「没有符合条件的喜好」与「重置筛选」按钮",
+   "两套文案与按钮各自独立"
+  ],
+  "testId": "packages/ling_app/test/widget/preference_list_test.dart::喜好空状态区分"
+ },
+ {
+  "id": "SYS-F-020",
+  "title": "礼物默认按计划日期升序，无日期条目排在最后",
+  "req": ["REQ-16-24"],
+  "reqSection": ["11.3"],
+  "screens": ["F8"],
+  "layer": "dao",
+  "priority": "P0",
+  "given": ["若干礼物条目，部分有计划日期、部分无计划日期"],
+  "when": ["按默认排序查询礼物列表"],
+  "then": [
+   "有计划日期的条目按日期升序排在前",
+   "无计划日期的条目排在最后，其中按更新时间降序",
+   "主列表隐藏已取消与已归档状态的条目"
+  ],
+  "testId": "packages/ling_app/test/dao/gift_dao_test.dart::礼物默认排序"
+ },
+ {
+  "id": "SYS-F-021",
+  "title": "礼物表单必填项有默认值，名称为空时保存禁用",
+  "req": ["REQ-16-28"],
+  "reqSection": ["11.1", "11.2"],
+  "screens": ["F9"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["打开新增礼物表单"],
+  "when": ["观察初始状态并点击置灰的保存按钮"],
+  "then": [
+   "分类默认为其他、等级默认为小、场合默认为日常、状态默认为想法、优先级默认为中，表单打开即为已选中",
+   "预算档默认为待设定",
+   "名称为空时保存按钮置灰，点击后显示红色提示「请填写礼物名称」",
+   "礼物分类表达用途、礼物等级表达规模，两个字段独立保存"
+  ],
+  "testId": "packages/ling_app/test/widget/gift_form_test.dart::礼物表单默认值与校验"
+ },
+ {
+  "id": "SYS-F-022",
+  "title": "礼物状态支持任意跳转与回退并自动写入送出日期",
+  "req": ["REQ-16-25"],
+  "reqSection": ["11.4"],
+  "screens": ["F10"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["某礼物状态为想法"],
+  "when": ["直接跳转到已送出，再回退到待购买，再跳转到已收到"],
+  "then": [
+   "状态选择浮层列出全部状态供直接选择，支持任意跳转与回退",
+   "变更为已送出时自动写入当天日期为送出日期",
+   "变更为已收到时送出日期为空则自动写入当天日期",
+   "送出日期可手动修改，并在条目详情与列表项上展示"
+  ],
+  "testId": "packages/ling_app/integration_test/gift_status_test.dart::状态流转与送出日期"
+ },
+ {
+  "id": "SYS-F-023",
+  "title": "归档视图展示已取消与已归档条目并支持恢复",
+  "req": ["REQ-16-24"],
+  "reqSection": ["11.3"],
+  "screens": ["F13"],
+  "layer": "integration",
+  "priority": "P1",
+  "given": ["存在已取消与已归档状态的礼物条目"],
+  "when": ["进入归档视图并将一条恢复为待购买"],
+  "then": [
+   "归档视图展示已取消与已归档条目",
+   "恢复后该条目回到主列表并按默认排序定位",
+   "归档视图为空时展示「没有已归档的礼物」"
+  ],
+  "testId": "packages/ling_app/integration_test/gift_archive_test.dart::归档与恢复"
+ },
+ {
+  "id": "SYS-F-024",
+  "title": "礼物详情来源追溯可跳转喜好，三种关联情形各有呈现",
+  "req": ["REQ-16-26"],
+  "reqSection": ["11.5"],
+  "screens": ["F12", "F1"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["三个礼物分别为有关联喜好、无关联喜好、来源喜好已删除"],
+  "when": ["查看各自的来源追溯并点击可跳转项"],
+  "then": [
+   "有关联喜好时展示喜好名称，点击跳转喜好 Tab 并定位该条目",
+   "跳转前清除喜好列表的全部筛选条件并重置筛选状态",
+   "关联喜好为空时显示「无关联喜好」",
+   "来源喜好已删除时该行显示为纯文本「来源喜好已删除」且不可点击"
+  ],
+  "testId": "packages/ling_app/integration_test/gift_source_test.dart::来源追溯三种情形"
+ },
+ {
+  "id": "SYS-F-025",
+  "title": "礼物筛选 3 项常用默认展开，其余收在更多筛选",
+  "req": ["REQ-16-27"],
+  "reqSection": ["11.6"],
+  "screens": ["F11"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["打开礼物筛选底部浮层"],
+  "when": ["观察默认展开项并展开更多筛选"],
+  "then": [
+   "状态、分类、优先级三项默认展开",
+   "等级、场合、预算档、是否有关联喜好收在更多筛选折叠区",
+   "所有维度支持多选，浮层底部提供重置筛选"
+  ],
+  "testId": "packages/ling_app/test/widget/gift_filter_test.dart::礼物筛选分组"
+ },
+ {
+  "id": "SYS-F-026",
+  "title": "删除礼物后重算来源喜好的已加入礼物标记",
+  "req": ["REQ-16-26"],
+  "reqSection": ["11.7"],
+  "screens": ["F8"],
+  "layer": "integration",
+  "priority": "P1",
+  "given": ["某喜好有 2 个关联礼物条目，已加入礼物标记为真"],
+  "when": ["依次删除这 2 个礼物条目"],
+  "then": [
+   "每次删除均弹出二次确认，文案为「删除后不可恢复，确认删除「XXX」？」",
+   "删除第一个后该喜好的已加入礼物标记保持为真",
+   "删除第二个后该喜好不存在任何未删除的关联礼物，标记置为假"
+  ],
+  "testId": "packages/ling_app/integration_test/gift_delete_test.dart::已加入礼物标记重算"
+ },
+ {
+  "id": "SYS-F-027",
+  "title": "礼物空状态与无匹配结果为两套文案",
+  "req": ["REQ-16-24"],
+  "reqSection": ["11.8"],
+  "screens": ["F14"],
+  "layer": "widget",
+  "priority": "P2",
+  "given": ["礼物列表为空，以及有数据但筛选后无匹配"],
+  "when": ["分别查看两种情形"],
+  "then": [
+   "列表为空展示「礼物清单还是空的」与「添加第一个礼物」按钮",
+   "筛选无匹配展示「没有符合条件的礼物」与「重置筛选」按钮",
+   "两套文案与按钮各自独立"
+  ],
+  "testId": "packages/ling_app/test/widget/gift_list_test.dart::礼物空状态区分"
+ },
+ {
+  "id": "SYS-F-028",
+  "title": "喜好与礼物为同一页面的两个 Tab",
+  "req": ["REQ-16-20", "REQ-16-24"],
+  "reqSection": ["10.1"],
+  "screens": ["F1", "F8"],
+  "layer": "widget",
+  "priority": "P1",
+  "given": ["进入喜好与礼物页面"],
+  "when": ["在两个 Tab 之间切换"],
+  "then": [
+   "两个 Tab 位于同一页面，同屏只呈现一个",
+   "切换 Tab 各自保留滚动位置与筛选条件",
+   "默认进入喜好 Tab"
+  ],
+  "testId": "packages/ling_app/test/widget/preference_page_test.dart::双 Tab 结构"
+ }
+]

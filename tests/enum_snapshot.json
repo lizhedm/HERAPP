@@ -1,0 +1,381 @@
+{
+ "$comment": "由 tests/check_enums.py 从需求文档 14 章生成。ling_core 的枚举测试读取本文件断言成员集合。",
+ "enums": {
+  "CardState": {
+   "section": "14.1",
+   "cnName": "卡片状态",
+   "members": [
+    "COVER",
+    "DATE",
+    "SUMMARY"
+   ]
+  },
+  "PreferenceType": {
+   "section": "14.2",
+   "cnName": "喜好类型",
+   "members": [
+    "LIKE",
+    "DISLIKE"
+   ]
+  },
+  "PreferenceCategory": {
+   "section": "14.3",
+   "cnName": "喜好分类",
+   "members": [
+    "饮食",
+    "饮品",
+    "甜点",
+    "音乐",
+    "影视",
+    "动漫",
+    "游戏",
+    "书籍",
+    "运动",
+    "旅行",
+    "地点",
+    "品牌",
+    "礼物",
+    "花卉",
+    "颜色",
+    "动物",
+    "气味",
+    "习惯",
+    "话题",
+    "纪念日",
+    "穿搭",
+    "美妆",
+    "数码",
+    "家居",
+    "收藏",
+    "其他"
+   ]
+  },
+  "CommonPreferenceStatus": {
+   "section": "14.4",
+   "cnName": "共同喜好状态",
+   "members": [
+    "COMMON_LIKE",
+    "COMMON_DISLIKE",
+    "CONFLICT",
+    "PENDING",
+    "INDEPENDENT"
+   ]
+  },
+  "StarLevel": {
+   "section": "14.5",
+   "cnName": "喜好星级",
+   "members": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ]
+  },
+  "GiftCategory": {
+   "section": "14.6",
+   "cnName": "礼物分类",
+   "members": [
+    "日常小礼物",
+    "生日礼物",
+    "纪念日大礼物",
+    "节日礼物",
+    "惊喜礼物",
+    "感谢礼物",
+    "道歉礼物",
+    "旅行纪念",
+    "定制礼物",
+    "体验礼物",
+    "实用礼物",
+    "DIY 礼物",
+    "收藏品",
+    "大额礼物",
+    "其他"
+   ]
+  },
+  "GiftLevel": {
+   "section": "14.7",
+   "cnName": "礼物等级",
+   "members": [
+    "SMALL",
+    "MEDIUM",
+    "LARGE",
+    "MAJOR"
+   ]
+  },
+  "GiftOccasion": {
+   "section": "14.8",
+   "cnName": "礼物场合",
+   "members": [
+    "日常",
+    "生日",
+    "恋爱纪念日",
+    "结婚纪念日",
+    "情人节",
+    "七夕",
+    "圣诞",
+    "新年",
+    "春节",
+    "毕业",
+    "旅行",
+    "道歉",
+    "感谢",
+    "探望",
+    "惊喜",
+    "其他"
+   ]
+  },
+  "GiftStatus": {
+   "section": "14.9",
+   "cnName": "礼物状态",
+   "members": [
+    "IDEA",
+    "TO_BUY",
+    "BOUGHT",
+    "GIVEN",
+    "RECEIVED",
+    "CANCELLED",
+    "ARCHIVED"
+   ]
+  },
+  "Priority": {
+   "section": "14.10",
+   "cnName": "优先级",
+   "members": [
+    "LOW",
+    "MEDIUM",
+    "HIGH"
+   ]
+  },
+  "BudgetRange": {
+   "section": "14.11",
+   "cnName": "预算档",
+   "members": [
+    "0-100",
+    "100-500",
+    "500-1000",
+    "1000-5000",
+    "5000+",
+    "PENDING"
+   ]
+  },
+  "EmotionType": {
+   "section": "14.12",
+   "cnName": "情绪类型",
+   "members": [
+    "开心",
+    "平静",
+    "兴奋",
+    "亲昵",
+    "感动",
+    "宠溺",
+    "期待",
+    "治愈",
+    "调皮",
+    "骄傲",
+    "感激",
+    "释然",
+    "怀念",
+    "无聊",
+    "疲惫",
+    "低落",
+    "难过",
+    "焦虑",
+    "生气",
+    "烦躁",
+    "失望",
+    "委屈",
+    "尴尬",
+    "惊讶",
+    "无奈",
+    "吃醋",
+    "愧疚",
+    "纠结",
+    "冷淡",
+    "中性"
+   ]
+  },
+  "EmotionColorFamily": {
+   "section": "14.13",
+   "cnName": "情绪色系",
+   "members": [
+    "WARM_YELLOW",
+    "PINK",
+    "LIGHT_GREEN",
+    "LIGHT_BLUE",
+    "ORANGE_RED",
+    "GRAY_BROWN"
+   ]
+  },
+  "WeatherType": {
+   "section": "14.14",
+   "cnName": "天气",
+   "members": [
+    "RAINBOW",
+    "SUNNY",
+    "PARTLY_CLOUDY",
+    "CLOUDY",
+    "WINDY",
+    "LIGHT_RAIN",
+    "RAIN",
+    "HEAVY_RAIN",
+    "THUNDERSTORM",
+    "SNOW",
+    "FOG",
+    "PENDING"
+   ]
+  },
+  "CoverLevel": {
+   "section": "14.15",
+   "cnName": "封面等级",
+   "members": [
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L5"
+   ]
+  },
+  "CoverIntimacyTier": {
+   "section": "14.16",
+   "cnName": "封面亲密度档",
+   "members": [
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5"
+   ]
+  },
+  "CoverEmotionTier": {
+   "section": "14.17",
+   "cnName": "封面情绪档",
+   "members": [
+    "E1",
+    "E2",
+    "E3",
+    "E4"
+   ]
+  },
+  "MessageType": {
+   "section": "14.18",
+   "cnName": "消息类型",
+   "members": [
+    "文本",
+    "图片",
+    "语音",
+    "视频",
+    "表情",
+    "链接",
+    "文件",
+    "系统消息",
+    "位置",
+    "红包",
+    "转账",
+    "通话记录",
+    "其他"
+   ]
+  },
+  "EvaluationStatus": {
+   "section": "14.19",
+   "cnName": "评估状态",
+   "members": [
+    "PENDING",
+    "RUNNING",
+    "SUCCESS",
+    "FAILED",
+    "STALE"
+   ]
+  },
+  "HighlightType": {
+   "section": "14.20",
+   "cnName": "高光类型",
+   "members": [
+    "OVERALL",
+    "HIGH_INTIMACY",
+    "HIGH_EMOTION",
+    "FUN",
+    "HIGH_SCORE"
+   ]
+  },
+  "HighlightSource": {
+   "section": "14.21",
+   "cnName": "高光来源",
+   "members": [
+    "AUTO",
+    "MANUAL"
+   ]
+  },
+  "SyncStatus": {
+   "section": "14.22",
+   "cnName": "同步状态",
+   "members": [
+    "IDLE",
+    "SYNCING",
+    "CANCELLED",
+    "SUCCESS",
+    "PARTIAL_SUCCESS",
+    "FAILED",
+    "PENDING_CONFIG",
+    "AUTH_FAILED",
+    "CONFIG_TIMEOUT"
+   ]
+  },
+  "PeriodType": {
+   "section": "14.23",
+   "cnName": "周期类型",
+   "members": [
+    "WEEK",
+    "MONTH",
+    "YEAR"
+   ]
+  },
+  "TrendMetric": {
+   "section": "14.24",
+   "cnName": "趋势指标",
+   "members": [
+    "OVERALL_SCORE",
+    "INTIMACY_SCORE",
+    "EMOTION_SCORE"
+   ]
+  },
+  "TrendGranularity": {
+   "section": "14.25",
+   "cnName": "趋势粒度",
+   "members": [
+    "WEEK",
+    "MONTH",
+    "YEAR"
+   ]
+  },
+  "Theme": {
+   "section": "14.26",
+   "cnName": "主题",
+   "members": [
+    "PAPER_CALENDAR",
+    "STAR_MAP",
+    "COLOR_FIELD",
+    "FROSTED_GLASS"
+   ]
+  },
+  "FilterScope": {
+   "section": "14.27",
+   "cnName": "筛选作用域",
+   "members": [
+    "PREFERENCE",
+    "GIFT",
+    "HIGHLIGHT"
+   ]
+  },
+  "CoverVariant": {
+   "section": "14.28",
+   "cnName": "封面池内变体",
+   "members": [
+    "V1",
+    "V2",
+    "V3",
+    "V4"
+   ]
+  }
+ }
+}

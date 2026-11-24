@@ -1,0 +1,142 @@
+# 客户端流水线（技术方案 7.5）
+#
+# 按技术方案 7.5 的阶段顺序执行，前一阶段失败即停止：
+#   format & analyze & import_lint   约 40 秒
+#     └─► 规则单测 + 服务单测 + DAO 迁移测试   约 1 分钟
+#           └─► Widget 测试 + 黄金图           约 5 分钟
+#                 └─► 三端构建产物             约 12 分钟，仅主干
+#
+# 阶段顺序按「失败成本从低到高」排列：静态检查秒级给出结论，
+# 黄金图需要渲染 4 套主题，三端构建需要十余分钟。
+# 前置阶段失败时后续阶段的结论没有参考价值，因此串行而非并行。
+#
+# 提交级总时长控制在 8 分钟内，因此三端构建只在主干执行。
+# 超出 8 分钟会导致开发者绕过检查，机制随之失效。
+#
+# 枚举一致性、规则字面量、追溯矩阵等跨文件检查在一致性校验流水线，
+# 那条流水线不按路径过滤，只改需求文档的提交同样会被它拦住。
+#
+# 跑在自托管 Mac Runner 上：iOS 与 macOS 构建需要 macOS 宿主，
+# 且该机器同时是后端宿主，复用它避免为 CI 单独付费。
+# Flutter 版本由仓库根的 .fvmrc 锁定，与本地开发环境一致。
+
+name: 客户端
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - '.github/workflows/client.yml'
+  pull_request:
+    paths:
+      - 'packages/**'
+      - '.github/workflows/client.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: client-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: 格式与静态检查
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装锁定版本依赖
+        run: |
+          fvm install
+          fvm flutter pub get --directory packages/ling_core
+          fvm flutter pub get --directory packages/ling_app
+
+      - name: 格式检查
+        run: fvm dart format --output=none --set-exit-if-changed packages/
+
+      - name: 静态分析
+        run: fvm flutter analyze packages/
+
+      # 技术方案 6.2 的三条模块边界规则由 import_lint 强制，违反即失败。
+      - name: 模块边界检查
+        run: fvm dart run import_lint --directory packages/ling_app
+
+      # ling_core 必须保持零 Flutter 与零 IO 依赖，否则规则层无法被后端复用。
+      - name: ling_core 依赖纯净
+        run: |
+          for forbidden in flutter drift dio; do
+            if grep -qE "^\s+${forbidden}:" packages/ling_core/pubspec.yaml; then
+              echo "ling_core 的 pubspec 出现禁止依赖 ${forbidden}，规则层须保持零 Flutter 零 IO"
+              exit 1
+            fi
+          done
+          echo "ling_core 依赖检查通过"
+
+  unit:
+    name: 规则、服务与 DAO 测试
+    needs: static
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装锁定版本依赖
+        run: |
+          fvm flutter pub get --directory packages/ling_core
+          fvm flutter pub get --directory packages/ling_app
+
+      # 规则层先跑：它是全部展示的输入，规则失败时其余测试的结论没有参考价值。
+      - name: 规则单测
+        run: cd packages/ling_core && fvm dart test
+
+      - name: 服务与 DAO 测试
+        run: cd packages/ling_app && fvm flutter test test/service test/dao
+
+  widget:
+    name: Widget 与黄金图测试
+    needs: unit
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装锁定版本依赖
+        run: fvm flutter pub get --directory packages/ling_app
+
+      - name: Widget 测试
+        run: cd packages/ling_app && fvm flutter test test/widget
+
+      # 黄金图以固定字体与固定设备尺寸渲染，避免宿主差异造成假失败（技术方案 5.5）。
+      - name: 黄金图测试
+        run: cd packages/ling_app && fvm flutter test test/golden
+
+      # 失败时上传实际渲染结果与差异图，使 4 套主题的视觉偏差可直接比对。
+      - name: 上传黄金图差异
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures
+          path: packages/ling_app/test/golden/failures/
+          if-no-files-found: ignore
+
+  build:
+    name: 三端构建产物
+    needs: widget
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装锁定版本依赖
+        run: fvm flutter pub get --directory packages/ling_app
+
+      - name: macOS 构建
+        run: cd packages/ling_app && fvm flutter build macos --release
+
+      - name: iOS 构建
+        run: cd packages/ling_app && fvm flutter build ios --release --no-codesign
+
+      - name: Android 构建
+        run: cd packages/ling_app && fvm flutter build apk --release

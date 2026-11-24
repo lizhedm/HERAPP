@@ -1,0 +1,215 @@
+# 安全检查流水线（技术方案 7.5）
+#
+# 两项检查：osv-scanner 扫描 pubspec.lock 与 uv.lock 的依赖漏洞，
+# gitleaks 扫描提交历史中的密钥泄漏。
+#
+# 每周定时执行，不占用提交级时长。发现问题时创建 Issue 而不阻断主干：
+# 依赖漏洞的修复节奏由上游决定，阻断主干会把问题转化为停工。
+#
+# gitleaks 的扫描范围是全部提交历史而非单次改动。sync.token 与 ai.apiKey
+# 一旦进入历史，仅靠后续提交删除并不生效，需要改写历史并轮换密钥。
+#
+# 跑在 GitHub 托管 Runner 上，两项检查均不需要 macOS 宿主。
+
+name: 安全检查
+
+on:
+  schedule:
+    # 每周一 20:00 UTC,即北京时间周二 04:00。
+    - cron: '0 20 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: security
+  cancel-in-progress: false
+
+jobs:
+  dependencies:
+    name: 依赖漏洞扫描
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      found: ${{ steps.scan.outputs.found }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 osv-scanner
+        run: |
+          curl -sSfL -o /usr/local/bin/osv-scanner \
+            https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64
+          chmod +x /usr/local/bin/osv-scanner
+          osv-scanner --version
+
+      # 显式指定锁文件路径而非递归扫描：仓库里有生成的测试骨架与文档，
+      # 递归扫描会把它们一并遍历，拖长时间且无收益。
+      # 退出码 1 表示发现漏洞，其他非零码表示扫描本身出错，两者要区分。
+      - name: 扫描锁文件
+        id: scan
+        run: |
+          targets=""
+          for lock in packages/ling_core/pubspec.lock packages/ling_app/pubspec.lock backend/uv.lock; do
+            if [ -f "$lock" ]; then
+              targets="$targets --lockfile=$lock"
+            else
+              echo "$lock 尚未提交，跳过" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+          if [ -z "$targets" ]; then
+            echo "没有可扫描的锁文件，本次无结论" >> "$GITHUB_STEP_SUMMARY"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          set +e
+          osv-scanner scan source $targets --format markdown > /tmp/osv.md 2>/tmp/osv.err
+          code=$?
+          set -e
+
+          # 退出码语义见 osv-scanner 的 Return Codes:
+          #   0        有包，无漏洞
+          #   1-126    有包，发现漏洞
+          #   127      一般错误
+          #   128      未找到任何包
+          #   129-255  与结果无关的错误
+          # 128 与 127 要分开处理：前者说明锁文件存在但扫描器没解析出依赖，
+          # 属于配置问题；后者是扫描器自身出错。两者都不能当作「通过」。
+          case "$code" in
+            0)
+              echo "依赖漏洞扫描通过" >> "$GITHUB_STEP_SUMMARY"
+              echo "found=false" >> "$GITHUB_OUTPUT"
+              ;;
+            128)
+              echo "扫描器未从锁文件中解析出任何依赖，扫描结论无效。"
+              echo "锁文件可能为空或格式不受支持，需确认后重跑。"
+              cat /tmp/osv.err
+              exit 1
+              ;;
+            12[7-9]|1[3-9][0-9]|2[0-5][0-9])
+              echo "osv-scanner 执行失败，退出码 $code:"
+              cat /tmp/osv.err
+              exit "$code"
+              ;;
+            *)
+              echo "found=true" >> "$GITHUB_OUTPUT"
+              cat /tmp/osv.md >> "$GITHUB_STEP_SUMMARY"
+              ;;
+          esac
+
+      - name: 上传扫描报告
+        if: steps.scan.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: osv-report
+          path: /tmp/osv.md
+
+      # 同一轮扫描只保留一个 Issue:每周新建会积累重复条目，
+      # 而漏洞清单的变化比条目本身更值得关注。
+      - name: 创建或更新 Issue
+        if: steps.scan.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # security 标签不存在时先建。缺标签会让建 Issue 在发现漏洞的那一刻失败，
+          # 即检查最需要出结论的时候反而没有结论。
+          gh label create security --color d93f0b --description "依赖漏洞与密钥泄漏" 2>/dev/null || true
+
+          title="依赖漏洞扫描发现问题"
+          body=$(printf '扫描时间： %s\n运行记录： %s\n\n%s\n' \
+            "$(date -u '+%Y-%m-%d %H:%M UTC')" "$RUN_URL" "$(cat /tmp/osv.md)")
+          existing=$(gh issue list --label security --state open \
+            --search "$title in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --label security --body "$body"
+          fi
+
+  secrets:
+    name: 密钥泄漏扫描
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # fetch-depth: 0 取全部历史。密钥泄漏的判定范围是历史而非单次改动，
+      # 浅克隆会让早期提交中的泄漏逃过扫描。
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 安装 gitleaks
+        run: |
+          version=$(curl -sSfL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | \
+            grep -o '"tag_name": *"v[^"]*"' | head -1 | sed 's/.*"v\(.*\)"/\1/')
+          curl -sSfL -o /tmp/gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz"
+          tar -xzf /tmp/gitleaks.tar.gz -C /usr/local/bin gitleaks
+          gitleaks version
+
+      # 用 git 子命令而非 detect：detect 自 v8.19.0 起已废弃，
+      # 仅为兼容保留且从帮助中隐去。本方案要被长期沿用，不固定在废弃接口上。
+      # git 模式底层走 git log -p 扫描补丁，范围即全部提交历史。
+      #
+      # 退出码 1 表示发现泄漏，其余非零码表示扫描本身出错，两者要区分。
+      # 报告写成 SARIF，GitHub 可直接按文件与行号呈现。
+      - name: 扫描提交历史
+        id: scan
+        run: |
+          set +e
+          gitleaks git . --report-format sarif --report-path /tmp/gitleaks.sarif \
+            --redact --exit-code 1 --no-banner
+          code=$?
+          set -e
+
+          case "$code" in
+            0)
+              echo "提交历史未发现密钥泄漏" >> "$GITHUB_STEP_SUMMARY"
+              echo "found=false" >> "$GITHUB_OUTPUT"
+              ;;
+            1)
+              echo "found=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "gitleaks 执行失败，退出码 $code"
+              exit "$code"
+              ;;
+          esac
+
+      # --redact 已遮蔽密钥原文，报告只含位置与规则名，可安全留存为构件。
+      - name: 上传扫描报告
+        if: steps.scan.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: /tmp/gitleaks.sarif
+
+      - name: 创建或更新 Issue
+        if: steps.scan.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create security --color d93f0b --description "依赖漏洞与密钥泄漏" 2>/dev/null || true
+
+          title="提交历史发现密钥泄漏"
+          body=$(printf '%s\n' \
+            "扫描时间： $(date -u '+%Y-%m-%d %H:%M UTC')" \
+            "运行记录： $RUN_URL" \
+            "" \
+            "报告见该运行记录的 gitleaks-report 构件，密钥原文已遮蔽。" \
+            "" \
+            "处置顺序：" \
+            "1. 立即轮换泄漏的密钥。历史中的密钥须视为已泄漏，改写历史不能替代轮换。" \
+            "2. 确认泄漏项的用途： sync.token 与 ai.apiKey 应存于系统安全存储，不落入仓库。" \
+            "3. 改写历史移除泄漏内容，并在 .gitignore 中补上对应路径。")
+          existing=$(gh issue list --label security --state open \
+            --search "$title in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --label security --body "$body"
+          fi

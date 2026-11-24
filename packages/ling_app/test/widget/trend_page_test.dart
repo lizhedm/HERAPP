@@ -1,0 +1,57 @@
+// 本文件由 tests/generate.py 从 tests/registry/ 生成，测试名与用例 ID 一一对应。
+// 用例的 given / when / then 见注释，断言在此实现。
+// 实现一条用例时删除该条的 skip 参数。
+
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  // SYS-E-001 [P0] 趋势页曲线与情绪日历为 Tab 切换且各自保留粒度
+  // 需求 REQ-16-18 / 章节 9.1
+  // 屏幕 E1, E2
+  // given: 趋势页存在曲线与情绪日历两个 Tab
+  // when: 在曲线 Tab 选择月粒度后切到情绪日历再切回
+  // then: 两个 Tab 由顶部切换器切换，同屏只呈现一个
+  // then: 切回曲线 Tab 时粒度保持为月
+  // then: 默认进入曲线 Tab 并显示当前周期
+  testWidgets('趋势 Tab 切换', (tester) async {
+    // 实现 SYS-E-001 的断言
+  }, skip: 'SYS-E-001 待实现');
+
+  // SYS-E-002 [P0] 曲线在缺评估日期处断开而非插值
+  // 需求 REQ-16-18 / 章节 9.2
+  // 屏幕 E1
+  // given: 周期内部分日期评估成功、部分日期待评估
+  // when: 渲染趋势曲线
+  // then: 待评估日期不产生数据点，曲线在该位置断开
+  // then: 相邻成功日期之间不做线性插值
+  // then: 评估成功与待重评日期参与趋势聚合
+  testWidgets('曲线断点', (tester) async {
+    // 实现 SYS-E-002 的断言
+  }, skip: 'SYS-E-002 待实现');
+
+  // SYS-E-003 [P1] 点击曲线数据点跳转该点对应周期
+  // 需求 REQ-16-18 / 章节 9.2
+  // 屏幕 E1, B3, B4, D1
+  // given: 曲线依次处于周、月、年三种粒度并显示若干数据点
+  // when: 点击某个数据点
+  // then: 周粒度的点对应单日，跳转日详情
+  // then: 月粒度的点对应单周，跳转月视图的周定位态
+  // then: 年粒度的点对应单月，跳转该月的月视图
+  // then: 高光日在曲线上以标记点标注
+  testWidgets('数据点跳转', (tester) async {
+    // 实现 SYS-E-003 的断言
+  }, skip: 'SYS-E-003 待实现');
+
+  // SYS-E-006 [P2] 趋势页无评估数据时展示空状态并引导同步
+  // 需求 REQ-16-18 / 章节 9.1
+  // 屏幕 E4
+  // given: 本地无任何评估成功的日期
+  // when: 进入趋势页
+  // then: 两个 Tab 均展示空状态
+  // then: 空状态引导至设置页执行同步
+  // then: 周期天气显示为待评估且均分为空
+  testWidgets('趋势空状态', (tester) async {
+    // 实现 SYS-E-006 的断言
+  }, skip: 'SYS-E-006 待实现');
+
+}

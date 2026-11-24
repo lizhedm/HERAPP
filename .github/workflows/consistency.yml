@@ -1,0 +1,63 @@
+# 一致性校验流水线（技术方案 7.5）
+#
+# 覆盖技术方案 5.6、6.1、6.3、6.4 要求的机械一致性检查：
+# 需求与用例、文档与代码、规则归属、配置清单。
+#
+# 五项检查只依赖 Python 标准库，跑在 GitHub 托管 Runner 上，
+# 不占用自托管 Mac 的时段，也不受 Flutter 与 Python 依赖安装耗时影响。
+# 整条流水线约 1 分钟，是提交后最先给出结论的一条。
+#
+# 任何路径的改动都触发：需求文档、用例清单、配置清单、源码任一处的改动
+# 都可能破坏一致性，按路径过滤会漏掉跨文件的失配。
+
+name: 一致性校验
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: consistency-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  consistency:
+    name: 需求、用例、文档与代码一致性
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 用例清单校验
+        run: python3 tests/validate.py
+
+      - name: 产物同步检查
+        run: python3 tests/check_generated.py
+
+      - name: 枚举一致性校验
+        run: python3 tests/check_enums.py
+
+      - name: 规则字面量扫描
+        run: python3 tests/check_rule_literals.py
+
+      - name: 配置项清单校验
+        run: python3 tests/check_config.py
+
+      # 快照由前述检查写出，提交中的副本应与重新生成的结果一致。
+      # 不一致说明有人改了需求文档却未重新生成，提交即被拦住。
+      - name: 快照无未提交差异
+        run: |
+          if ! git diff --quiet; then
+            echo "以下生成产物与提交中的副本不一致，请在本地执行 tests/run.sh --quick 后提交："
+            git diff --stat
+            git diff
+            exit 1
+          fi

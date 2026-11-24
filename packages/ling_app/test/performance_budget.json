@@ -1,0 +1,49 @@
+{
+ "$comment": "需求 15 章的性能要求转为可测阈值，技术方案 5.8 的单一出处。性能用例读取本文件断言，阈值调整只改这里，调整动作留在版本历史中。",
+ "dataset": "stress",
+ "datasetDescription": "400 天，含 320 个待评估日。阈值在该数据集上验证。",
+ "budgets": {
+  "configLoadMs": {
+   "threshold": 8000,
+   "requirement": "REQ-16-01",
+   "reqSection": "3.1",
+   "description": "启动至配置加载完成。超时进入超时态，重新加载重新计时。",
+   "cases": ["SYS-A-001", "SYS-A-002", "SYS-PERF-001"]
+  },
+  "monthViewFirstFrameMs": {
+   "threshold": 500,
+   "requirement": "REQ-16-06",
+   "reqSection": "4.4",
+   "description": "月视图首帧呈现 30 张卡片摘要。读取聚合表，不做全表扫描。",
+   "cases": ["SYS-B-015", "SYS-PERF-001"]
+  },
+  "scrollFrameMs": {
+   "threshold": 16,
+   "requirement": "REQ-16-06",
+   "reqSection": "4.4",
+   "description": "月视图滚动的平均帧构建时间。",
+   "cases": ["SYS-B-015", "SYS-PERF-001"]
+  },
+  "dayDetailFirstFrameMs": {
+   "threshold": 300,
+   "requirement": "REQ-16-12",
+   "reqSection": "4.10",
+   "description": "日详情消息列表首屏。消息按需分页加载。",
+   "cases": ["SYS-D-018", "SYS-PERF-001"]
+  },
+  "trendFirstFrameMs": {
+   "threshold": 1000,
+   "requirement": "REQ-16-18",
+   "reqSection": "9.1",
+   "description": "趋势曲线与情绪日历渲染完成。读取聚合数据。",
+   "cases": ["SYS-PERF-001"]
+  },
+  "syncPeakMemoryMb": {
+   "threshold": 300,
+   "requirement": "REQ-16-03",
+   "reqSection": "3.4",
+   "description": "全量同步 400 天的内存峰值。日文件按批处理，不一次性载入。",
+   "cases": ["SYS-PERF-002"]
+  }
+ }
+}

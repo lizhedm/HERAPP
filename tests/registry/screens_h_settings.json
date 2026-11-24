@@ -1,0 +1,246 @@
+[
+ {
+  "id": "SYS-H-001",
+  "title": "设置首页分组展示 5 个入口与同步摘要",
+  "req": ["REQ-16-29"],
+  "reqSection": ["12.1"],
+  "screens": ["H1"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["已完成一次部分成功的同步，失败天数不为零"],
+  "when": ["进入设置首页"],
+  "then": [
+   "同步分组展示同步状态、上次同步时间、已同步天数、失败天数与立即同步按钮",
+   "失败天数不为零时提供查看失败日期入口",
+   "主题分组展示当前主题名称",
+   "页面含同步、主题、显示偏好、说明、关于五个分组"
+  ],
+  "testId": "packages/ling_app/test/widget/settings_test.dart::设置首页分组"
+ },
+ {
+  "id": "SYS-H-002",
+  "title": "立即同步为手动触发同步的唯一入口",
+  "req": ["REQ-16-30"],
+  "reqSection": ["12.1", "4.2"],
+  "screens": ["H1", "B0"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["同步状态为空闲"],
+  "when": ["点击立即同步"],
+  "then": [
+   "同步以后台形式执行，保持当前页面并显示正在同步轻提示",
+   "完成后设置页的同步摘要刷新",
+   "时间墙空状态的去设置看看按钮跳转至本页"
+  ],
+  "testId": "packages/ling_app/integration_test/manual_sync_test.dart::立即同步入口"
+ },
+ {
+  "id": "SYS-H-003",
+  "title": "主题选择页以 2 列网格展示 4 套主题且点击立即生效",
+  "req": ["REQ-16-31"],
+  "reqSection": ["12.2"],
+  "screens": ["H2"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["当前主题为纸月历"],
+  "when": ["点击星图主题后返回"],
+  "then": [
+   "4 个主题以 2 列网格展示预览图，当前选中项带勾选标识",
+   "点击后立即应用并写入用户偏好，返回即生效",
+   "重启应用后主题保持为星图"
+  ],
+  "testId": "packages/ling_app/integration_test/theme_test.dart::主题切换与持久化"
+ },
+ {
+  "id": "SYS-H-004",
+  "title": "主题作用范围限于呈现样式，映射规则在 4 套主题下一致",
+  "req": ["REQ-16-31"],
+  "reqSection": ["12.2"],
+  "screens": ["H2", "H3", "B3"],
+  "layer": "golden",
+  "priority": "P0",
+  "given": ["同一月份数据，依次切换 4 套主题"],
+  "when": ["对月视图截取黄金图"],
+  "then": [
+   "全局底色、卡片容器样式、字体族、分隔线、按钮与标签样式随主题变化",
+   "封面等级、天气图标、情绪色系的映射结果在 4 套主题下完全一致",
+   "情绪色系保持相同色相序列，越鲜艳明亮越好的辨识方向在 4 套主题下一致"
+  ],
+  "testId": "packages/ling_app/test/golden/theme_golden_test.dart::四主题月视图黄金图"
+ },
+ {
+  "id": "SYS-H-005",
+  "title": "显示偏好含 5 项配置且各自作用于对应页面",
+  "req": ["REQ-16-29"],
+  "reqSection": ["12.3"],
+  "screens": ["H4", "B3", "E1", "D2"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["进入显示偏好页"],
+  "when": ["依次修改 5 项配置并进入对应页面"],
+  "then": [
+   "默认卡片状态决定进入月视图时全部卡片的初始状态",
+   "趋势默认指标与默认粒度决定进入趋势页的初始选择",
+   "曲线叠加开关开启时趋势曲线默认同时显示三个指标",
+   "日详情互动统计默认展开开关决定统计区的初始折叠状态"
+  ],
+  "testId": "packages/ling_app/integration_test/display_preference_test.dart::显示偏好五项生效"
+ },
+ {
+  "id": "SYS-H-006",
+  "title": "用户偏好默认值与同步、配置重载后的保留",
+  "req": ["REQ-16-29"],
+  "reqSection": ["13"],
+  "screens": ["H2", "H4"],
+  "layer": "dao",
+  "priority": "P0",
+  "given": ["首次安装的空数据库"],
+  "when": ["读取用户偏好，随后执行同步与配置文件重载"],
+  "then": [
+   "默认值为主题纸月历、默认卡片状态封面、趋势指标总分、趋势粒度月、曲线叠加关闭、统计默认折叠",
+   "同步与配置重载保留用户偏好",
+   "应用配置为只读实体，配置服务只读取不写入"
+  ],
+  "testId": "packages/ling_app/test/dao/user_preference_dao_test.dart::偏好默认值与保留"
+ },
+ {
+  "id": "SYS-H-007",
+  "title": "隐私说明页说明本地加密、安全存储与脱敏口径",
+  "req": ["REQ-16-36"],
+  "reqSection": ["12.4"],
+  "screens": ["H5"],
+  "layer": "widget",
+  "priority": "P2",
+  "given": ["进入隐私说明页"],
+  "when": ["浏览页面"],
+  "then": [
+   "说明聊天记录在本地加密存储，后端 Token 与 AI Key 存入系统安全存储",
+   "说明 AI 调用使用脱敏文本，6 类敏感信息替换为占位标识后再送 AI，本地保留原文",
+   "说明用户编辑的总结、备注、收藏、喜好、礼物仅保存在本地",
+   "页面为只读，不提供修改入口"
+  ],
+  "testId": "packages/ling_app/test/widget/privacy_page_test.dart::隐私说明内容"
+ },
+ {
+  "id": "SYS-H-008",
+  "title": "规则说明页同时展示封面与天气两套规则并标注区别",
+  "req": ["REQ-16-29", "REQ-16-14"],
+  "reqSection": ["12.5"],
+  "screens": ["H6"],
+  "layer": "widget",
+  "priority": "P1",
+  "given": ["进入封面与天气规则说明页"],
+  "when": ["浏览页面"],
+  "then": [
+   "展示封面综合关系分公式与 L1-L5 等级区间表、亲密度档与情绪档区间",
+   "展示天气综合分公式与权重含义、日天气判定优先级表含雾与雪触发条件、周月天气平均值映射说明",
+   "展示情绪色系映射表与明度规则、封面情绪色块蒙层的各主题不透明度",
+   "标注封面综合分侧重关系状态、天气综合分侧重当天体感，两者独立计算"
+  ],
+  "testId": "packages/ling_app/test/widget/rules_page_test.dart::两套规则同屏展示"
+ },
+ {
+  "id": "SYS-H-009",
+  "title": "关于页同屏展示五条版本轴与资源来源说明",
+  "req": ["REQ-16-29", "REQ-16-33"],
+  "reqSection": ["12.6"],
+  "screens": ["H7"],
+  "layer": "widget",
+  "priority": "P2",
+  "given": ["进入关于页"],
+  "when": ["浏览页面"],
+  "then": [
+   "展示应用名称 LingLing",
+   "同屏展示 appVersion、schemaVersion、ruleVersion、promptVersion、coverPoolVersion 五个版本号",
+   "五个版本号各自独立取值，互不换算",
+   "展示封面资源来源说明，标注资源为原创角色或已授权 IP",
+   "展示数据来源说明与本地数据存储位置说明"
+  ],
+  "testId": "packages/ling_app/test/widget/about_page_test.dart::关于页字段"
+ },
+ {
+  "id": "SYS-H-010",
+  "title": "失败日期列表支持单日与批量重试并在清空后隐藏入口",
+  "req": ["REQ-16-04"],
+  "reqSection": ["12.1", "3.6"],
+  "screens": ["H8", "H1"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["同步失败日期列表含 2 条记录"],
+  "when": ["逐条重试成功后返回设置首页"],
+  "then": [
+   "列表每条含日期与失败原因，提供单日重试与重试全部失败项",
+   "重试成功的日期从列表移除",
+   "列表清空后设置首页的查看失败日期入口隐藏，失败天数显示为 0"
+  ],
+  "testId": "packages/ling_app/integration_test/failed_dates_test.dart::失败列表重试与清空"
+ },
+ {
+  "id": "SYS-H-011",
+  "title": "主题应用效果对照页呈现同一月份在 4 套主题下的差异",
+  "req": ["REQ-16-31", "REQ-16-32"],
+  "reqSection": ["12.2"],
+  "screens": ["H3"],
+  "layer": "golden",
+  "priority": "P2",
+  "given": ["同一组日卡片数据"],
+  "when": ["在主题应用效果对照页查看 4 套主题"],
+  "then": [
+   "4 套主题的卡片容器、底色与字体差异可辨",
+   "封面图与情绪蒙层在 4 套主题下均渲染，不透明度依次为 15%、15%、45%、30%",
+   "黄金图锁定 4 套主题的视觉差异"
+  ],
+  "testId": "packages/ling_app/test/golden/theme_compare_golden_test.dart::主题对照黄金图"
+ },
+ {
+  "id": "SYS-PERF-001",
+  "title": "启动配置加载、月视图、日详情、趋势页满足性能预算",
+  "req": ["REQ-16-01", "REQ-16-06", "REQ-16-12", "REQ-16-18"],
+  "reqSection": ["3.1", "4.4", "4.10", "9.1"],
+  "screens": ["A1", "B3", "D1", "E1"],
+  "layer": "perf",
+  "priority": "P0",
+  "given": ["性能预算文件声明各项阈值"],
+  "when": ["依次测量配置加载、月视图首帧、滚动帧时间、日详情首帧、趋势页首帧"],
+  "then": [
+   "配置加载不超过 8 秒，月视图首帧不超过 500 毫秒",
+   "滚动平均帧时间不超过 16 毫秒，日详情首帧不超过 300 毫秒，趋势页首帧不超过 1 秒",
+   "任一项超出阈值时断言失败并输出实测值与阈值"
+  ],
+  "testId": "packages/ling_app/test/perf/budget_test.dart::性能预算全项"
+ },
+ {
+  "id": "SYS-PERF-002",
+  "title": "全量同步峰值内存不超过预算",
+  "req": ["REQ-16-03"],
+  "reqSection": ["3.4"],
+  "screens": ["A5"],
+  "layer": "perf",
+  "priority": "P1",
+  "given": ["同步 300 个日期且每日含 500 条消息"],
+  "when": ["执行全量同步并采样内存"],
+  "then": [
+   "峰值内存不超过 300 MB",
+   "日文件按批处理，不一次性全部载入内存",
+   "阈值取自性能预算文件"
+  ],
+  "testId": "packages/ling_app/test/perf/sync_memory_test.dart::同步内存预算"
+ },
+ {
+  "id": "SYS-MIGRATE-001",
+  "title": "数据库迁移保留用户数据并可重复执行",
+  "req": ["REQ-16-29"],
+  "reqSection": ["13"],
+  "screens": [],
+  "layer": "dao",
+  "priority": "P0",
+  "given": ["旧版本数据库含用户总结、备注、收藏、喜好、礼物与筛选状态"],
+  "when": ["执行迁移到当前模式版本"],
+  "then": [
+   "全部用户数据在迁移后完整保留",
+   "迁移在已迁移的数据库上重复执行不产生副作用",
+   "模式版本与规则版本、提示词版本、资源池版本各自独立"
+  ],
+  "testId": "packages/ling_app/test/dao/migration_test.dart::迁移幂等与数据保留"
+ }
+]

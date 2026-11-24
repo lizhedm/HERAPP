@@ -1,0 +1,293 @@
+{
+ "$comment": "由 tests/check_config.py 从 docs/config-reference.md 生成。断言默认值的测试读取本文件，使默认值有单一出处。",
+ "entries": {
+  "sync.baseUrl": {
+   "section": "sync 同步",
+   "type": "string",
+   "default": "无，必填",
+   "range": "合法 http/https URL",
+   "timing": "启动",
+   "requirement": "3.7"
+  },
+  "sync.authHeader": {
+   "section": "sync 同步",
+   "type": "string",
+   "default": "`Authorization`",
+   "range": "非空字符串",
+   "timing": "启动",
+   "requirement": "3.7"
+  },
+  "sync.token": {
+   "section": "sync 同步",
+   "type": "string",
+   "default": "无，必填",
+   "range": "非空字符串，存入系统安全存储",
+   "timing": "启动",
+   "requirement": "3.7、11"
+  },
+  "sync.manifestPath": {
+   "section": "sync 同步",
+   "type": "string",
+   "default": "`/v1/manifest`",
+   "range": "以 `/` 开头的路径",
+   "timing": "启动",
+   "requirement": "3.7"
+  },
+  "sync.dayFilePathTemplate": {
+   "section": "sync 同步",
+   "type": "string",
+   "default": "`/v1/days/{date}`",
+   "range": "含 `{date}` 占位符的路径",
+   "timing": "启动",
+   "requirement": "3.7"
+  },
+  "sync.timeoutSeconds": {
+   "section": "sync 同步",
+   "type": "int",
+   "default": "30",
+   "range": "5-120",
+   "timing": "下次同步",
+   "requirement": "3.7"
+  },
+  "sync.retryCount": {
+   "section": "sync 同步",
+   "type": "int",
+   "default": "3",
+   "range": "0-10",
+   "timing": "下次同步",
+   "requirement": "3.7、3.6"
+  },
+  "sync.batchSize": {
+   "section": "sync 同步",
+   "type": "int",
+   "default": "30",
+   "range": "1-100",
+   "timing": "下次同步",
+   "requirement": "3.7"
+  },
+  "sync.autoSyncOnLaunch": {
+   "section": "sync 同步",
+   "type": "bool",
+   "default": "true",
+   "range": "—",
+   "timing": "启动",
+   "requirement": "3.7"
+  },
+  "sync.scheduledIntervalMinutes": {
+   "section": "sync 同步",
+   "type": "int",
+   "default": "0",
+   "range": "0 表示关闭，否则 15-1440",
+   "timing": "启动",
+   "requirement": "3.7"
+  },
+  "ai.baseUrl": {
+   "section": "ai AI 服务",
+   "type": "string",
+   "default": "无，必填",
+   "range": "合法 http/https URL",
+   "timing": "启动",
+   "requirement": "3.7"
+  },
+  "ai.model": {
+   "section": "ai AI 服务",
+   "type": "string",
+   "default": "`deepseek-flash`",
+   "range": "非空字符串，后端启动时校验可用",
+   "timing": "下次同步",
+   "requirement": "3.7、技术方案 3.4"
+  },
+  "ai.promptVersion": {
+   "section": "ai AI 服务",
+   "type": "string",
+   "default": "`v1`",
+   "range": "与后端 `prompts/` 下的版本文件对应",
+   "timing": "下次同步",
+   "requirement": "3.7、6.2"
+  },
+  "ai.apiKey": {
+   "section": "ai AI 服务",
+   "type": "string",
+   "default": "无，必填",
+   "range": "非空字符串，存入系统安全存储",
+   "timing": "启动",
+   "requirement": "3.7、11"
+  },
+  "ai.concurrency": {
+   "section": "ai AI 服务",
+   "type": "int",
+   "default": "3",
+   "range": "1-5",
+   "timing": "下次同步",
+   "requirement": "3.7、6.3"
+  },
+  "ai.maxDatesPerSync": {
+   "section": "ai AI 服务",
+   "type": "int",
+   "default": "300",
+   "range": "1-1000",
+   "timing": "下次同步",
+   "requirement": "3.7、6.3"
+  },
+  "thresholds.configLoadTimeoutSeconds": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "8",
+   "range": "3-30",
+   "timing": "启动",
+   "requirement": "3.1"
+  },
+  "thresholds.fogConfidenceBelow": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "40",
+   "range": "0-100",
+   "timing": "即时",
+   "requirement": "7.2"
+  },
+  "thresholds.snowMessageCountBelow": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "10",
+   "range": "0-100",
+   "timing": "即时",
+   "requirement": "7.2"
+  },
+  "thresholds.snowEmotionAtLeast": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "50",
+   "range": "0-100",
+   "timing": "即时",
+   "requirement": "7.2"
+  },
+  "thresholds.highlightOverallAtLeast": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "85",
+   "range": "0-100",
+   "timing": "即时",
+   "requirement": "8.1"
+  },
+  "thresholds.highlightEmotionAtLeast": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "70",
+   "range": "0-100",
+   "timing": "即时",
+   "requirement": "8.1"
+  },
+  "thresholds.highlightOverallAlone": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "90",
+   "range": "0-100",
+   "timing": "即时",
+   "requirement": "8.1"
+  },
+  "thresholds.funMomentCountAtLeast": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "2",
+   "range": "1-3",
+   "timing": "即时",
+   "requirement": "8.1"
+  },
+  "thresholds.summaryMaxChars": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "50",
+   "range": "10-200",
+   "timing": "即时",
+   "requirement": "4.8、6.2"
+  },
+  "thresholds.highlightCandidateMax": {
+   "section": "thresholds 阈值",
+   "type": "int",
+   "default": "3",
+   "range": "1-10",
+   "timing": "下次同步",
+   "requirement": "6.2"
+  },
+  "coverPools.manifestPath": {
+   "section": "coverPools 封面资源池",
+   "type": "string",
+   "default": "`assets/cover/manifest.json`",
+   "range": "仓库内相对路径",
+   "timing": "启动",
+   "requirement": "5.2、10.1"
+  },
+  "coverPools.version": {
+   "section": "coverPools 封面资源池",
+   "type": "string",
+   "default": "`pool-2026.11`",
+   "range": "非空字符串，展示于关于页",
+   "timing": "启动",
+   "requirement": "10.3、12.6"
+  },
+  "coverPools.fallbackAsset": {
+   "section": "coverPools 封面资源池",
+   "type": "string",
+   "default": "`assets/cover/placeholder.png`",
+   "range": "仓库内相对路径",
+   "timing": "启动",
+   "requirement": "10.3"
+  },
+  "theme": {
+   "section": "UserPreference 用户可写偏好",
+   "type": "Theme",
+   "default": "`PAPER_CALENDAR`",
+   "range": "需求 14.26 的 4 个取值",
+   "timing": "即时",
+   "requirement": "12.2、13"
+  },
+  "cardDefaultState": {
+   "section": "UserPreference 用户可写偏好",
+   "type": "CardState",
+   "default": "`COVER`",
+   "range": "需求 14.1 的 3 个取值",
+   "timing": "下次进入月视图",
+   "requirement": "12.4、13"
+  },
+  "trendMetric": {
+   "section": "UserPreference 用户可写偏好",
+   "type": "TrendMetric",
+   "default": "`OVERALL_SCORE`",
+   "range": "需求 14.24 的 3 个取值",
+   "timing": "下次进入趋势页",
+   "requirement": "12.4、13"
+  },
+  "trendGranularity": {
+   "section": "UserPreference 用户可写偏好",
+   "type": "TrendGranularity",
+   "default": "`MONTH`",
+   "range": "需求 14.25 的 3 个取值",
+   "timing": "下次进入趋势页",
+   "requirement": "12.4、13"
+  },
+  "curveOverlay": {
+   "section": "UserPreference 用户可写偏好",
+   "type": "bool",
+   "default": "false",
+   "range": "—",
+   "timing": "下次进入趋势页",
+   "requirement": "12.4、13"
+  },
+  "statsExpanded": {
+   "section": "UserPreference 用户可写偏好",
+   "type": "bool",
+   "default": "false",
+   "range": "—",
+   "timing": "下次进入日详情",
+   "requirement": "12.4、13"
+  },
+  "updatedAt": {
+   "section": "UserPreference 用户可写偏好",
+   "type": "datetime",
+   "default": "写入时间",
+   "range": "—",
+   "timing": "即时",
+   "requirement": "13"
+  }
+ }
+}

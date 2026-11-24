@@ -10,7 +10,7 @@ CSS = open("/tmp/wf_css.txt", encoding="utf-8").read()
 # 补充 2 列栅格（主题预览与月视图卡片墙使用）
 CSS = CSS.replace("</style>",
     ".g2{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}\n</style>")
-OUT = "/Users/zhe/Documents/TophantAIGit/HERAPP/低保真线框图-个人关系聊天回忆App-V1.1.html"
+OUT = "/Users/zhe/Documents/TophantAIGit/HERAPP/低保真线框图-LingLing-V1.1.html"
 
 P = []          # 页面片段累积
 def w(s): P.append(s)
@@ -63,13 +63,13 @@ w(f'''<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>个人关系聊天回忆 App · 低保真线框图</title>
+<title>LingLing · 低保真线框图</title>
 {CSS}
 </head>
 <body>
 <div class="wrap">
-<h1>个人关系聊天回忆 App · 低保真线框图</h1>
-<p class="sub">依据《个人关系聊天回忆 App 需求描述文档》绘制 · 表达信息层级、核心文案、按钮位置与页面状态 · 正式视觉设计另行输出</p>
+<h1>LingLing · 低保真线框图</h1>
+<p class="sub">依据《LingLing 需求描述文档》绘制 · 表达信息层级、核心文案、按钮位置与页面状态 · 正式视觉设计另行输出</p>
 
 <div class="doc">
   <p><b>页面内容约定</b>：手机壳内只放最终呈现给用户的界面内容（文案、数据、控件）。实现说明、服务与字段名、判定规则一律放在手机壳右侧的「关键元素 / 用户可执行操作 / 操作后去向 / 规则」区域，开发时不要把这些说明绘制到界面上。</p>
@@ -79,7 +79,7 @@ w(f'''<!DOCTYPE html>
   <div class="idx">
     <a href="#ga">A 启动与同步（8 屏）</a><a href="#gb">B 时间墙 年→月份→月（5 屏）</a><a href="#gc">C 日卡片三态与长按（7 屏）</a>
     <a href="#gd">D 日详情与评估（9 屏）</a><a href="#ge">E 趋势与热力图（4 屏）</a><a href="#gf">F 喜好与礼物（14 屏）</a>
-    <a href="#gg">G 回忆（高光）（4 屏）</a><a href="#gh">H 设置（8 屏）</a><a href="#rules">规则速查</a><a href="#pending">待确认事项</a>
+    <a href="#gg">G 回忆（高光）（4 屏）</a><a href="#gh">H 设置（8 屏）</a><a href="#rules">规则速查</a><a href="#coverpool">封面资源寻址</a>
   </div>
 </div>
 
@@ -158,7 +158,7 @@ w(f'''<!DOCTYPE html>
               ├─ 显示偏好 ──► H4（默认卡片状态 / 趋势默认指标 / 趋势默认粒度 / 曲线叠加 / 统计默认展开）
               ├─ 隐私说明 ──► H5
               ├─ 封面与天气规则说明 ──► H6（两套综合分公式 + L1-L5 + 天气优先级 + 情绪色系）
-              ├─ 关于 ──► H7（版本 / 提示词版本 / 资源池版本 / 数据来源 / 存储位置）
+              ├─ 关于 ──► H7（五条版本轴 / 资源来源 / 数据来源 / 存储位置）
               └─ 失败日期列表 ──► H8（单日重试 + 批量重试，与 A8 同组件）
 </pre>
 </div>
@@ -174,7 +174,7 @@ grp("ga", "A · 启动与同步（需求 3）",
 w(screen("A1", "启动页 · 配置加载（加载中）", "应用冷启动第一屏 · 超时上限 8 秒",
   phone("", '''<div class="ctr">
     <div class="img" style="width:62px;height:62px">LOGO</div>
-    <div style="font-size:11px;font-weight:700">关系回忆</div>
+    <div style="font-size:11px;font-weight:700">LingLing</div>
     <div class="box d" style="width:100%">读取配置中…</div>
     <div class="skel" style="width:70%"></div>
   </div>''', bar=True),
@@ -521,7 +521,7 @@ grp("gc", "C · 日卡片三态与长按（需求 4.4-4.7）",
 w(screen("C1", "日卡片 · 封面状态 COVER（默认态）", "B3 月视图卡片状态之一",
   phone("2026年11月", '''<div class="row" style="gap:5px">
       <div class="dcard" style="min-height:70px;padding:0;position:relative">
-        <div class="img" style="flex:1;border:0;font-size:8px">L5 封面图<br>（资源池按日期哈希）</div>
+        <div class="img" style="flex:1;border:0;font-size:8px">L5 封面图<br>（V3 子池按日期哈希）</div>
         <div style="position:absolute;top:2px;left:3px;font-size:8.5px;background:#fff;padding:0 2px">11</div>
         <div style="position:absolute;top:2px;right:3px;font-size:9px">🌈 😊</div>
         <div style="position:absolute;bottom:2px;left:3px;font-size:8px">★ 📝</div>
@@ -535,10 +535,10 @@ w(screen("C1", "日卡片 · 封面状态 COVER（默认态）", "B3 月视图�
       </div>
     </div>
     <div class="lbl">综合关系分 = 亲密度×0.6 + 情绪分×0.4</div>
-    <div class="box" style="font-size:8.5px;padding:3px">
-      L1 0-20 · L2 21-40 · L3 41-60 · L4 61-80 · L5 81-100</div>''', nav="时间墙"),
+    <div class="box" style="font-size:8px;padding:3px;line-height:1.7">
+      L1 0-20 · L2 21-40 · L3 41-60 · L4 61-80 · L5 81-100<br>等级定主池 · 亲密度档与情绪档定池内变体 V1-V4</div>''', nav="时间墙"),
   meta(
-    ["封面等级图片铺满卡片（资源池按日期哈希选图）",
+    ["封面等级图片铺满卡片（等级定主池、D/E 档定池内变体、日期哈希选图）",
      "左上角日期角标", "右上角天气图标与情绪图标",
      "角标区：高光标记 ★、收藏标记、备注标记 📝",
      "右下角独立箭头 ›"],
@@ -1889,6 +1889,13 @@ w(screen("H6", "封面与天气规则说明（只读）", "H1 进入 · 合并�
     <div class="lbl">封面等级</div>
     <div class="box" style="font-size:8px;padding:3px;line-height:1.7">
       L1 0-20 · L2 21-40 · L3 41-60<br>L4 61-80 · L5 81-100</div>
+    <div class="lbl">封面选图</div>
+    <div class="box" style="font-size:7.6px;padding:3px;line-height:1.6">
+      等级定主池，亲密度档与情绪档合成池内变体<br>
+      差值 = 亲密度档中值 − 情绪档中值<br>
+      ≤-25 → V1 情绪张力 · &lt;0 → V2 轻快<br>
+      &lt;25 → V3 陪伴 · ≥25 → V4 静默相处<br>
+      子池内按日期哈希轮换，同一日期取同一张</div>
     <div class="lbl">天气综合分</div>
     <div class="box" style="font-size:8.5px;padding:3px">
       = 总分 × 0.5 + 情绪分 × 0.3 + 亲密度 × 0.2
@@ -1912,6 +1919,7 @@ w(screen("H6", "封面与天气规则说明（只读）", "H1 进入 · 合并�
     nav="设置", ics='<span class="ic">←</span>'),
   meta(
     ["封面综合关系分公式（亲密度×0.6 + 情绪分×0.4）", "L1-L5 等级区间表",
+     "封面选图规则：等级定主池、D/E 档合成池内变体 V1-V4、子池内日期哈希轮换",
      "天气综合分公式（总分×0.5 + 情绪分×0.3 + 亲密度×0.2）与权重含义",
      "日天气判定优先级表（含雾与雪触发条件）",
      "雪雾优先级与周期天气说明",
@@ -1928,10 +1936,14 @@ w(screen("H6", "封面与天气规则说明（只读）", "H1 进入 · 合并�
 w(screen("H7", "关于（只读）", "H1 进入",
   phone("关于", '''<div class="ctr" style="flex:0 0 auto;padding:6px 0">
       <div class="img" style="width:44px;height:44px">LOGO</div>
-      <div style="font-size:10px;font-weight:700">关系回忆</div>
-      <div style="font-size:8.5px;color:#666">版本 1.1.0</div></div>
+      <div style="font-size:10px;font-weight:700">LingLing</div>
+      <div style="font-size:8.5px;color:#666">appVersion 1.1.0</div></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
-      <span>AI 提示词版本</span><span class="mono">v2</span></div>
+      <span>数据库结构版本</span><span class="mono">schema 1</span></div>
+    <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
+      <span>规则版本</span><span class="mono">rule 1</span></div>
+    <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
+      <span>AI 提示词版本</span><span class="mono">prompt v2</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
       <span>封面资源池版本</span><span class="mono">pool-2026.11</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;line-height:1.7">
@@ -1946,12 +1958,13 @@ w(screen("H7", "关于（只读）", "H1 进入",
       <span class="mono" style="font-size:7.5px">应用沙盒 /Documents/relation.db</span></div>''',
     nav="设置", ics='<span class="ic">←</span>'),
   meta(
-    ["应用名称与版本号", "AI 提示词版本号",
-     "封面资源池版本与资源来源说明",
+    ["应用名称与 appVersion",
+     "schemaVersion、ruleVersion、promptVersion、coverPoolVersion 同屏展示",
+     "封面资源来源说明",
      "数据来源说明", "本地数据存储位置说明"],
     ["阅读", "返回"],
     [f"返回 {to('H1 设置首页')}"],
-    ["关于页内容为本版新定：版本、提示词版本、资源池版本、资源来源、数据来源、存储位置。"])))
+    ["五条版本轴同屏展示，一张截图即可读全排查所需的版本信息。"])))
 
 # H8 失败日期列表
 w(screen("H8", "失败日期列表", "H1 点击「查看失败日期」· 与 A8 同组件",
@@ -2065,6 +2078,7 @@ w('''<div class="grp" id="rules">
 <tr><td>脱敏对象</td><td>手机号、身份证号、银行卡号、邮箱、详细地址、验证码替换为占位标识；姓名与昵称保留原文；本地存储与对话流展示保留原文</td></tr>
 <tr><td>时区基准</td><td>日期归属以后端切分日文件的时区为权威，日文件 date 即唯一标识；设备时区变化不改变日期归属与统计结果</td></tr>
 <tr><td>当天数据</td><td>当天为进行中日期，保持 PENDING、天气显示待评估、封面为占位封面，可查看对话流与编辑总结备注；跨入次日后入队评估</td></tr>
+<tr><td>封面选图</td><td>pool[等级][变体][日期哈希 % 子池张数]。等级 L1-L5 定主池；变体按亲密度档中值 − 情绪档中值判定：≤-25 → V1 · &lt;0 → V2 · &lt;25 → V3 · ≥25 → V4。20 子池每池 5 张共 100 个池位，L1V4 与 L5V1 不可达按占位封面兜底</td></tr>
 <tr><td>封面情绪蒙层</td><td>4 套主题均展示封面图，情绪色块作蒙层叠加：纸月历 15% · 星图 15% · 色域 45% · 磨砂玻璃 30%（叠在模糊后的封面图上）</td></tr>
 <tr><td>共同喜好语义</td><td>喜好「类型」代表 TA 的态度，commonStatus 代表双方态度组合。类型 = 喜欢且 commonStatus = CONFLICT 表示 TA 喜欢而我不喜欢</td></tr>
 <tr><td>0 消息日</td><td>不调用 AI，状态保持 PENDING，不写入 DailyEvaluation，不计入均分、周期天气与曲线；12 项统计显示「--」</td></tr>
@@ -2083,25 +2097,30 @@ w('''<div class="grp" id="rules">
 </div>
 ''')
 
-# ═══════════════════════════════════════════════ 待确认事项
+# ═══════════════════════════════════════════════ 封面资源寻址
 w('''
-<div class="grp" id="pending">
-<h2>待确认事项</h2>
-<div class="gnote">以下事项需产品决策后补入对应屏幕与需求章节，当前线框图未绘制对应界面。与需求文档第 17 章对应。</div>
+<div class="grp" id="coverpool">
+<h2>封面资源寻址</h2>
+<div class="gnote">封面等级定主池、亲密度档与情绪档合成池内变体、日期哈希在子池内轮换。对应需求文档 5.2，影响屏幕 C1 · H6。</div>
 <table class="tb">
-<tr><th style="width:150px">事项</th><th>待确认的点</th><th style="width:88px">影响屏幕</th></tr>
-<tr><td>封面辅助档位的选图机制与资源张数</td><td>亲密度档 D1-D5 与情绪档 E1-E4 标注「用于资源池微调」，与「每等级一个资源池按日期哈希轮换」的结合方式待确认：仅按 L1-L5 分 5 个池 / 按 L×D×E 细分 / L 决定主池而 D 或 E 决定同池内变体。决定美术资源总量与排期</td><td>C1 · H6</td></tr>
+<tr><th style="width:150px">环节</th><th>规则</th></tr>
+<tr><td>主池</td><td>封面等级 L1-L5，由综合关系分（亲密度×0.6 + 情绪分×0.4）映射，共 5 个主池</td></tr>
+<tr><td>池内变体</td><td>差值 = 亲密度档中值 − 情绪档中值，中值取 D1 10 / D2 30 / D3 50 / D4 70 / D5 90 与 E1 13 / E2 38 / E3 63 / E4 88。差值 ≤ -25 → V1 情绪张力，-25&lt;差值&lt;0 → V2 轻快，0≤差值&lt;25 → V3 陪伴，差值 ≥ 25 → V4 静默相处</td></tr>
+<tr><td>变体查找表</td><td>D1：V2 V1 V1 V1 · D2：V3 V2 V1 V1 · D3：V4 V3 V2 V1 · D4：V4 V4 V3 V2 · D5：V4 V4 V4 V3（列序 E1 E2 E3 E4）</td></tr>
+<tr><td>选图</td><td>pool[等级][变体][日期哈希 % 子池张数]，同一日期稳定取到同一张图</td></tr>
+<tr><td>资源量</td><td>5 主池 × 4 变体 = 20 子池，每子池 5 张，池位总量 100 张</td></tr>
+<tr><td>不可达子池</td><td>综合关系分由亲密度与情绪分推导，L1 与 V4、L5 与 V1 算术上无法成立。这两个子池不排产资源，美术实际交付 18 子池 × 5 张 = 90 张，代码按默认占位封面兜底</td></tr>
 </table>
 </div>
 ''')
-print("待确认事项完成")
+print("封面资源寻址完成")
 
 # ═══════════════════════════════════════════════ 页脚
 w('''<footer>
 <p><b>屏幕统计</b>：A 启动与同步 8 屏 · B 时间墙 5 屏 · C 日卡片 8 屏 · D 日详情 9 屏 ·
 E 趋势 4 屏 · F 喜好与礼物 14 屏 · G 回忆 4 屏 · H 设置 8 屏 ——<b>共 60 屏</b>。</p>
 <p><b>手机壳内外的分工</b>：手机壳内＝最终界面呈现内容；手机壳外的「关键元素 / 用户可执行操作 / 操作后去向 / 规则」＝给开发看的实现说明，不绘制到界面上。</p>
-<p>配套文档：《个人关系聊天回忆 App 需求描述文档》。两份交付物中的阈值、文案、字段、优先级规则一一对应；文档第 17 章列出的待确认事项在本图中同样标注为待确认。</p>
+<p>配套文档：《LingLing 需求描述文档》。两份交付物中的阈值、文案、字段、优先级规则一一对应，需求文档全 16 章无未定项。</p>
 </footer>
 </div>
 </body>

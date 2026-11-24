@@ -1,0 +1,296 @@
+[
+ {
+  "id": "SYS-C-001",
+  "title": "长按动作面板含收藏、编辑总结、添加备注与取消",
+  "req": ["REQ-16-09"],
+  "reqSection": ["4.7"],
+  "screens": ["C6"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["月视图中某张日卡片"],
+  "when": ["长按该卡片"],
+  "then": [
+   "底部动作面板含收藏、编辑总结、添加备注、取消四项",
+   "面板不含重新评估，该入口位于日详情页",
+   "已收藏的日期该项显示为取消收藏"
+  ],
+  "testId": "packages/ling_app/test/widget/day_card_actions_test.dart::动作面板项目"
+ },
+ {
+  "id": "SYS-C-002",
+  "title": "收藏切换后关闭面板并刷新卡片标记",
+  "req": ["REQ-16-09"],
+  "reqSection": ["4.7"],
+  "screens": ["C6", "C1"],
+  "layer": "integration",
+  "priority": "P1",
+  "given": ["某日期未收藏"],
+  "when": ["长按卡片点击收藏，再次长按点击取消收藏"],
+  "then": [
+   "收藏后面板关闭，卡片角标区出现收藏标记",
+   "取消收藏后标记移除",
+   "收藏状态持久化，重新进入月视图后保持"
+  ],
+  "testId": "packages/ling_app/integration_test/favorite_test.dart::收藏切换与持久化"
+ },
+ {
+  "id": "SYS-C-003",
+  "title": "编辑总结上限 50 字，超出后保存按钮为禁用态",
+  "req": ["REQ-16-10"],
+  "reqSection": ["4.8"],
+  "screens": ["C7"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["进入编辑一句话总结页"],
+  "when": ["输入 50 字后再输入第 51 字"],
+  "then": [
+   "实时显示已输入字数",
+   "50 字时保存按钮可用",
+   "超过 50 字时保存按钮为禁用态并提示「总结不超过 50 字」"
+  ],
+  "testId": "packages/ling_app/test/widget/summary_edit_test.dart::总结字数上限"
+ },
+ {
+  "id": "SYS-C-004",
+  "title": "恢复为 AI 总结清空用户总结字段并还原来源标识",
+  "req": ["REQ-16-10"],
+  "reqSection": ["4.8"],
+  "screens": ["C7", "C3"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["某日已有用户总结与 AI 原始总结"],
+  "when": ["点击恢复为 AI 总结并保存"],
+  "then": [
+   "输入框内容替换为 AI 原始总结",
+   "保存后用户总结字段清空，卡片来源标识回到「AI」",
+   "AI 原始总结为空时该按钮为禁用态"
+  ],
+  "testId": "packages/ling_app/integration_test/summary_edit_test.dart::恢复为 AI 总结"
+ },
+ {
+  "id": "SYS-C-005",
+  "title": "总结未保存退出有二次确认",
+  "req": ["REQ-16-10"],
+  "reqSection": ["4.8"],
+  "screens": ["C7"],
+  "layer": "widget",
+  "priority": "P1",
+  "given": ["编辑总结页内容已改动且未保存"],
+  "when": ["点击返回后分别选择继续编辑与放弃修改"],
+  "then": [
+   "弹出二次确认，文案为「总结尚未保存，确认放弃修改？」",
+   "选择继续编辑留在页面且内容保留",
+   "选择放弃修改退出页面且改动不保存",
+   "内容无改动时点击返回直接退出"
+  ],
+  "testId": "packages/ling_app/test/widget/summary_edit_test.dart::未保存二次确认"
+ },
+ {
+  "id": "SYS-C-006",
+  "title": "无评估的日期允许编辑总结并在卡片上展示",
+  "req": ["REQ-16-10"],
+  "reqSection": ["4.8"],
+  "screens": ["C4", "C7"],
+  "layer": "integration",
+  "priority": "P1",
+  "given": ["某日期评估状态为待评估且无 AI 总结"],
+  "when": ["编辑并保存用户总结"],
+  "then": [
+   "保存成功，用户总结写入该日期",
+   "卡片一句话总结状态展示该总结并带「已编辑」标识",
+   "恢复为 AI 总结按钮保持禁用态"
+  ],
+  "testId": "packages/ling_app/integration_test/summary_edit_test.dart::无评估日编辑总结"
+ },
+ {
+  "id": "SYS-C-007",
+  "title": "备注上限 200 字且非空时卡片显示备注图标",
+  "req": ["REQ-16-11"],
+  "reqSection": ["4.9"],
+  "screens": ["C8", "C1"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["进入添加备注页"],
+  "when": ["输入 200 字保存，再输入第 201 字"],
+  "then": [
+   "实时显示已输入字数，200 字时保存按钮可用",
+   "超过 200 字时保存按钮为禁用态并提示「备注不超过 200 字」",
+   "备注非空时日卡片三态均在角标区显示备注图标",
+   "未保存退出弹出文案「备注尚未保存，确认放弃修改？」的二次确认"
+  ],
+  "testId": "packages/ling_app/integration_test/note_edit_test.dart::备注字数与标记"
+ },
+ {
+  "id": "SYS-C-008",
+  "title": "评估缺失卡片展示降级内容并提供操作提示",
+  "req": ["REQ-16-08"],
+  "reqSection": ["4.6"],
+  "screens": ["C4"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["某日期已同步但尚无评估结果"],
+  "when": ["查看该日卡片的三态"],
+  "then": [
+   "封面状态展示默认占位封面，天气为待评估图标",
+   "日期数字状态的总分与亲密度显示「--」",
+   "一句话总结状态显示「今天还没有总结」并在底部提供操作提示"
+  ],
+  "testId": "packages/ling_app/test/widget/day_card_test.dart::评估缺失降级"
+ },
+ {
+  "id": "SYS-D-010",
+  "title": "日详情对话流以气泡呈现并左右区分双方",
+  "req": ["REQ-16-12"],
+  "reqSection": ["4.10"],
+  "screens": ["D1"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["某日评估成功且含双方多条消息"],
+  "when": ["进入日详情"],
+  "then": [
+   "消息以聊天气泡呈现，双方按左右区分",
+   "每条展示时间、类型与内容",
+   "顶部展示日期、天气图标、情绪图标、总分、亲密度",
+   "页面提供互动统计折叠区与只读的亮点、有趣内容展示区"
+  ],
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::对话流呈现"
+ },
+ {
+  "id": "SYS-D-011",
+  "title": "重新评估覆盖 AI 结果并刷新版本与元数据字段",
+  "req": ["REQ-16-09", "REQ-16-35"],
+  "reqSection": ["4.10"],
+  "screens": ["D1", "D3"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["某日已有评估结果，评估版本号为 1"],
+  "when": ["在日详情点击重新评估"],
+  "then": [
+   "覆盖 AI 原始结果，评估版本号加 1",
+   "文件哈希、提示词版本、评估时间刷新为当前值",
+   "重新评估使用当前提示词版本",
+   "用户总结与备注保留"
+  ],
+  "testId": "packages/ling_app/integration_test/re_evaluate_test.dart::重新评估字段刷新"
+ },
+ {
+  "id": "SYS-D-012",
+  "title": "评估中展示加载态且对话流保持可读",
+  "req": ["REQ-16-08"],
+  "reqSection": ["4.10"],
+  "screens": ["D3"],
+  "layer": "widget",
+  "priority": "P1",
+  "given": ["某日评估状态为评估中"],
+  "when": ["进入日详情"],
+  "then": [
+   "评估区展示评估中加载态",
+   "对话流与互动统计保持可读",
+   "重新评估入口在评估中期间为禁用态"
+  ],
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::评估中加载态"
+ },
+ {
+  "id": "SYS-D-013",
+  "title": "评估失败展示失败状态与重试入口",
+  "req": ["REQ-16-08"],
+  "reqSection": ["4.10"],
+  "screens": ["D4"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["某日评估状态为失败"],
+  "when": ["进入日详情并点击重试"],
+  "then": [
+   "评估区展示评估失败状态与重试入口",
+   "对话流与互动统计保持可用",
+   "重试触发该日单日评估并进入评估中状态"
+  ],
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::评估失败重试"
+ },
+ {
+  "id": "SYS-D-014",
+  "title": "待重评展示状态提示并沿用上次成功结果",
+  "req": ["REQ-16-15"],
+  "reqSection": ["4.10"],
+  "screens": ["D5"],
+  "layer": "widget",
+  "priority": "P1",
+  "given": ["某日评估状态为待重评"],
+  "when": ["进入日详情"],
+  "then": [
+   "评估区展示待重评状态提示",
+   "分数、情绪、总结按上次成功评估结果展示",
+   "提供重新评估入口"
+  ],
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::待重评状态提示"
+ },
+ {
+  "id": "SYS-D-015",
+  "title": "当日无消息与该日未同步为两种独立空状态",
+  "req": ["REQ-16-12"],
+  "reqSection": ["4.11"],
+  "screens": ["D7a", "D7b"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["一个日期已同步但消息为空，另一个日期尚未同步"],
+  "when": ["分别进入两个日期的日详情"],
+  "then": [
+   "已同步无消息展示「这天没有聊天记录」与说明行「该日期已同步，文件内消息为空」，操作限于编辑总结与备注",
+   "未同步展示「这天还没有同步」与说明行「该日期在服务端存在，本地尚未拉取」，并提供「同步这一天」按钮",
+   "两种空状态的文案与可用操作各自独立"
+  ],
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::两种空状态区分"
+ },
+ {
+  "id": "SYS-D-016",
+  "title": "同步这一天仅拉取该日期并刷新页面状态",
+  "req": ["REQ-16-04"],
+  "reqSection": ["4.11"],
+  "screens": ["D7b", "D1"],
+  "layer": "integration",
+  "priority": "P1",
+  "given": ["某日期未同步且服务端存在该日文件"],
+  "when": ["点击同步这一天"],
+  "then": [
+   "仅拉取该日期的文件，不触发全量同步",
+   "完成后页面刷新为对话流或当日无消息状态",
+   "该日期进入评估流程"
+  ],
+  "testId": "packages/ling_app/integration_test/single_day_sync_test.dart::单日同步"
+ },
+ {
+  "id": "SYS-D-017",
+  "title": "当天进行中展示状态提示且统计实时计算",
+  "req": ["REQ-16-38"],
+  "reqSection": ["6.3"],
+  "screens": ["D8"],
+  "layer": "widget",
+  "priority": "P0",
+  "given": ["按后端时区计算的当天，已同步部分消息"],
+  "when": ["进入该日日详情"],
+  "then": [
+   "展示当天进行中状态提示，说明评估在次日解锁",
+   "对话流可查看，互动统计按当前已同步消息实时计算",
+   "可编辑总结、备注与切换收藏",
+   "重新评估入口在该日为禁用态"
+  ],
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::当天进行中提示"
+ },
+ {
+  "id": "SYS-D-018",
+  "title": "日详情在 300 毫秒内完成首帧",
+  "req": ["REQ-16-12"],
+  "reqSection": ["4.10"],
+  "screens": ["D1"],
+  "layer": "perf",
+  "priority": "P1",
+  "given": ["某日含 500 条消息"],
+  "when": ["从月视图进入日详情"],
+  "then": [
+   "首帧渲染在 300 毫秒内完成",
+   "互动统计展开不产生掉帧",
+   "阈值取自性能预算文件"
+  ],
+  "testId": "packages/ling_app/test/perf/day_detail_perf_test.dart::日详情渲染预算"
+ }
+]

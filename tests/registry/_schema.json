@@ -1,0 +1,33 @@
+{
+  "$comment": "LingLing 系统测试用例清单的字段约定。validate.py 按本文件校验 registry/ 下全部用例文件。",
+  "caseFields": {
+    "id": "必填。格式 SYS-<区>-<三位序号>，区取 A-H 屏幕组或 RULE、BACKEND、PERF。全局唯一，一经分配不再复用。",
+    "title": "必填。一句话描述被验证的行为，不写「验证」「测试」等冗余前缀。",
+    "req": "必填。覆盖的需求验收标准编号数组，取值为需求文档 16 章的 REQ-16-nn。规则类用例可为空数组，但须填 reqSection。",
+    "reqSection": "必填。对应的需求章节号数组，如 [\"7.2\"]。用于需求变更时反查受影响用例。",
+    "screens": "必填。覆盖的线框图屏幕 ID 数组。后端与规则类用例为空数组。",
+    "layer": "必填。承载该用例的自动化测试层，取值见 layers。",
+    "priority": "必填。P0 阻断发布，P1 影响主干体验，P2 细节完善。",
+    "given": "必填。前置状态，字符串数组。",
+    "when": "必填。操作步骤，字符串数组。",
+    "then": "必填。期望结果，字符串数组，每条可独立断言。",
+    "oracle": "选填。规则类用例的可执行断言，由 validate.py 直接执行。见 oracleFields。",
+    "testId": "必填。该用例的测试标识，格式 <文件路径>::<测试名>。路径前缀由 layer 决定，与技术方案 2.3 的仓库结构一致。generate.py 据此产出测试骨架与追溯表。"
+  },
+  "oracleFields": {
+    "fn": "rules.py 中的函数名。",
+    "cases": "输入输出对数组，每项为 {\"args\": [...], \"kwargs\": {...}, \"expect\": <值>}。",
+    "exhaustive": "选填。取值 cover_reachability 时执行穷举断言而非逐例断言。"
+  },
+  "layers": {
+    "rule": "ling_core 纯函数单测，位于 packages/ling_core/test/。期望值取自 oracle_fixtures.json，与参考实现同源。",
+    "service": "有状态服务单测，依赖替换为假实现，位于 packages/ling_app/test/service/。",
+    "dao": "Drift 查询口径与迁移测试，位于 packages/ling_app/test/dao/。",
+    "widget": "单屏状态与交互测试，位于 packages/ling_app/test/widget/。",
+    "golden": "黄金图测试，锁定主题视觉差异，位于 packages/ling_app/test/golden/。",
+    "integration": "端到端集成测试，跑在真实 Drift 与测试后端上，位于 packages/ling_app/integration_test/。",
+    "backend": "后端 pytest，覆盖脱敏、队列调度、解析降级、提示词与日界切分，位于 backend/tests/。",
+    "contract": "OpenAPI 双向契约校验，位于 backend/tests/。",
+    "perf": "性能预算断言，读取 packages/ling_app/test/performance_budget.json，位于 packages/ling_app/test/perf/。"
+  }
+}

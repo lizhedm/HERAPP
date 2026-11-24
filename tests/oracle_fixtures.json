@@ -1,0 +1,2034 @@
+{
+ "$comment": "由 tests/generate.py 从 tests/registry/ 生成。Dart 与后端读取同一份期望值，保证跨语言一致。",
+ "ruleVersion": 1,
+ "oracles": {
+  "SYS-BACKEND-011": {
+   "fn": "mask",
+   "title": "姓名与昵称保留原文，供亲密度判定使用",
+   "testId": "backend/tests/test_mask.py::姓名昵称保留",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "小玲今天真好看"
+     ],
+     "expect": "小玲今天真好看"
+    },
+    {
+     "args": [
+      "宝宝我到家了"
+     ],
+     "expect": "宝宝我到家了"
+    },
+    {
+     "args": [
+      "张三说要一起吃饭"
+     ],
+     "expect": "张三说要一起吃饭"
+    }
+   ]
+  },
+  "SYS-RULE-001": {
+   "fn": "weather_score",
+   "title": "天气综合分按总分 0.5、情绪 0.3、亲密 0.2 加权并四舍五入",
+   "testId": "packages/ling_core/test/weather_test.dart::天气综合分加权",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      88,
+      82,
+      90
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      0,
+      0,
+      0
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      100,
+      100,
+      100
+     ],
+     "expect": 100
+    },
+    {
+     "args": [
+      85,
+      85,
+      85
+     ],
+     "expect": 85
+    },
+    {
+     "args": [
+      86,
+      87,
+      86
+     ],
+     "expect": 86
+    }
+   ]
+  },
+  "SYS-RULE-002": {
+   "fn": "cover_score",
+   "title": "天气综合分与封面综合关系分对同一组分数互不影响",
+   "testId": "packages/ling_core/test/composite_isolation_test.dart::双综合分独立",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      90,
+      82
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      100,
+      0
+     ],
+     "expect": 60
+    },
+    {
+     "args": [
+      0,
+      100
+     ],
+     "expect": 40
+    }
+   ]
+  },
+  "SYS-RULE-003": {
+   "fn": "weather_by_band",
+   "title": "天气综合分区间映射在每个区间端点取到唯一天气",
+   "testId": "packages/ling_core/test/weather_test.dart::天气区间端点",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      95
+     ],
+     "expect": "RAINBOW"
+    },
+    {
+     "args": [
+      100
+     ],
+     "expect": "RAINBOW"
+    },
+    {
+     "args": [
+      85
+     ],
+     "expect": "SUNNY"
+    },
+    {
+     "args": [
+      94
+     ],
+     "expect": "SUNNY"
+    },
+    {
+     "args": [
+      75
+     ],
+     "expect": "PARTLY_CLOUDY"
+    },
+    {
+     "args": [
+      84
+     ],
+     "expect": "PARTLY_CLOUDY"
+    },
+    {
+     "args": [
+      65
+     ],
+     "expect": "CLOUDY"
+    },
+    {
+     "args": [
+      74
+     ],
+     "expect": "CLOUDY"
+    },
+    {
+     "args": [
+      55
+     ],
+     "expect": "WINDY"
+    },
+    {
+     "args": [
+      64
+     ],
+     "expect": "WINDY"
+    },
+    {
+     "args": [
+      45
+     ],
+     "expect": "LIGHT_RAIN"
+    },
+    {
+     "args": [
+      54
+     ],
+     "expect": "LIGHT_RAIN"
+    },
+    {
+     "args": [
+      35
+     ],
+     "expect": "RAIN"
+    },
+    {
+     "args": [
+      44
+     ],
+     "expect": "RAIN"
+    },
+    {
+     "args": [
+      25
+     ],
+     "expect": "HEAVY_RAIN"
+    },
+    {
+     "args": [
+      34
+     ],
+     "expect": "HEAVY_RAIN"
+    },
+    {
+     "args": [
+      0
+     ],
+     "expect": "THUNDERSTORM"
+    },
+    {
+     "args": [
+      24
+     ],
+     "expect": "THUNDERSTORM"
+    }
+   ]
+  },
+  "SYS-RULE-004": {
+   "fn": "day_weather",
+   "title": "日天气优先级 1 待评估覆盖未同步、零消息与未完成评估三种情形",
+   "testId": "packages/ling_core/test/weather_test.dart::待评估优先级",
+   "exhaustive": null,
+   "cases": [
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": false,
+      "msg_count": 50
+     },
+     "expect": "PENDING"
+    },
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 0
+     },
+     "expect": "PENDING"
+    },
+    {
+     "kwargs": {
+      "eval_status": "PENDING",
+      "synced": true,
+      "msg_count": 50
+     },
+     "expect": "PENDING"
+    },
+    {
+     "kwargs": {
+      "eval_status": "RUNNING",
+      "synced": true,
+      "msg_count": 50
+     },
+     "expect": "PENDING"
+    },
+    {
+     "kwargs": {
+      "eval_status": "FAILED",
+      "synced": true,
+      "msg_count": 50
+     },
+     "expect": "PENDING"
+    }
+   ]
+  },
+  "SYS-RULE-005": {
+   "fn": "day_weather",
+   "title": "置信度低于 40 时日天气为雾并遮蔽综合分区间",
+   "testId": "packages/ling_core/test/weather_test.dart::雾优先级",
+   "exhaustive": null,
+   "cases": [
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 50,
+      "confidence": 39,
+      "overall": 100,
+      "emotion": 100,
+      "intimacy": 100
+     },
+     "expect": "FOG"
+    },
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 50,
+      "confidence": 40,
+      "overall": 100,
+      "emotion": 100,
+      "intimacy": 100
+     },
+     "expect": "RAINBOW"
+    },
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 50,
+      "confidence": 0,
+      "overall": 0,
+      "emotion": 0,
+      "intimacy": 0
+     },
+     "expect": "FOG"
+    }
+   ]
+  },
+  "SYS-RULE-006": {
+   "fn": "day_weather",
+   "title": "消息少于 10 条且情绪分不低于 50 时日天气为雪并遮蔽综合分区间",
+   "testId": "packages/ling_core/test/weather_test.dart::雪优先级",
+   "exhaustive": null,
+   "cases": [
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 9,
+      "confidence": 80,
+      "overall": 100,
+      "emotion": 50,
+      "intimacy": 100
+     },
+     "expect": "SNOW"
+    },
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 10,
+      "confidence": 80,
+      "overall": 100,
+      "emotion": 50,
+      "intimacy": 100
+     },
+     "expect": "SUNNY"
+    },
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 9,
+      "confidence": 80,
+      "overall": 100,
+      "emotion": 49,
+      "intimacy": 100
+     },
+     "expect": "SUNNY"
+    },
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 9,
+      "confidence": 39,
+      "overall": 100,
+      "emotion": 50,
+      "intimacy": 100
+     },
+     "expect": "FOG"
+    }
+   ]
+  },
+  "SYS-RULE-007": {
+   "fn": "period_weather",
+   "title": "周期天气取该周期天气综合分平均值并跳过雾与雪规则",
+   "testId": "packages/ling_core/test/weather_test.dart::周期天气",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      []
+     ],
+     "expect": {
+      "weather": "PENDING",
+      "avgScore": null
+     }
+    },
+    {
+     "args": [
+      [
+       95,
+       85
+      ]
+     ],
+     "expect": {
+      "weather": "SUNNY",
+      "avgScore": 90
+     }
+    },
+    {
+     "args": [
+      [
+       20,
+       30,
+       40
+      ]
+     ],
+     "expect": {
+      "weather": "HEAVY_RAIN",
+      "avgScore": 30
+     }
+    },
+    {
+     "args": [
+      [
+       87
+      ]
+     ],
+     "expect": {
+      "weather": "SUNNY",
+      "avgScore": 87
+     }
+    }
+   ]
+  },
+  "SYS-RULE-008": {
+   "fn": "day_weather",
+   "title": "STALE 日期沿用上次成功评估的分数参与天气判定",
+   "testId": "packages/ling_core/test/weather_test.dart::STALE 沿用上次结果",
+   "exhaustive": null,
+   "cases": [
+    {
+     "kwargs": {
+      "eval_status": "STALE",
+      "synced": true,
+      "msg_count": 50,
+      "confidence": 80,
+      "overall": 88,
+      "emotion": 82,
+      "intimacy": 90
+     },
+     "expect": "SUNNY"
+    }
+   ]
+  },
+  "SYS-RULE-010": {
+   "fn": "cover_score",
+   "title": "封面综合关系分按亲密 0.6、情绪 0.4 加权并四舍五入",
+   "testId": "packages/ling_core/test/cover_test.dart::封面综合关系分加权",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      90,
+      82
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      0,
+      0
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      100,
+      100
+     ],
+     "expect": 100
+    },
+    {
+     "args": [
+      34,
+      34
+     ],
+     "expect": 34
+    },
+    {
+     "args": [
+      33,
+      34
+     ],
+     "expect": 33
+    }
+   ]
+  },
+  "SYS-RULE-011": {
+   "fn": "cover_level",
+   "title": "封面等级 L1-L5 在每个区间端点取到唯一等级",
+   "testId": "packages/ling_core/test/cover_test.dart::封面等级端点",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      0,
+      0
+     ],
+     "expect": "L1"
+    },
+    {
+     "args": [
+      20,
+      20
+     ],
+     "expect": "L1"
+    },
+    {
+     "args": [
+      21,
+      21
+     ],
+     "expect": "L2"
+    },
+    {
+     "args": [
+      40,
+      40
+     ],
+     "expect": "L2"
+    },
+    {
+     "args": [
+      41,
+      41
+     ],
+     "expect": "L3"
+    },
+    {
+     "args": [
+      60,
+      60
+     ],
+     "expect": "L3"
+    },
+    {
+     "args": [
+      61,
+      61
+     ],
+     "expect": "L4"
+    },
+    {
+     "args": [
+      80,
+      80
+     ],
+     "expect": "L4"
+    },
+    {
+     "args": [
+      81,
+      81
+     ],
+     "expect": "L5"
+    },
+    {
+     "args": [
+      100,
+      100
+     ],
+     "expect": "L5"
+    }
+   ]
+  },
+  "SYS-RULE-012": {
+   "fn": "intimacy_tier",
+   "title": "亲密度档 D1-D5 与情绪档 E1-E4 在端点取到唯一档位",
+   "testId": "packages/ling_core/test/cover_test.dart::亲密度档端点",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      0
+     ],
+     "expect": "D1"
+    },
+    {
+     "args": [
+      20
+     ],
+     "expect": "D1"
+    },
+    {
+     "args": [
+      21
+     ],
+     "expect": "D2"
+    },
+    {
+     "args": [
+      40
+     ],
+     "expect": "D2"
+    },
+    {
+     "args": [
+      41
+     ],
+     "expect": "D3"
+    },
+    {
+     "args": [
+      60
+     ],
+     "expect": "D3"
+    },
+    {
+     "args": [
+      61
+     ],
+     "expect": "D4"
+    },
+    {
+     "args": [
+      80
+     ],
+     "expect": "D4"
+    },
+    {
+     "args": [
+      81
+     ],
+     "expect": "D5"
+    },
+    {
+     "args": [
+      100
+     ],
+     "expect": "D5"
+    }
+   ]
+  },
+  "SYS-RULE-013": {
+   "fn": "emotion_tier",
+   "title": "情绪档 E1-E4 在端点取到唯一档位",
+   "testId": "packages/ling_core/test/cover_test.dart::情绪档端点",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      0
+     ],
+     "expect": "E1"
+    },
+    {
+     "args": [
+      25
+     ],
+     "expect": "E1"
+    },
+    {
+     "args": [
+      26
+     ],
+     "expect": "E2"
+    },
+    {
+     "args": [
+      50
+     ],
+     "expect": "E2"
+    },
+    {
+     "args": [
+      51
+     ],
+     "expect": "E3"
+    },
+    {
+     "args": [
+      75
+     ],
+     "expect": "E3"
+    },
+    {
+     "args": [
+      76
+     ],
+     "expect": "E4"
+    },
+    {
+     "args": [
+      100
+     ],
+     "expect": "E4"
+    }
+   ]
+  },
+  "SYS-RULE-014": {
+   "fn": "cover_variant",
+   "title": "池内变体由档位中值差决定，5×4 查找表的 20 个格子逐一对应",
+   "testId": "packages/ling_core/test/cover_test.dart::池内变体查找表",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "D1",
+      "E1"
+     ],
+     "expect": "V2"
+    },
+    {
+     "args": [
+      "D1",
+      "E2"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D1",
+      "E3"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D1",
+      "E4"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D2",
+      "E1"
+     ],
+     "expect": "V3"
+    },
+    {
+     "args": [
+      "D2",
+      "E2"
+     ],
+     "expect": "V2"
+    },
+    {
+     "args": [
+      "D2",
+      "E3"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D2",
+      "E4"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D3",
+      "E1"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D3",
+      "E2"
+     ],
+     "expect": "V3"
+    },
+    {
+     "args": [
+      "D3",
+      "E3"
+     ],
+     "expect": "V2"
+    },
+    {
+     "args": [
+      "D3",
+      "E4"
+     ],
+     "expect": "V1"
+    },
+    {
+     "args": [
+      "D4",
+      "E1"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D4",
+      "E2"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D4",
+      "E3"
+     ],
+     "expect": "V3"
+    },
+    {
+     "args": [
+      "D4",
+      "E4"
+     ],
+     "expect": "V2"
+    },
+    {
+     "args": [
+      "D5",
+      "E1"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D5",
+      "E2"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D5",
+      "E3"
+     ],
+     "expect": "V4"
+    },
+    {
+     "args": [
+      "D5",
+      "E4"
+     ],
+     "expect": "V3"
+    }
+   ]
+  },
+  "SYS-RULE-015": {
+   "fn": "reachable_subpools",
+   "title": "穷举全部整数输入得到 18 个可达子池，不可达子池恰为 L1V4 与 L5V1",
+   "testId": "packages/ling_core/test/cover_test.dart::子池可达性穷举",
+   "exhaustive": "cover_reachability",
+   "cases": []
+  },
+  "SYS-RULE-016": {
+   "fn": "select_cover",
+   "title": "同一日期在同一档位组合下稳定取到同一张封面图",
+   "testId": "packages/ling_core/test/cover_test.dart::日期哈希稳定选图",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      90,
+      82,
+      "2026-11-11"
+     ],
+     "expect": {
+      "level": "L5",
+      "variant": "V3",
+      "assetKey": "cover/L5/V3/4",
+      "reachable": true
+     }
+    },
+    {
+     "args": [
+      90,
+      82,
+      "2026-01-01"
+     ],
+     "expect": {
+      "level": "L5",
+      "variant": "V3",
+      "assetKey": "cover/L5/V3/3",
+      "reachable": true
+     }
+    },
+    {
+     "args": [
+      90,
+      82,
+      "2026-11-24"
+     ],
+     "expect": {
+      "level": "L5",
+      "variant": "V3",
+      "assetKey": "cover/L5/V3/1",
+      "reachable": true
+     }
+    },
+    {
+     "args": [
+      0,
+      0,
+      "2026-01-01"
+     ],
+     "expect": {
+      "level": "L1",
+      "variant": "V2",
+      "assetKey": "cover/L1/V2/3",
+      "reachable": true
+     }
+    },
+    {
+     "args": [
+      100,
+      100,
+      "2026-01-01"
+     ],
+     "expect": {
+      "level": "L5",
+      "variant": "V3",
+      "assetKey": "cover/L5/V3/3",
+      "reachable": true
+     }
+    }
+   ]
+  },
+  "SYS-RULE-017": {
+   "fn": "stable_hash",
+   "title": "FNV-1a 哈希对固定输入给出固定值，Dart 与 Python 结果一致",
+   "testId": "packages/ling_core/test/cover_test.dart::稳定哈希跨语言一致",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      ""
+     ],
+     "expect": 2166136261
+    },
+    {
+     "args": [
+      "2026-01-01"
+     ],
+     "expect": 2049302883
+    },
+    {
+     "args": [
+      "2026-11-11"
+     ],
+     "expect": 1830542489
+    },
+    {
+     "args": [
+      "2026-11-24"
+     ],
+     "expect": 35190161
+    }
+   ]
+  },
+  "SYS-RULE-020": {
+   "fn": "highlight_triggered",
+   "title": "高光触发条件为总分不低于 85 且情绪分不低于 70，或总分不低于 90",
+   "testId": "packages/ling_core/test/highlight_test.dart::高光触发条件",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      85,
+      70
+     ],
+     "expect": true
+    },
+    {
+     "args": [
+      85,
+      69
+     ],
+     "expect": false
+    },
+    {
+     "args": [
+      84,
+      70
+     ],
+     "expect": false
+    },
+    {
+     "args": [
+      90,
+      0
+     ],
+     "expect": true
+    },
+    {
+     "args": [
+      89,
+      69
+     ],
+     "expect": false
+    },
+    {
+     "args": [
+      100,
+      100
+     ],
+     "expect": true
+    }
+   ]
+  },
+  "SYS-RULE-021": {
+   "fn": "highlight_type",
+   "title": "高光类型按 5 条优先级判定，前一条命中即停止",
+   "testId": "packages/ling_core/test/highlight_test.dart::高光类型优先级",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      90,
+      85,
+      85,
+      0
+     ],
+     "expect": "OVERALL"
+    },
+    {
+     "args": [
+      100,
+      100,
+      100,
+      0
+     ],
+     "expect": "OVERALL"
+    },
+    {
+     "args": [
+      90,
+      84,
+      85,
+      0
+     ],
+     "expect": "HIGH_SCORE"
+    },
+    {
+     "args": [
+      90,
+      85,
+      84,
+      0
+     ],
+     "expect": "HIGH_SCORE"
+    },
+    {
+     "args": [
+      85,
+      70,
+      90,
+      0
+     ],
+     "expect": "HIGH_INTIMACY"
+    },
+    {
+     "args": [
+      85,
+      90,
+      80,
+      0
+     ],
+     "expect": "HIGH_EMOTION"
+    },
+    {
+     "args": [
+      85,
+      70,
+      80,
+      2
+     ],
+     "expect": "FUN"
+    },
+    {
+     "args": [
+      85,
+      70,
+      80,
+      1
+     ],
+     "expect": "HIGH_SCORE"
+    },
+    {
+     "args": [
+      90,
+      0,
+      0,
+      0
+     ],
+     "expect": "HIGH_SCORE"
+    },
+    {
+     "args": [
+      89,
+      69,
+      50,
+      5
+     ],
+     "expect": null
+    }
+   ]
+  },
+  "SYS-RULE-030": {
+   "fn": "emotion_color",
+   "title": "30 种情绪完整映射到 6 个色系，无遗漏无重复归属",
+   "testId": "packages/ling_core/test/emotion_test.dart::情绪色系全映射",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "开心",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "兴奋",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "调皮",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "骄傲",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "期待",
+      80
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "亲昵",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "宠溺",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "感动",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "感激",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "吃醋",
+      80
+     ],
+     "expect": {
+      "family": "PINK",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "平静",
+      60
+     ],
+     "expect": {
+      "family": "LIGHT_GREEN",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "治愈",
+      60
+     ],
+     "expect": {
+      "family": "LIGHT_GREEN",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "释然",
+      60
+     ],
+     "expect": {
+      "family": "LIGHT_GREEN",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "中性",
+      60
+     ],
+     "expect": {
+      "family": "LIGHT_GREEN",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "低落",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "难过",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "委屈",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "失望",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "怀念",
+      30
+     ],
+     "expect": {
+      "family": "LIGHT_BLUE",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "生气",
+      20
+     ],
+     "expect": {
+      "family": "ORANGE_RED",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "烦躁",
+      20
+     ],
+     "expect": {
+      "family": "ORANGE_RED",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "焦虑",
+      20
+     ],
+     "expect": {
+      "family": "ORANGE_RED",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "纠结",
+      20
+     ],
+     "expect": {
+      "family": "ORANGE_RED",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "无聊",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "疲惫",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "冷淡",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "尴尬",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "无奈",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "愧疚",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "惊讶",
+      10
+     ],
+     "expect": {
+      "family": "GRAY_BROWN",
+      "brightness": "DIM"
+     }
+    }
+   ]
+  },
+  "SYS-RULE-031": {
+   "fn": "emotion_color",
+   "title": "情绪分决定明度档，4 个区间在端点取到唯一明度",
+   "testId": "packages/ling_core/test/emotion_test.dart::情绪明度端点",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "开心",
+      100
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      76
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      75
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      51
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "MID_HIGH"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      50
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      26
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "MID_LOW"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      25
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "DIM"
+     }
+    },
+    {
+     "args": [
+      "开心",
+      0
+     ],
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "DIM"
+     }
+    }
+   ]
+  },
+  "SYS-RULE-032": {
+   "fn": "emotion_color",
+   "title": "待评估日期情绪着色为中性灰且不带明度",
+   "testId": "packages/ling_core/test/emotion_test.dart::待评估中性灰",
+   "exhaustive": null,
+   "cases": [
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "PENDING"
+     },
+     "expect": {
+      "family": "NEUTRAL_GRAY",
+      "brightness": null
+     }
+    },
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "RUNNING"
+     },
+     "expect": {
+      "family": "NEUTRAL_GRAY",
+      "brightness": null
+     }
+    },
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "FAILED"
+     },
+     "expect": {
+      "family": "NEUTRAL_GRAY",
+      "brightness": null
+     }
+    },
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "SUCCESS"
+     },
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    },
+    {
+     "kwargs": {
+      "emotion_type": "开心",
+      "emotion_score": 80,
+      "eval_status": "STALE"
+     },
+     "expect": {
+      "family": "WARM_YELLOW",
+      "brightness": "VIVID"
+     }
+    }
+   ]
+  },
+  "SYS-RULE-040": {
+   "fn": "text_length",
+   "title": "字数口径为 TEXT 类型内容的 Unicode 码点数且不含首尾空白",
+   "testId": "packages/ling_core/test/stats_test.dart::字数口径",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "  hello 世界  "
+     ],
+     "expect": 8
+    },
+    {
+     "args": [
+      ""
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      "   "
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      "你好"
+     ],
+     "expect": 2
+    },
+    {
+     "args": [
+      "a b"
+     ],
+     "expect": 3
+    }
+   ]
+  },
+  "SYS-RULE-041": {
+   "fn": "segment_count",
+   "title": "连续对话段按 30 分钟间隔切分，恰好 30 分钟归入同一段",
+   "testId": "packages/ling_core/test/stats_test.dart::对话段切分",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      []
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ]
+     ],
+     "expect": 1
+    },
+    {
+     "args": [
+      [
+       0,
+       1800
+      ]
+     ],
+     "expect": 1
+    },
+    {
+     "args": [
+      [
+       0,
+       1801
+      ]
+     ],
+     "expect": 2
+    },
+    {
+     "args": [
+      [
+       0,
+       600,
+       1200,
+       3000,
+       3001,
+       5000
+      ]
+     ],
+     "expect": 2
+    },
+    {
+     "args": [
+      [
+       0,
+       2000,
+       4000,
+       6000
+      ]
+     ],
+     "expect": 4
+    }
+   ]
+  },
+  "SYS-RULE-042": {
+   "fn": "longest_segment",
+   "title": "最长连续对话条数取各段条数的最大值",
+   "testId": "packages/ling_core/test/stats_test.dart::最长连续对话",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      []
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      [
+       5
+      ]
+     ],
+     "expect": 1
+    },
+    {
+     "args": [
+      [
+       0,
+       600,
+       1200,
+       3000,
+       3001,
+       5000
+      ]
+     ],
+     "expect": 5
+    },
+    {
+     "args": [
+      [
+       5000,
+       3001,
+       3000,
+       1200,
+       600,
+       0
+      ]
+     ],
+     "expect": 5
+    },
+    {
+     "args": [
+      [
+       0,
+       2000,
+       4000,
+       6000
+      ]
+     ],
+     "expect": 1
+    }
+   ]
+  },
+  "SYS-RULE-043": {
+   "fn": "period_key",
+   "title": "周期键按 ISO 8601 计算，周一为周首且跨年周归属正确",
+   "testId": "packages/ling_core/test/stats_test.dart::周期键计算",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "2026-11-24",
+      "WEEK"
+     ],
+     "expect": "2026-W48"
+    },
+    {
+     "args": [
+      "2026-01-01",
+      "WEEK"
+     ],
+     "expect": "2026-W01"
+    },
+    {
+     "args": [
+      "2026-12-31",
+      "WEEK"
+     ],
+     "expect": "2026-W53"
+    },
+    {
+     "args": [
+      "2026-11-24",
+      "MONTH"
+     ],
+     "expect": "2026-11"
+    },
+    {
+     "args": [
+      "2026-11-24",
+      "YEAR"
+     ],
+     "expect": "2026"
+    }
+   ]
+  },
+  "SYS-RULE-044": {
+   "fn": "trend_average",
+   "title": "趋势聚合取已评估日期的算术平均并四舍五入，空周期缺失",
+   "testId": "packages/ling_core/test/stats_test.dart::趋势聚合",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      []
+     ],
+     "expect": null
+    },
+    {
+     "args": [
+      [
+       85
+      ]
+     ],
+     "expect": 85
+    },
+    {
+     "args": [
+      [
+       80,
+       90
+      ]
+     ],
+     "expect": 85
+    },
+    {
+     "args": [
+      [
+       86,
+       87
+      ]
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      [
+       0,
+       100
+      ]
+     ],
+     "expect": 50
+    }
+   ]
+  },
+  "SYS-RULE-045": {
+   "fn": "round_half_up",
+   "title": "四舍五入在 0.5 边界向上进位，与语言内置银行家舍入区分",
+   "testId": "packages/ling_core/test/stats_test.dart::四舍五入口径",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      86.5
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      85.5
+     ],
+     "expect": 86
+    },
+    {
+     "args": [
+      0.5
+     ],
+     "expect": 1
+    },
+    {
+     "args": [
+      86.4
+     ],
+     "expect": 86
+    },
+    {
+     "args": [
+      86.6
+     ],
+     "expect": 87
+    },
+    {
+     "args": [
+      0
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      100
+     ],
+     "expect": 100
+    }
+   ]
+  },
+  "SYS-RULE-050": {
+   "fn": "mask",
+   "title": "脱敏按固定顺序替换 6 类结构化敏感信息",
+   "testId": "backend/tests/test_mask.py::六类敏感信息替换",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "我的电话是13812345678"
+     ],
+     "expect": "我的电话是[手机号]"
+    },
+    {
+     "args": [
+      "身份证11010519491231002X"
+     ],
+     "expect": "身份证[身份证号]"
+    },
+    {
+     "args": [
+      "身份证11010519491231002x"
+     ],
+     "expect": "身份证[身份证号]"
+    },
+    {
+     "args": [
+      "卡号6222021234567890123"
+     ],
+     "expect": "卡号[银行卡号]"
+    },
+    {
+     "args": [
+      "邮箱 zhang.san+a@example.com 收"
+     ],
+     "expect": "邮箱 [邮箱] 收"
+    },
+    {
+     "args": [
+      "电话13812345678 邮箱a@b.com 验证码 123456 身份证11010519491231002X"
+     ],
+     "expect": "电话[手机号] [邮箱] 验证码 [验证码] 身份证[身份证号]"
+    }
+   ]
+  },
+  "SYS-RULE-051": {
+   "fn": "mask",
+   "title": "验证码只替换与验证码字样相邻的数字，普通数字保留原文",
+   "testId": "backend/tests/test_mask.py::验证码上下文识别",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "验证码123456"
+     ],
+     "expect": "验证码[验证码]"
+    },
+    {
+     "args": [
+      "验证码是 9527"
+     ],
+     "expect": "验证码是 [验证码]"
+    },
+    {
+     "args": [
+      "验证码：8888"
+     ],
+     "expect": "验证码：[验证码]"
+    },
+    {
+     "args": [
+      "码 1234"
+     ],
+     "expect": "码 [验证码]"
+    },
+    {
+     "args": [
+      "订单号1234567"
+     ],
+     "expect": "订单号1234567"
+    },
+    {
+     "args": [
+      "价格 1200 元"
+     ],
+     "expect": "价格 1200 元"
+    },
+    {
+     "args": [
+      "2026年"
+     ],
+     "expect": "2026年"
+    }
+   ]
+  },
+  "SYS-RULE-052": {
+   "fn": "mask",
+   "title": "详细地址识别省市区与门牌号组合",
+   "testId": "backend/tests/test_mask.py::详细地址识别",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      "我家在浙江省杭州市西湖区文三路100号"
+     ],
+     "expect": "[地址]"
+    },
+    {
+     "args": [
+      "下次去杭州玩"
+     ],
+     "expect": "下次去杭州玩"
+    },
+    {
+     "args": [
+      "杭州的天气真好"
+     ],
+     "expect": "杭州的天气真好"
+    }
+   ]
+  },
+  "SYS-RULE-053": {
+   "fn": "eval_queue",
+   "title": "评估队列按日期倒序排序并在 300 条上限处截断",
+   "testId": "backend/tests/test_queue.py::队列排序与截断",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      [
+       "2026-01-01",
+       "2026-01-03",
+       "2026-01-02"
+      ]
+     ],
+     "expect": {
+      "queued": [
+       "2026-01-03",
+       "2026-01-02",
+       "2026-01-01"
+      ],
+      "deferred": []
+     }
+    },
+    {
+     "args": [
+      [
+       "2026-01-01",
+       "2026-01-02",
+       "2026-01-03"
+      ],
+      2
+     ],
+     "expect": {
+      "queued": [
+       "2026-01-03",
+       "2026-01-02"
+      ],
+      "deferred": [
+       "2026-01-01"
+      ]
+     }
+    },
+    {
+     "args": [
+      []
+     ],
+     "expect": {
+      "queued": [],
+      "deferred": []
+     }
+    }
+   ]
+  }
+ }
+}

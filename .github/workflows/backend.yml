@@ -1,0 +1,151 @@
+# 后端流水线（技术方案 7.5）
+#
+# 阶段顺序：格式与类型检查 → 单测 → 契约校验 → 启动冒烟。
+#
+# 部署形态是 launchd 托管的 Uvicorn 进程（技术方案 2.1），
+# 发布动作为切换代码目录并重启（8.4 节），不构建容器镜像。
+# 末步的启动冒烟因此验证发布前提：锁定依赖能装上、进程能起来、
+# /v1/health 可达。这与实际发布动作一致，容器化构建则不是。
+#
+# 跑在 GitHub 托管 Runner 上：后端是纯 Python，不需要 macOS 宿主，
+# 放在托管 Runner 上可与客户端流水线并行，不争抢自托管 Mac 的时段。
+#
+# 依赖由 uv + uv.lock 锁定（技术方案 7.2），与本地开发环境一致。
+# 实现尚未落地时，带 pyproject.toml 的步骤自动跳过并在摘要中列明，
+# 使流水线在实现推进过程中逐步收紧，而不是一开始就全红。
+
+name: 后端
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'contracts/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'contracts/**'
+      - '.github/workflows/backend.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: 格式、类型、单测与契约
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 后端实现是否已落地决定后续步骤的执行方式，先判定一次供各步引用。
+      - name: 判定后端实现状态
+        id: probe
+        run: |
+          if [ -f backend/pyproject.toml ]; then
+            echo "impl=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "impl=false" >> "$GITHUB_OUTPUT"
+            echo "backend/pyproject.toml 尚未创建，格式检查、类型检查、单测与启动冒烟本次跳过" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f contracts/openapi.yaml ]; then
+            echo "contract=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "contract=false" >> "$GITHUB_OUTPUT"
+            echo "contracts/openapi.yaml 尚未创建，契约校验本次跳过" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # 实现落地前先保证测试骨架本身可被解析：
+      # 生成器产出的 85 个文件若有语法错误，后续所有结论都不可信。
+      - name: 测试骨架语法检查
+        run: python3 -m compileall -q backend/tests
+
+      - name: 安装 uv
+        if: steps.probe.outputs.impl == 'true'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # --frozen 要求 uv.lock 与 pyproject.toml 一致，锁文件漏提交即失败。
+      - name: 安装锁定版本依赖
+        if: steps.probe.outputs.impl == 'true'
+        run: cd backend && uv sync --frozen
+
+      - name: 格式检查
+        if: steps.probe.outputs.impl == 'true'
+        run: cd backend && uv run ruff format --check .
+
+      - name: 静态检查
+        if: steps.probe.outputs.impl == 'true'
+        run: cd backend && uv run ruff check .
+
+      # mypy --strict 是技术方案 7.2 的锁定项：后端处理脱敏与评估结果解析，
+      # 类型错误在这两处会静默写坏数据，静态类型因此按严格模式执行。
+      - name: 类型检查
+        if: steps.probe.outputs.impl == 'true'
+        run: cd backend && uv run mypy --strict app
+
+      # DeepSeek 调用在测试中全部替换为录制响应（技术方案 5.4），不产生真实费用。
+      - name: 单测
+        if: steps.probe.outputs.impl == 'true'
+        run: cd backend && uv run pytest tests -v --tb=short
+
+      # 契约以 contracts/openapi.yaml 为单一来源，由 FastAPI 类型注解生成（技术方案 2.5）。
+      # 重新生成后与提交中的副本比对，不一致说明改了路由却未同步契约，
+      # 而客户端的 Dart 模型由该契约生成，漂移会在运行时才暴露。
+      - name: 契约校验
+        if: steps.probe.outputs.impl == 'true' && steps.probe.outputs.contract == 'true'
+        run: |
+          cd backend
+          uv run --with pyyaml python - <<'PY'
+          import pathlib
+          import sys
+
+          import yaml
+
+          from app.main import app
+
+          generated = app.openapi()
+          committed = yaml.safe_load(
+              pathlib.Path("../contracts/openapi.yaml").read_text(encoding="utf-8")
+          )
+          if generated != committed:
+              print("生成的 OpenAPI 与 contracts/openapi.yaml 不一致。")
+              print("路由或类型注解已变更而契约未同步，客户端 Dart 模型由该契约生成，")
+              print("漂移会推迟到运行时才暴露。请重新导出契约后提交：")
+              print("  cd backend && uv run --with pyyaml python -c \\")
+              print("    'import yaml,sys; from app.main import app; "
+                    "yaml.safe_dump(app.openapi(), sys.stdout, allow_unicode=True, sort_keys=True)' \\")
+              print("    > ../contracts/openapi.yaml")
+              sys.exit(1)
+          print(f"契约一致，{len(generated.get('paths', {}))} 个路径")
+          PY
+
+      # 启动冒烟验证发布前提：进程能起来且健康检查可达。
+      # 失败时打印日志，因为启动失败的原因通常只在日志里。
+      - name: 启动冒烟
+        if: steps.probe.outputs.impl == 'true'
+        run: |
+          cd backend
+          uv run uvicorn app.main:app --host 127.0.0.1 --port 8099 > /tmp/uvicorn.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8099/v1/health > /tmp/health.json 2>/dev/null; then
+              echo "健康检查可达："
+              cat /tmp/health.json
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "30 秒内 /v1/health 未就绪，启动日志："
+          cat /tmp/uvicorn.log
+          exit 1

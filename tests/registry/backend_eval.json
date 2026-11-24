@@ -1,0 +1,357 @@
+[
+ {
+  "id": "SYS-RULE-050",
+  "title": "脱敏按固定顺序替换 6 类结构化敏感信息",
+  "req": ["REQ-16-36"],
+  "reqSection": ["6.5"],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["含手机号、身份证号、银行卡号、邮箱、详细地址与验证码的文本"],
+  "when": ["执行送 AI 前的脱敏"],
+  "then": [
+   "6 类对象各替换为对应占位符",
+   "邮箱先行替换，整个邮箱作为一个整体被替换",
+   "身份证先于银行卡，18 位纯数字判为身份证号",
+   "身份证末位的 X 大小写均识别"
+  ],
+  "oracle": {
+   "fn": "mask",
+   "cases": [
+    {"args": ["我的电话是13812345678"], "expect": "我的电话是[手机号]"},
+    {"args": ["身份证11010519491231002X"], "expect": "身份证[身份证号]"},
+    {"args": ["身份证11010519491231002x"], "expect": "身份证[身份证号]"},
+    {"args": ["卡号6222021234567890123"], "expect": "卡号[银行卡号]"},
+    {"args": ["邮箱 zhang.san+a@example.com 收"], "expect": "邮箱 [邮箱] 收"},
+    {"args": ["电话13812345678 邮箱a@b.com 验证码 123456 身份证11010519491231002X"], "expect": "电话[手机号] [邮箱] 验证码 [验证码] 身份证[身份证号]"}
+   ]
+  },
+  "testId": "backend/tests/test_mask.py::六类敏感信息替换"
+ },
+ {
+  "id": "SYS-RULE-051",
+  "title": "验证码只替换与验证码字样相邻的数字，普通数字保留原文",
+  "req": ["REQ-16-36"],
+  "reqSection": ["6.5"],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["含验证码数字与普通数字的文本"],
+  "when": ["执行脱敏"],
+  "then": [
+   "与「验证码」「码」相邻的 4-8 位数字替换为占位符，字样本身保留",
+   "冒号、空格、「是」「为」作为分隔符时同样识别",
+   "订单号、价格、年份等普通数字保留原文，供 AI 判断语义"
+  ],
+  "oracle": {
+   "fn": "mask",
+   "cases": [
+    {"args": ["验证码123456"], "expect": "验证码[验证码]"},
+    {"args": ["验证码是 9527"], "expect": "验证码是 [验证码]"},
+    {"args": ["验证码：8888"], "expect": "验证码：[验证码]"},
+    {"args": ["码 1234"], "expect": "码 [验证码]"},
+    {"args": ["订单号1234567"], "expect": "订单号1234567"},
+    {"args": ["价格 1200 元"], "expect": "价格 1200 元"},
+    {"args": ["2026年"], "expect": "2026年"}
+   ]
+  },
+  "testId": "backend/tests/test_mask.py::验证码上下文识别"
+ },
+ {
+  "id": "SYS-RULE-052",
+  "title": "详细地址识别省市区与门牌号组合",
+  "req": ["REQ-16-36"],
+  "reqSection": ["6.5"],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P1",
+  "given": ["含省市区与门牌号的地址串，以及仅含城市名的普通文本"],
+  "when": ["执行脱敏"],
+  "then": [
+   "完整地址串替换为地址占位符",
+   "仅提及城市名而无门牌号的文本保留原文，城市话题是情绪判定的依据",
+   "识别偏保守方向，地址串前缀一并替换不影响 AI 判断"
+  ],
+  "oracle": {
+   "fn": "mask",
+   "cases": [
+    {"args": ["我家在浙江省杭州市西湖区文三路100号"], "expect": "[地址]"},
+    {"args": ["下次去杭州玩"], "expect": "下次去杭州玩"},
+    {"args": ["杭州的天气真好"], "expect": "杭州的天气真好"}
+   ]
+  },
+  "testId": "backend/tests/test_mask.py::详细地址识别"
+ },
+ {
+  "id": "SYS-RULE-053",
+  "title": "评估队列按日期倒序排序并在 300 条上限处截断",
+  "req": ["REQ-16-34"],
+  "reqSection": ["6.3"],
+  "screens": ["A5", "H1"],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["本次同步新增或变更的日期集合"],
+  "when": ["构建评估队列"],
+  "then": [
+   "队列按日期倒序，时间最近的日期排在最前",
+   "超过单次上限的日期留在待评估集合中，不进入本次队列",
+   "输入日期乱序时结果与有序输入一致"
+  ],
+  "oracle": {
+   "fn": "eval_queue",
+   "cases": [
+    {"args": [["2026-01-01", "2026-01-03", "2026-01-02"]], "expect": {"queued": ["2026-01-03", "2026-01-02", "2026-01-01"], "deferred": []}},
+    {"args": [["2026-01-01", "2026-01-02", "2026-01-03"], 2], "expect": {"queued": ["2026-01-03", "2026-01-02"], "deferred": ["2026-01-01"]}},
+    {"args": [[]], "expect": {"queued": [], "deferred": []}}
+   ]
+  },
+  "testId": "backend/tests/test_queue.py::队列排序与截断"
+ },
+ {
+  "id": "SYS-BACKEND-001",
+  "title": "单次同步超过 300 个日期时仅前 300 个进入队列，其余保持待评估",
+  "req": ["REQ-16-34"],
+  "reqSection": ["6.3"],
+  "screens": ["A5", "C4"],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["本次同步产生 336 个新增日期"],
+  "when": ["同步完成触发评估调度"],
+  "then": [
+   "按日期倒序取最近 300 个进入评估队列",
+   "更早的 36 个日期评估状态保持待评估",
+   "进度展示为「评估中 N / 300」"
+  ],
+  "testId": "backend/tests/test_queue.py::单次上限 300"
+ },
+ {
+  "id": "SYS-BACKEND-002",
+  "title": "评估并发数为 3 且配置项取值限制在 1-5",
+  "req": ["REQ-16-34"],
+  "reqSection": ["6.3"],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["评估队列中有 10 个待评估日期"],
+  "when": ["执行队列"],
+  "then": [
+   "同时在途的 AI 请求数不超过 3",
+   "配置项取 0 或 6 时回落到默认值 3 并记录告警",
+   "配置项取 1-5 之间的值时按配置执行"
+  ],
+  "testId": "backend/tests/test_queue.py::并发上限"
+ },
+ {
+  "id": "SYS-BACKEND-003",
+  "title": "待评估日期进入日详情时触发单日评估并优先于队列剩余任务",
+  "req": ["REQ-16-34"],
+  "reqSection": ["6.3"],
+  "screens": ["C4", "D3"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["队列仍在执行，某个待评估日期未进入本次队列"],
+  "when": ["进入该日期的日详情"],
+  "then": [
+   "该日期立即触发单日评估，优先级高于队列剩余任务",
+   "日详情展示评估中状态",
+   "评估完成后封面、天气、情绪、总结一次性落定"
+  ],
+  "testId": "packages/ling_app/integration_test/eval_priority_test.dart::单日评估抢占"
+ },
+ {
+  "id": "SYS-BACKEND-004",
+  "title": "队列任务失败按配置重试，耗尽后置为失败且队列继续",
+  "req": ["REQ-16-34"],
+  "reqSection": ["6.3"],
+  "screens": ["D4", "H8"],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["队列中某个日期的 AI 调用持续失败"],
+  "when": ["执行队列"],
+  "then": [
+   "按配置的重试次数重试该日期",
+   "重试耗尽后该日期评估状态置为失败，队列继续执行后续任务",
+   "失败日期出现在设置页的失败日期列表中"
+  ],
+  "testId": "backend/tests/test_queue.py::失败重试与队列续行"
+ },
+ {
+  "id": "SYS-BACKEND-005",
+  "title": "AI 输出 JSON 解析失败记录失败状态并保留重试入口",
+  "req": ["REQ-16-13"],
+  "reqSection": ["6.2"],
+  "screens": ["D4"],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["AI 返回非 JSON 或字段缺失的响应"],
+  "when": ["解析评估结果"],
+  "then": [
+   "评估状态置为失败，不写入部分结果",
+   "日详情展示评估失败状态与重试入口",
+   "同步与对话流继续可用"
+  ],
+  "testId": "backend/tests/test_ai_client.py::JSON 解析失败处理"
+ },
+ {
+  "id": "SYS-BACKEND-006",
+  "title": "评估缓存键由日期、文件哈希、提示词版本三者构成",
+  "req": ["REQ-16-35"],
+  "reqSection": ["6.2"],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["同一日期在文件哈希或提示词版本变化前后各评估一次"],
+  "when": ["查询评估缓存"],
+  "then": [
+   "三项全部相同时命中缓存，不重复调用 AI",
+   "文件哈希变化时缓存失效并触发重评",
+   "评估版本号首次为 1，每次重新评估加 1"
+  ],
+  "testId": "backend/tests/test_store.py::缓存键命中与失效"
+ },
+ {
+  "id": "SYS-BACKEND-007",
+  "title": "提示词版本变更只对新同步日期生效，历史日期保留原结果",
+  "req": ["REQ-16-35"],
+  "reqSection": ["6.2"],
+  "screens": ["D5"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["若干日期已用旧提示词版本评估成功，随后提示词版本升级"],
+  "when": ["执行一次新的同步"],
+  "then": [
+   "新同步的日期使用新提示词版本评估",
+   "历史日期保留原结果与原提示词版本，评估状态保持成功",
+   "历史日期手动点击重新评估时使用当前提示词版本"
+  ],
+  "testId": "packages/ling_app/integration_test/prompt_version_test.dart::提示词版本生效范围"
+ },
+ {
+  "id": "SYS-BACKEND-008",
+  "title": "消息条数为 0 的日期不调用 AI 且不计入任何聚合",
+  "req": ["REQ-16-34"],
+  "reqSection": ["6.2"],
+  "screens": ["D7a"],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["某日已同步但消息条数为 0"],
+  "when": ["执行评估调度"],
+  "then": [
+   "不调用 AI，评估状态保持待评估，不写入评估记录",
+   "不计入年月均分、周期天气与趋势曲线",
+   "日天气按优先级 1 显示为待评估"
+  ],
+  "testId": "backend/tests/test_queue.py::零消息跳过评估"
+ },
+ {
+  "id": "SYS-BACKEND-009",
+  "title": "当天为进行中日期，保持待评估并在次日进入队列",
+  "req": ["REQ-16-38"],
+  "reqSection": ["6.3"],
+  "screens": ["D8", "C4"],
+  "layer": "integration",
+  "priority": "P0",
+  "given": ["按后端时区计算的当天，聊天仍在产生"],
+  "when": ["执行评估调度，随后跨入次日再次调度"],
+  "then": [
+   "当天不进入评估队列，评估状态保持待评估，日天气为待评估",
+   "当天日卡片正常展示，封面为默认占位封面，可查看对话流与编辑总结、备注、收藏",
+   "互动统计对当天按已同步消息实时计算",
+   "跨入次日后进入评估队列，评估完成后封面、天气、情绪、总结一次性落定，高分日高光此时生成"
+  ],
+  "testId": "packages/ling_app/integration_test/today_test.dart::进行中日期处理"
+ },
+ {
+  "id": "SYS-BACKEND-010",
+  "title": "脱敏在内存副本上执行，本地存储与对话流保留原文",
+  "req": ["REQ-16-36"],
+  "reqSection": ["6.5"],
+  "screens": ["D1"],
+  "layer": "backend",
+  "priority": "P0",
+  "given": ["某日消息含手机号与邮箱"],
+  "when": ["该日完成 AI 评估后查看对话流"],
+  "then": [
+   "送 AI 的文本为脱敏后内容",
+   "本地数据库与对话流展示保留原文",
+   "字数统计以原文为准，脱敏引起的长度变化不影响统计"
+  ],
+  "testId": "backend/tests/test_mask.py::脱敏不落盘"
+ },
+ {
+  "id": "SYS-BACKEND-011",
+  "title": "姓名与昵称保留原文，供亲密度判定使用",
+  "req": ["REQ-16-36"],
+  "reqSection": ["6.5"],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P1",
+  "given": ["含双方姓名与昵称的文本"],
+  "when": ["执行脱敏"],
+  "then": [
+   "姓名与昵称保留原文",
+   "称呼本身是亲密度判定的依据，替换会改变评估结果",
+   "聊天正文的其余内容同样保留原文"
+  ],
+  "oracle": {
+   "fn": "mask",
+   "cases": [
+    {"args": ["小玲今天真好看"], "expect": "小玲今天真好看"},
+    {"args": ["宝宝我到家了"], "expect": "宝宝我到家了"},
+    {"args": ["张三说要一起吃饭"], "expect": "张三说要一起吃饭"}
+   ]
+  },
+  "testId": "backend/tests/test_mask.py::姓名昵称保留"
+ },
+ {
+  "id": "SYS-BACKEND-012",
+  "title": "非文本消息以类型占位符送入提示词，条数照常计入",
+  "req": ["REQ-16-36"],
+  "reqSection": ["6.6"],
+  "screens": ["D1"],
+  "layer": "backend",
+  "priority": "P1",
+  "given": ["某日消息含图片、语音、视频、红包、转账、通话记录"],
+  "when": ["构建 AI 提示词的消息序列"],
+  "then": [
+   "文本类型传脱敏后文本，其余类型传对应的类型占位符",
+   "各类型消息条数照常计入互动统计，字数计 0",
+   "提示词仅要求输出 JSON 本体"
+  ],
+  "testId": "backend/tests/test_prompt.py::非文本占位符"
+ },
+ {
+  "id": "SYS-BACKEND-013",
+  "title": "置信度低于 40 时日详情显示低置信度提示且分数照常展示",
+  "req": ["REQ-16-13"],
+  "reqSection": ["6.4"],
+  "screens": ["D6"],
+  "layer": "widget",
+  "priority": "P1",
+  "given": ["某日评估成功且置信度为 35"],
+  "when": ["进入日详情"],
+  "then": [
+   "评估区显示低置信度提示行",
+   "封面与分数按评估结果正常展示",
+   "该日日天气为雾"
+  ],
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::低置信度提示"
+ },
+ {
+  "id": "SYS-BACKEND-014",
+  "title": "OpenAPI 契约与后端实现双向一致",
+  "req": ["REQ-16-01", "REQ-16-03"],
+  "reqSection": ["2.2"],
+  "screens": [],
+  "layer": "contract",
+  "priority": "P0",
+  "given": ["后端 OpenAPI 文档与客户端生成的请求模型"],
+  "when": ["执行契约校验"],
+  "then": [
+   "后端实际响应满足 OpenAPI 声明的结构与类型",
+   "客户端请求满足 OpenAPI 声明的必填字段",
+   "契约变更未同步时校验失败并阻断合并"
+  ],
+  "testId": "backend/tests/test_contract.py::双向契约一致"
+ }
+]
