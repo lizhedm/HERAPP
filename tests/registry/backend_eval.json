@@ -663,5 +663,112 @@
    "契约变更未同步时校验失败并阻断合并"
   ],
   "testId": "backend/tests/test_contract.py::双向契约一致"
+ },
+ {
+  "id": "SYS-BACKEND-017",
+  "title": "每日定时任务在 01:00 处理前一天并完成入队",
+  "req": [
+   "REQ-16-53"
+  ],
+  "reqSection": [
+   "3.13"
+  ],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": [
+   "约定目录中存在前一天的导出文件，该日期尚无日文件"
+  ],
+  "when": [
+   "执行定时导入任务"
+  ],
+  "then": [
+   "任务取前一天而非当天为处理日期，日界按 importer.timezone 归属",
+   "完成导入、写日文件、更新 manifest 并将该日期入评估队列",
+   "launchd 配置的 StartCalendarInterval 为 01:00",
+   "执行结果写入巡检摘要，含处理日期、是否跳过、评估结果与失败原因"
+  ],
+  "testId": "backend/tests/test_daily_import.py::前一天导入与入队"
+ },
+ {
+  "id": "SYS-BACKEND-018",
+  "title": "导出文件缺失记为无待处理数据，重复执行不重复入队",
+  "req": [
+   "REQ-16-53"
+  ],
+  "reqSection": [
+   "3.13",
+   "6.3"
+  ],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": [
+   "先移除前一天的导出文件，随后放回同一份文件并改动其内容"
+  ],
+  "when": [
+   "连续三次执行定时导入任务"
+  ],
+  "then": [
+   "导出文件不存在时记为「无待处理数据」并以成功退出码结束，不记为失败",
+   "同一日期的日文件内容未变时跳过评估，队列不新增条目",
+   "导出内容变化后该日期重新入队评估",
+   "任务可重复执行，关机后的补齐执行不产生副作用"
+  ],
+  "testId": "backend/tests/test_daily_import.py::缺失文件与幂等"
+ },
+ {
+  "id": "SYS-BACKEND-019",
+  "title": "补偿范围为最近 7 天且只处理缺失或失败的日期",
+  "req": [
+   "REQ-16-54"
+  ],
+  "reqSection": [
+   "3.13"
+  ],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": [
+   "最近 10 天中有日文件缺失、评估为 FAILED 与评估为 SUCCESS 三类日期"
+  ],
+  "when": [
+   "执行定时导入任务，其中一个日期的导入步骤抛出异常"
+  ],
+  "then": [
+   "补偿只覆盖最近 7 天内日文件缺失或评估为 FAILED 的日期",
+   "评估为 SUCCESS 的日期不重复处理，7 天之外的日期不进入扫描范围",
+   "单个日期失败不中断其余日期，失败日期与原因写入日志",
+   "补偿天数取自 importer.compensationDays，不在代码中硬编码"
+  ],
+  "testId": "backend/tests/test_daily_import.py::补偿范围与失败隔离"
+ },
+ {
+  "id": "SYS-BACKEND-020",
+  "title": "改密码脚本按 scope 分别写入两道密码的哈希与盐值",
+  "req": [
+   "REQ-16-55"
+  ],
+  "reqSection": [
+   "12.4",
+   "3.10"
+  ],
+  "screens": [],
+  "layer": "backend",
+  "priority": "P0",
+  "given": [
+   "两道密码均为默认值 QWEasdZXC@2026"
+  ],
+  "when": [
+   "分别以 --scope gate 与 --scope content 改密码，再请求两个凭据接口"
+  ],
+  "then": [
+   "两个 scope 的哈希与盐值各自存放，改一个不改变另一个",
+   "两处设为相同明文时库中哈希不同，从库文件无法判断两道密码是否一致",
+   "/v1/content-gate 返回哈希与盐值，响应体不含明文密码",
+   "缺少 --scope 时脚本报错而不默认写入任一表",
+   "脚本拒绝长度不足 8 位或缺字母数字的密码"
+  ],
+  "testId": "backend/tests/test_gate.py::双 scope 改密与下发"
  }
 ]

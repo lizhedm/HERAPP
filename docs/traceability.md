@@ -4,7 +4,7 @@
 每条需求验收标准至少对应一条用例，每条用例对应一个可定位的测试标识。
 `tests/validate.py` 在 CI 中强制这两条性质，覆盖缺口会阻断合并。
 
-需求验收标准 52 条，用例 162 条，测试标识 162 个。
+需求验收标准 57 条，用例 171 条，测试标识 171 个。
 
 ## 需求 → 用例 → 屏幕 → 测试
 
@@ -124,7 +124,7 @@
 | REQ-16-27 | SYS-F-025 | P0 | widget | F11 | 礼物筛选 3 项常用默认展开，其余收在更多筛选 | `packages/ling_app/test/widget/gift_filter_test.dart::礼物筛选分组` |
 | REQ-16-28 | SYS-F-003 | P0 | widget | F2 | 喜好名称为空时保存禁用，点击后显示字段级红色提示 | `packages/ling_app/test/widget/preference_form_test.dart::名称必填校验` |
 | REQ-16-28 | SYS-F-021 | P0 | widget | F9 | 礼物表单必填项有默认值，名称为空时保存禁用 | `packages/ling_app/test/widget/gift_form_test.dart::礼物表单默认值与校验` |
-| REQ-16-29 | SYS-H-001 | P0 | widget | H1 | 设置首页分组展示 5 个入口与同步摘要 | `packages/ling_app/test/widget/settings_test.dart::设置首页分组` |
+| REQ-16-29 | SYS-H-001 | P0 | widget | H1 | 设置首页分组展示各入口与同步摘要 | `packages/ling_app/test/widget/settings_test.dart::设置首页分组` |
 | REQ-16-29 | SYS-H-005 | P0 | integration | H3, B3, E1, D2 | 显示偏好含 5 项配置且各自作用于对应页面 | `packages/ling_app/integration_test/display_preference_test.dart::显示偏好五项生效` |
 | REQ-16-29 | SYS-H-006 | P0 | dao | H2, H3 | 用户偏好默认值与同步、配置重载后的保留 | `packages/ling_app/test/dao/user_preference_dao_test.dart::偏好默认值与保留` |
 | REQ-16-29 | SYS-H-008 | P1 | widget | H5 | 规则说明页同时展示封面与天气两套规则并标注区别 | `packages/ling_app/test/widget/rules_page_test.dart::两套规则同屏展示` |
@@ -186,6 +186,15 @@
 | REQ-16-51 | SYS-F-015 | P1 | backend | F2, F9 | 删除条目图片后解除引用，无引用图片由后端清理 | `backend/tests/test_image.py::引用解除与无引用清理` |
 | REQ-16-52 | SYS-C-009 | P0 | widget | C8, B3 | 无消息日卡片弱化呈现，只保留日期与箭头按钮 | `packages/ling_app/test/widget/day_card_test.dart::无消息日弱化样式` |
 | REQ-16-52 | SYS-C-010 | P1 | integration | C8, C6 | 无消息日写入用户内容后恢复为常规卡片 | `packages/ling_app/integration_test/empty_day_card_test.dart::写入内容后恢复常规卡片` |
+| REQ-16-53 | SYS-BACKEND-017 | P0 | backend | — | 每日定时任务在 01:00 处理前一天并完成入队 | `backend/tests/test_daily_import.py::前一天导入与入队` |
+| REQ-16-53 | SYS-BACKEND-018 | P0 | backend | — | 导出文件缺失记为无待处理数据，重复执行不重复入队 | `backend/tests/test_daily_import.py::缺失文件与幂等` |
+| REQ-16-54 | SYS-BACKEND-019 | P0 | backend | — | 补偿范围为最近 7 天且只处理缺失或失败的日期 | `backend/tests/test_daily_import.py::补偿范围与失败隔离` |
+| REQ-16-55 | SYS-BACKEND-020 | P0 | backend | — | 改密码脚本按 scope 分别写入两道密码的哈希与盐值 | `backend/tests/test_gate.py::双 scope 改密与下发` |
+| REQ-16-55 | SYS-H-011 | P0 | widget | H8 | 内容密码校验页每次更改均要求输入，错误清空输入框 | `packages/ling_app/test/widget/content_gate_test.dart::内容密码校验与错误提示` |
+| REQ-16-55 | SYS-H-012 | P0 | integration | H9, H1, D9 | 可见性开关立即生效、跨重启保留且仅本机生效 | `packages/ling_app/integration_test/content_visibility_test.dart::开关生效与仅本机` |
+| REQ-16-55 | SYS-H-013 | P0 | service | H8 | 内容密码与访问密码各自锁定计数、各自刷新哈希 | `packages/ling_app/test/service/content_visibility_service_test.dart::双密码独立` |
+| REQ-16-56 | SYS-H-014 | P0 | widget | D9, C2 | 不可见时日详情隐藏聊天内容并保留数值内容 | `packages/ling_app/test/widget/day_detail_hidden_test.dart::不可见日详情呈现` |
+| REQ-16-57 | SYS-H-015 | P1 | integration | C5, G1, E1, B3 | 不可见时长按面板精简、高光条目隐藏文本、趋势与月视图不变 | `packages/ling_app/integration_test/content_visibility_scope_test.dart::不可见时的操作与范围` |
 
 ## 屏幕 → 用例
 
@@ -204,13 +213,13 @@
 | B0 | SYS-B-003, SYS-H-002 |
 | B1 | SYS-B-001, SYS-B-002, SYS-RULE-007 |
 | B2 | SYS-B-001, SYS-B-004, SYS-RULE-007 |
-| B3 | SYS-A-010, SYS-B-001, SYS-B-005, SYS-B-006, SYS-B-007, SYS-B-008, SYS-B-015, SYS-C-009, SYS-E-003, SYS-H-004, SYS-H-005, SYS-PERF-001, SYS-RULE-007, SYS-RULE-016 |
+| B3 | SYS-A-010, SYS-B-001, SYS-B-005, SYS-B-006, SYS-B-007, SYS-B-008, SYS-B-015, SYS-C-009, SYS-E-003, SYS-H-004, SYS-H-005, SYS-H-015, SYS-PERF-001, SYS-RULE-007, SYS-RULE-016 |
 | B4 | SYS-B-009, SYS-E-003 |
 | C1 | SYS-B-006, SYS-B-007, SYS-B-010, SYS-B-012, SYS-C-002, SYS-C-007, SYS-COVER-001, SYS-COVER-002, SYS-RULE-010, SYS-RULE-011, SYS-RULE-014, SYS-RULE-016 |
-| C2 | SYS-B-006, SYS-B-007, SYS-B-010, SYS-B-011, SYS-C-004 |
+| C2 | SYS-B-006, SYS-B-007, SYS-B-010, SYS-B-011, SYS-C-004, SYS-H-014 |
 | C3 | SYS-B-011, SYS-BACKEND-001, SYS-BACKEND-003, SYS-BACKEND-009, SYS-C-006, SYS-C-008, SYS-RULE-004 |
 | C4 | SYS-B-013, SYS-B-014, SYS-RULE-004 |
-| C5 | SYS-B-013, SYS-C-001, SYS-C-002 |
+| C5 | SYS-B-013, SYS-C-001, SYS-C-002, SYS-H-015 |
 | C6 | SYS-A-018, SYS-A-019, SYS-A-022, SYS-C-003, SYS-C-004, SYS-C-005, SYS-C-006, SYS-C-010 |
 | C7 | SYS-A-018, SYS-C-007 |
 | C8 | SYS-C-009, SYS-C-010 |
@@ -223,7 +232,8 @@
 | D7a | SYS-BACKEND-008, SYS-D-002, SYS-D-015, SYS-RULE-004 |
 | D7b | SYS-B-013, SYS-D-015, SYS-D-016, SYS-RULE-004 |
 | D8 | SYS-BACKEND-009, SYS-D-017, SYS-RULE-004 |
-| E1 | SYS-B-009, SYS-E-001, SYS-E-002, SYS-E-003, SYS-E-007, SYS-H-005, SYS-PERF-001, SYS-RULE-007, SYS-RULE-043, SYS-RULE-044 |
+| D9 | SYS-H-012, SYS-H-014 |
+| E1 | SYS-B-009, SYS-E-001, SYS-E-002, SYS-E-003, SYS-E-007, SYS-H-005, SYS-H-015, SYS-PERF-001, SYS-RULE-007, SYS-RULE-043, SYS-RULE-044 |
 | E2 | SYS-E-001, SYS-E-004, SYS-RULE-030, SYS-RULE-031, SYS-RULE-032, SYS-RULE-043 |
 | E3 | SYS-E-005, SYS-RULE-030, SYS-RULE-031 |
 | E4 | SYS-E-006 |
@@ -241,29 +251,31 @@
 | F12 | SYS-F-007, SYS-F-014, SYS-F-024 |
 | F13 | SYS-F-023 |
 | F14 | SYS-F-027 |
-| G1 | SYS-G-001, SYS-G-003, SYS-G-004, SYS-RULE-020, SYS-RULE-021 |
+| G1 | SYS-G-001, SYS-G-003, SYS-G-004, SYS-H-015, SYS-RULE-020, SYS-RULE-021 |
 | G2 | SYS-A-018, SYS-G-004 |
 | G3 | SYS-G-002, SYS-RULE-021 |
 | G4 | SYS-G-005 |
-| H1 | SYS-A-010, SYS-A-017, SYS-A-019, SYS-A-020, SYS-F-013, SYS-H-001, SYS-H-002, SYS-H-010, SYS-RULE-053 |
+| H1 | SYS-A-010, SYS-A-017, SYS-A-019, SYS-A-020, SYS-F-013, SYS-H-001, SYS-H-002, SYS-H-010, SYS-H-012, SYS-RULE-053 |
 | H2 | SYS-COVER-001, SYS-H-003, SYS-H-004, SYS-H-006 |
 | H3 | SYS-A-018, SYS-B-008, SYS-H-005, SYS-H-006 |
 | H4 | SYS-H-007 |
 | H5 | SYS-H-008, SYS-RULE-011, SYS-RULE-012, SYS-RULE-013, SYS-RULE-014, SYS-RULE-015 |
 | H6 | SYS-H-009 |
 | H7 | SYS-BACKEND-004, SYS-H-010 |
+| H8 | SYS-H-011, SYS-H-013 |
+| H9 | SYS-H-012 |
 
 ## 分层统计
 
 | 层 | 用例数 | P0 | P1 | P2 |
 | --- | --- | --- | --- | --- |
-| widget | 61 | 37 | 16 | 8 |
-| integration | 40 | 31 | 9 | 0 |
+| widget | 63 | 39 | 16 | 8 |
+| integration | 42 | 32 | 10 | 0 |
 | rule | 29 | 27 | 2 | 0 |
-| backend | 17 | 12 | 5 | 0 |
-| service | 5 | 2 | 3 | 0 |
+| backend | 21 | 16 | 5 | 0 |
+| service | 6 | 3 | 3 | 0 |
 | perf | 4 | 1 | 3 | 0 |
 | dao | 4 | 4 | 0 | 0 |
 | contract | 1 | 1 | 0 | 0 |
 | golden | 1 | 1 | 0 | 0 |
-| **合计** | **162** | **116** | **38** | **8** |
+| **合计** | **171** | **124** | **39** | **8** |

@@ -44,6 +44,19 @@
 | `ai.concurrency` | int | 3 | 1-5 | 下次同步 | 3.7、6.3 |
 | `ai.maxDatesPerSync` | int | 300 | 1-1000 | 下次同步 | 3.7、6.3 |
 
+### importer 导入与定时任务
+
+作用域为后端。`importer.timezone` 随 manifest 下发给客户端用于本地换算，其余两项只在后端生效，客户端配置文件中不存在。
+定时任务由 launchd 每次执行时启动独立进程，因此三项的生效时机均为启动：改动后下一次执行即生效，不需要重启常驻服务。
+
+| 键名 | 类型 | 默认值 | 取值范围 | 生效时机 | 需求 |
+| --- | --- | --- | --- | --- | --- |
+| `importer.timezone` | string | `Asia/Shanghai` | IANA 时区名 | 启动 | 6.1、3.13 |
+| `importer.exportDir` | string | `~/LingLing/export` | 后端本机的绝对路径或 `~` 展开路径 | 启动 | 3.13 |
+| `importer.compensationDays` | int | 7 | 1-30 | 启动 | 3.13 |
+
+`importer.compensationDays` 为定时任务回看的天数。调大使更久以前的失败日期仍能自动补齐，代价是每次执行的扫描范围变大；调小使扫描更快而故障修复窗口变窄。
+
 ### thresholds 阈值
 
 全部取自需求的判定条件，调整后 `ruleVersion` 递增并清空派生缓存重算。
@@ -99,6 +112,20 @@
 | `gate.defaultPasswordHash` | string | 无，必填 | argon2id 哈希串 | 启动 | 3.10 |
 | `gate.defaultSalt` | string | 无，必填 | base64 编码的 16 字节盐值 | 启动 | 3.10 |
 
+### contentGate 内容密码
+
+控制聊天记录可见性开关的密码。与 `gate` 分组同构而取值独立：默认值相同，哈希与盐值各自生成，因此两道密码相互不泄露。
+`contentGate.password` 作用域为后端，由 `ops/set_password.py --scope content` 写入后端库；其余两项作用域为客户端。
+错误次数上限与锁定时长沿用 `thresholds.gateMaxAttempts` 与 `thresholds.gateLockoutSeconds`，锁定计数与门禁各自独立，因此不另设键名。
+
+| 键名 | 类型 | 默认值 | 取值范围 | 生效时机 | 需求 |
+| --- | --- | --- | --- | --- | --- |
+| `contentGate.password` | string | `QWEasdZXC@2026` | 长度不少于 8 位且含字母与数字 | 下次同步 | 12.4 |
+| `contentGate.defaultPasswordHash` | string | 无，必填 | argon2id 哈希串 | 启动 | 12.4 |
+| `contentGate.defaultSalt` | string | 无，必填 | base64 编码的 16 字节盐值 | 启动 | 12.4 |
+
+内容密码没有免输入有效期：每次切换可见性都要求输入，因此 `thresholds.gateGraceMinutes` 只作用于门禁。
+
 ---
 
 ## UserPreference 用户可写偏好
@@ -118,6 +145,9 @@
 `cardDefaultState` 作用于进入月视图时的卡片初始化。单张卡片切换后的当前状态为视图层临时状态，
 随月视图生命周期存在，不写回本结构也不参与回写。
 
+聊天记录可见性开关不在本结构内。需求 12.4 规定该开关仅本机生效，而本结构的全部键名随回写队列提交后端并在各端一致，
+两者语义相反。该开关存于本机的 `content_visibility` 表，由 `ContentVisibilityService` 读写。
+
 ---
 
 ## 密钥处理
@@ -125,6 +155,8 @@
 `sync.token` 与 `ai.apiKey` 两项的值存入系统安全存储，配置文件中只保留占位符。
 两项均不写入日志、不进入崩溃上报、不出现在界面展示。需求 11 与技术方案 9.2 规定其轮换方式。
 
-`gate.password` 的明文只存在于执行 `ops/set_password.py` 时的命令行入参，脚本写入后端库的是
-argon2id 哈希与盐值。`/v1/gate` 只下发哈希与盐值，客户端取到后存入系统安全存储。
-明文不落盘、不进日志、不出现在任何接口响应中。
+`gate.password` 与 `contentGate.password` 的明文只存在于执行 `ops/set_password.py` 时的命令行入参，
+脚本按 `--scope` 写入后端库的是 argon2id 哈希与盐值。`/v1/gate` 与 `/v1/content-gate` 只下发哈希与盐值，
+客户端取到后存入系统安全存储。明文不落盘、不进日志、不出现在任何接口响应中。
+
+两个 scope 各自生成随机盐，因此两处设为相同明文时库中的哈希不相同，从库文件无法判断两道密码是否一致。
