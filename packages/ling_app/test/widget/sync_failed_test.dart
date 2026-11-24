@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // SYS-A-008 [P0] 同步失败展示原因分类与最近同步时间
   // 需求 REQ-16-02 / 章节 3.5
-  // 屏幕 A7
+  // 屏幕 A9
   // given: 同步因网络不可用、请求超时、服务端错误或重试耗尽而失败
   // when: 进入同步失败页
   // then: 展示对应的失败原因分类与最近一次同步时间

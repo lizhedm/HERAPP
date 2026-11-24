@@ -45,8 +45,16 @@ RULES = [
         "name": "天气综合分权重",
         "section": "需求 7.1",
         "hint": "改为调用 ling_core 的 WeatherService.compositeScore",
-        "values": [r"[*×]\s*0\.5\b", r"[*×]\s*0\.3\b", r"[*×]\s*0\.2\b",
-                   r"0\.5\s*[*×]", r"0\.3\s*[*×]", r"0\.2\s*[*×]"],
+        "values": [r"[*×]\s*0\.4\b", r"[*×]\s*0\.25\b", r"[*×]\s*0\.15\b", r"[*×]\s*0\.2\b",
+                   r"0\.4\s*[*×]", r"0\.25\s*[*×]", r"0\.15\s*[*×]", r"0\.2\s*[*×]"],
+        "threshold": 3,
+    },
+    {
+        "name": "沟通比分项权重与对等度公式",
+        "section": "需求 6.4",
+        "hint": "改为调用 ling_core 的 BalanceService.communicationBalance",
+        "values": [r"[*×]\s*0\.30?\b", r"[*×]\s*0\.25\b", r"[*×]\s*0\.20?\b",
+                   r"2\s*[*×]\s*min", r"\bminOf\b"],
         "threshold": 3,
     },
     {

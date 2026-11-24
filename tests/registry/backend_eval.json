@@ -356,7 +356,7 @@
   ],
   "screens": [
    "D4",
-   "H8"
+   "H7"
   ],
   "layer": "backend",
   "priority": "P0",
@@ -612,7 +612,7 @@
  },
  {
   "id": "SYS-BACKEND-013",
-  "title": "置信度低于 40 时日详情显示低置信度提示且分数照常展示",
+  "title": "沟通比低于 40 时日详情显示单向对话提示且分数照常展示",
   "req": [
    "REQ-16-13"
   ],
@@ -625,17 +625,18 @@
   "layer": "widget",
   "priority": "P1",
   "given": [
-   "某日评估成功且置信度为 35"
+   "某日评估成功，客户端算出的沟通比为 23"
   ],
   "when": [
    "进入日详情"
   ],
   "then": [
-   "评估区显示低置信度提示行",
-   "封面与分数按评估结果正常展示",
-   "该日日天气为雾"
+   "评估区显示「这天的对话偏单向」提示行与一句原因说明",
+   "封面与分数按评估结果正常展示，顶部评估条照常展示沟通比数值",
+   "该日日天气为雾",
+   "重新评估不改变沟通比，沟通比由客户端从互动统计计算"
   ],
-  "testId": "packages/ling_app/test/widget/day_detail_test.dart::低置信度提示"
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::单向对话提示"
  },
  {
   "id": "SYS-BACKEND-014",

@@ -112,7 +112,7 @@ table.tb th{background:#ededed}
                         ├─ 部分成功 ──► A10 部分成功（失败日期列表 · 单日重试 + 批量重试）
                         └─ 成功 ─────► 本地统计 → 送 AI 评估
                                         │  评估状态：待评估 → 评估中 → 成功 / 失败 / 待重评
-                                        │  置信度 &lt;40 → 日天气雾；0 消息日与当天保持待评估
+                                        │  沟通比 &lt;40 → 日天气雾；0 消息日与当天保持待评估
                                         │  调度：日期倒序 · 并发 3 · 单次上限 300 · 超出部分进日详情时单日评估
                                         ▼
                                      B1 年视图（无数据 → B0 空状态）· 展示年度均分
@@ -133,8 +133,8 @@ table.tb th{background:#ededed}
                                                               ├─ RUNNING ──► D3 评估中
                                                               ├─ FAILED ──► D4 评估失败 ──► 重试
                                                               ├─ STALE ──► D5 待重评 ──► 重新评估（版本号递增）
-                                                              ├─ 低置信度 ──► D6 置信度提示行（天气显示为雾）
-                                                              ├─ 当日无消息 ──► D7a（可编辑总结 · 无同步入口）
+                                                              ├─ 对话偏单向 ──► D6 单向对话提示行（天气显示为雾）
+                                                              ├─ 当日无消息 ──► D7a（可编辑总结 · 无同步入口 · 卡片见 C8 弱化样式）
                                                               ├─ 该日未同步 ──► D7b（提供「同步这一天」）
                                         └─ 当天进行中 ──► D8（待评估 · 可看对话与统计 · 次日解锁评估）
                                      高分日（总分≥85且情绪分≥70，或总分≥90）─ HighlightService
@@ -142,7 +142,7 @@ table.tb th{background:#ededed}
                                      日详情「标记为高光」──► 手动高光（类型固定综合高光）
 
 底部导航并列分支
- ├─ 趋势 ──► E1 曲线 Tab（指标 总分/亲密度/情绪分 · 粒度 周/月/年 · 默认当前周期 · 缺评估断开）
+ ├─ 趋势 ──► E1 曲线 Tab（指标 总分/亲密度/情绪分/沟通比 · 粒度 周/月/年 · 默认当前周期 · 缺评估断开）
  │            ├─ 点击数据点 ──► 周粒度→D1 日详情 / 月粒度→B4 月视图周定位态 / 年粒度→B3 该月月视图
  │            ├─ E2 情绪日历 Tab（6 色系 × 情绪分明度 · 待评估中性灰 · 点击→D1）
  │            ├─ E3 色系图例
@@ -169,12 +169,11 @@ table.tb th{background:#ededed}
  │            └─ G4 空状态（展示配置阈值数字 + 去时间墙看看）
  └─ 设置 ──► H1 设置首页（同步状态 + 立即同步 + 查看失败日期 + 主题）
               ├─ 主题 ──► H2 主题选择（纸月历 / 星图 / 色域 / 磨砂玻璃 · 点击即应用）
-              │             └─ H3 主题应用效果对照
-              ├─ 显示偏好 ──► H4（默认卡片状态 / 趋势默认指标 / 趋势默认粒度 / 曲线叠加 / 统计默认展开）
-              ├─ 隐私说明 ──► H5
-              ├─ 封面与天气规则说明 ──► H6（两套综合分公式 + L1-L5 + 天气优先级 + 情绪色系）
-              ├─ 关于 ──► H7（五条版本轴 / 资源来源 / 数据来源 / 存储位置）
-              └─ 失败日期列表 ──► H8（单日重试 + 批量重试，与 A10 同组件）
+              ├─ 显示偏好 ──► H3（默认卡片状态 / 趋势默认指标 / 趋势默认粒度 / 曲线叠加 / 统计默认展开）
+              ├─ 隐私说明 ──► H4
+              ├─ 封面与天气规则说明 ──► H5（两套综合分公式 + 沟通比分项 + L1-L5 + 天气优先级 + 情绪色系）
+              ├─ 关于 ──► H6（五条版本轴 / 资源来源 / 数据来源 / 存储位置）
+              └─ 失败日期列表 ──► H7（单日重试 + 批量重试，与 A10 同组件）
 </pre>
 </div>
 <div class="grp" id="ga">
@@ -249,7 +248,7 @@ table.tb th{background:#ededed}
     <div class="btn" style="width:100%">重新加载配置</div>
     <div class="btn" style="width:100%">查看配置说明</div>
   </div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>只读提示图标与标题</li><li>正文说明配置由代码或配置文件提供</li><li>「重新加载配置」按钮</li><li>「查看配置说明」入口</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新加载配置」</li><li>点击「查看配置说明」</li></ul><h4>操作后去向</h4><ul><li>配置已补全 <span class="to">→ A7 同步中</span></li><li>仍缺失 <span class="to">→ A5 本屏</span></li><li>查看说明 <span class="to">→ H6 封面与天气规则说明 / H5 隐私说明</span></li></ul><div class="tbd"><b>规则</b>配置由代码或配置文件维护，本屏操作限于重新加载与查看说明。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>只读提示图标与标题</li><li>正文说明配置由代码或配置文件提供</li><li>「重新加载配置」按钮</li><li>「查看配置说明」入口</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新加载配置」</li><li>点击「查看配置说明」</li></ul><h4>操作后去向</h4><ul><li>配置已补全 <span class="to">→ A7 同步中</span></li><li>仍缺失 <span class="to">→ A5 本屏</span></li><li>查看说明 <span class="to">→ H5 封面与天气规则说明 / H4 隐私说明</span></li></ul><div class="tbd"><b>规则</b>配置由代码或配置文件维护，本屏操作限于重新加载与查看说明。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -347,7 +346,7 @@ table.tb th{background:#ededed}
     </div>
     <div class="btn pri" style="width:100%">重试全部失败项</div>
     <div class="btn" style="width:100%">继续浏览</div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>成功/失败天数摘要</li><li>失败日期列表（来源 SyncState.failedDates，每条含日期与失败原因）</li><li>每行单日「重试」按钮</li><li>底部「重试全部失败项」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击某日期行的「重试」（仅重拉该日）</li><li>点击「重试全部失败项」</li><li>点击「继续浏览」</li></ul><h4>操作后去向</h4><ul><li>该日成功则从列表移除；全部成功 <span class="to">→ B1 年视图</span></li><li>仍有失败 <span class="to">→ A10 本屏（列表更新）</span></li><li>继续浏览 <span class="to">→ B1 年视图</span></li></ul><div class="tbd"><b>规则</b>向用户暴露失败日期列表，重试粒度同时支持单日与批量。</div><div class="tbd"><b>规则</b>设置页同样提供该列表入口（H6），两处使用同一组件。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>成功/失败天数摘要</li><li>失败日期列表（来源 SyncState.failedDates，每条含日期与失败原因）</li><li>每行单日「重试」按钮</li><li>底部「重试全部失败项」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击某日期行的「重试」（仅重拉该日）</li><li>点击「重试全部失败项」</li><li>点击「继续浏览」</li></ul><h4>操作后去向</h4><ul><li>该日成功则从列表移除；全部成功 <span class="to">→ B1 年视图</span></li><li>仍有失败 <span class="to">→ A10 本屏（列表更新）</span></li><li>继续浏览 <span class="to">→ B1 年视图</span></li></ul><div class="tbd"><b>规则</b>向用户暴露失败日期列表，重试粒度同时支持单日与批量。</div><div class="tbd"><b>规则</b>设置页同样提供该列表入口（H7 失败日期列表），两处使用同一组件。</div></div>
   </div>
 </div>
 </div>
@@ -482,7 +481,7 @@ table.tb th{background:#ededed}
 </div>
 <div class="grp" id="gc">
 <h2>C · 日卡片两态与长按（需求 4.4-4.7）</h2>
-<div class="gnote">两态互切：封面态 ⇄ 一句话总结态，点击卡片主体在两态之间来回切换。<b>每张卡片独立切换</b>，点击一张卡片只改变这张卡片的状态，同屏可同时存在封面态与总结态，界面不提供全部切换入口；默认状态在设置页 H4 配置。长按面板含收藏、编辑总结、添加备注，重新评估入口位于日详情 D1。</div>
+<div class="gnote">两态互切：封面态 ⇄ 一句话总结态，点击卡片主体在两态之间来回切换。<b>每张卡片独立切换</b>，点击一张卡片只改变这张卡片的状态，同屏可同时存在封面态与总结态，界面不提供全部切换入口；默认状态在设置页 H3 显示偏好配置。长按面板含收藏、编辑总结、添加备注，重新评估入口位于日详情 D1。当日已同步但无消息的日期按 C8 的弱化样式呈现。</div>
 <div class="screens">
 <div class="screen">
   <div class="sc-head"><span class="sid">C1</span><h3>日卡片 · 封面态（默认态）</h3>
@@ -521,7 +520,7 @@ table.tb th{background:#ededed}
         <div style="position:absolute;bottom:14px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
       </div>
     </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>封面图片铺满卡片</li><li>左下角信息条：日期、天气图标、天气分数，置于半透明暗色底衬之上以保证图片上的可读性</li><li>右上角角标：高光标记 ★、收藏标记、备注标记 📝</li><li>右下角独立箭头 ›</li><li>同屏第 3 张为总结态，示意两态按张独立切换</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体切换到一句话总结态</li><li>点击箭头进入日详情</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C3 一句话总结态（仅该张卡片）</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C5 动作面板</span></li></ul><div class="tbd"><b>规则</b>进入月视图时按显示偏好里的默认卡片状态初始化全部卡片，之后每张卡片的状态各自保持，离开月视图回到默认状态。</div><div class="tbd"><b>规则</b>封面选图规则参见 H6 封面与天气规则说明。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>封面图片铺满卡片</li><li>左下角信息条：日期、天气图标、天气分数，置于半透明暗色底衬之上以保证图片上的可读性</li><li>右上角角标：高光标记 ★、收藏标记、备注标记 📝</li><li>右下角独立箭头 ›</li><li>同屏第 3 张为总结态，示意两态按张独立切换</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体切换到一句话总结态</li><li>点击箭头进入日详情</li><li>长按打开动作面板</li></ul><h4>操作后去向</h4><ul><li>点击主体 <span class="to">→ C3 一句话总结态（仅该张卡片）</span></li><li>点击箭头 <span class="to">→ D1 日详情</span></li><li>长按 <span class="to">→ C5 动作面板</span></li></ul><div class="tbd"><b>规则</b>进入月视图时按显示偏好里的默认卡片状态初始化全部卡片，之后每张卡片的状态各自保持，离开月视图回到默认状态。</div><div class="tbd"><b>规则</b>封面选图规则参见 H5 封面与天气规则说明。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -655,18 +654,56 @@ table.tb th{background:#ededed}
     <div class="meta"><h4>关键元素</h4><ul><li>多行文本输入框</li><li>实时字数计数 28 / 200</li><li>备注标记说明</li><li>取消 / 保存按钮</li></ul><h4>用户可执行操作</h4><ul><li>编辑备注文本</li><li>点击保存</li><li>点击取消或返回</li></ul><h4>操作后去向</h4><ul><li>保存 → 写 DayCardUserData.note，卡片显示 📝 <span class="to">→ 调用来源屏</span></li><li>有改动点返回 <span class="to">→ C8a 未保存二次确认</span></li><li>无改动点返回 <span class="to">→ 调用来源屏</span></li></ul><div class="tbd"><b>规则</b>备注字数上限 200 字，超出时禁用保存并提示「备注不超过 200 字」。</div><div class="tbd"><b>规则</b>备注非空时在日卡片角标区增加备注图标 📝。</div><div class="tbd"><b>规则</b>未保存退出需二次确认，文案「备注尚未保存，确认放弃修改？」。</div></div>
   </div>
 </div>
+<div class="screen">
+  <div class="sc-head"><span class="sid">C8</span><h3>日卡片 · 当日无消息（弱化样式）</h3>
+  <span class="pos">流程位置：该日期已同步，文件内消息为空</span></div>
+  <div class="sc-body">
+    <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>2026年11月</span></div><div class="body"><div class="row" style="gap:5px">
+      <div class="dcard" style="min-height:70px;padding:0;position:relative;box-shadow:2px 2px 0 #111">
+        <div class="img" style="flex:1;border:0;font-size:8px">封面图</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;font-size:7.6px;padding:1px 3px">
+          <b>19日</b> ☀ 85</div>
+        <div style="position:absolute;bottom:12px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
+      </div>
+      <div class="dcard" style="min-height:70px;border:0;background:#fafafa;opacity:.4;position:relative">
+        <div style="font-size:7.6px;color:#999"><b>20日</b></div>
+        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #ccc;background:#fff;font-size:8px;padding:0 3px;color:#aaa">›</div>
+      </div>
+    </div>
+    <div class="row" style="gap:5px">
+      <div class="dcard" style="min-height:70px;border:0;background:#fafafa;opacity:.4;position:relative">
+        <div style="font-size:7.6px;color:#999"><b>21日</b></div>
+        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #ccc;background:#fff;font-size:8px;padding:0 3px;color:#aaa">›</div>
+      </div>
+      <div class="dcard" style="min-height:70px;position:relative;box-shadow:2px 2px 0 #111">
+        <div style="font-size:7.6px"><b>22日</b> ⛅ 😌</div>
+        <div style="font-size:8px;line-height:1.45;margin-top:2px">下午聊了周末的安排，晚上互道晚安。</div>
+        <div style="position:absolute;bottom:2px;right:2px;border:1px solid #111;background:#fff;font-size:8px;padding:0 3px">›</div>
+      </div>
+    </div>
+    <div class="lbl">写入内容后恢复为常规卡片</div>
+    <div class="g2">
+      <div class="dcard" style="min-height:40px;position:relative;box-shadow:2px 2px 0 #111">
+        <div style="font-size:7.6px"><b>20日</b> <span class="tag k">已编辑</span></div>
+        <div style="font-size:8px;line-height:1.4;margin-top:2px">今天各自忙，没顾上聊天。</div></div>
+      <div class="box d" style="font-size:7.8px;color:#666;align-self:start">
+        用户写了总结或备注后，该卡片恢复全不透明并展示内容</div>
+    </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>无消息日卡片：只显示日期一项，不展示封面图、天气图标、情绪图标、分数与总结区</li><li>底色取主题最浅中性色，整卡不透明度 40%，日期文字取次级文字色</li><li>不展示边框与投影，与有消息卡片的层次差异来自投影的有无</li><li>右下角箭头按钮保留</li><li>用户写入总结或备注后恢复全不透明并展示该内容</li></ul><h4>用户可执行操作</h4><ul><li>点击卡片主体 → 无响应，两态切换不适用</li><li>点击右下角箭头 → 进入日详情</li><li>长按卡片 → 底部动作面板</li></ul><h4>操作后去向</h4><ul><li>点击箭头 <span class="to">→ D7a 当日无消息</span></li><li>长按 <span class="to">→ C5 动作面板（收藏 / 编辑总结 / 添加备注 三项可用）</span></li><li>写入总结 <span class="to">→ C6 编辑一句话总结</span></li></ul><div class="tbd"><b>规则</b>无消息日在月视图弱化呈现，使注意力落在有消息的卡片上，月视图的滚动浏览节奏由有消息的卡片决定。</div><div class="tbd"><b>规则</b>弱化样式与未同步日的置灰占位是两种不同呈现：无消息日不显示占位文字，未同步日显示「未同步」并提供同步入口。</div><div class="tbd"><b>规则</b>用户写入内容后该日期不再属于弱化样式。</div></div>
+  </div>
+</div>
 </div>
 </div>
 <div class="grp" id="gd">
 <h2>D · 日详情与评估（需求 4.8-4.9 / 6）</h2>
-<div class="gnote">由 B3 卡片右下角箭头进入。AI 输出新增 confidence 置信度字段，置信度 &lt;40 时日天气映射为雾并显示提示行。亮点与有趣内容只读。当日无消息与该日未同步为两种独立空状态。</div>
+<div class="gnote">由 B3 卡片右下角箭头进入。沟通比由客户端从互动统计计算，沟通比 &lt;40 时日天气映射为雾并显示提示行。亮点与有趣内容只读。当日无消息与该日未同步为两种独立空状态。</div>
 <div class="screens">
 <div class="screen">
   <div class="sc-head"><span class="sid">D1</span><h3>日详情 · 对话流（评估成功，核心屏）</h3>
   <span class="pos">流程位置：B3 点击卡片右下角箭头进入</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>11月11日</span><span class="ic">←</span><span class="ic">⋯</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
-      🌈 彩虹 · 😊 开心 82 · 总分 88 · 亲密度 85</div>
+      🌈 彩虹 · 😊 开心 82 · 总分 88 · 亲密度 85 · 沟通比 85</div>
     <div class="box d" style="font-size:9px;display:flex;justify-content:space-between">
       <span>▸ 互动统计</span><span>展开</span></div>
     <div class="bub">早安，今天天气不错</div>
@@ -678,7 +715,7 @@ table.tb th{background:#ededed}
     <div class="box d" style="font-size:8.5px">一起确定了旅行日期</div>
     <div class="lbl">有趣内容（只读）</div>
     <div class="box d" style="font-size:8.5px">互相吐槽表情包</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>顶部评估条：天气、情绪、总分、亲密度</li><li>「互动统计」折叠区（默认展开状态由设置 H2 控制）</li><li>聊天气泡对话流，左右区分双方，含时间与类型</li><li>亮点区与有趣内容区（只读，不可编辑）</li><li>右上角 ⋯ 菜单：重新评估、标记为高光、编辑总结、编辑备注、收藏</li></ul><h4>用户可执行操作</h4><ul><li>展开互动统计</li><li>点击 ⋯ 打开操作菜单</li><li>点击「重新评估」</li><li>点击「标记为高光」</li><li>编辑总结 / 备注 / 切换收藏</li></ul><h4>操作后去向</h4><ul><li>展开统计 <span class="to">→ D2 互动统计展开</span></li><li>重新评估 <span class="to">→ D3 评估中</span></li><li>标记为高光 → 生成手动高光 <span class="to">→ G1 高光列表可见</span></li><li>编辑总结 <span class="to">→ C6</span></li><li>编辑备注 <span class="to">→ C7</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>亮点与有趣内容只读展示，不可编辑。</div><div class="tbd"><b>规则</b>「标记为高光」入口在日详情提供，手动高光类型固定为综合高光。</div><div class="tbd"><b>规则</b>「重新评估」入口仅在本屏提供。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>顶部评估条：天气、情绪、总分、亲密度、沟通比（缺失时显示「--」）</li><li>「互动统计」折叠区（默认展开状态由 H3 显示偏好控制）</li><li>聊天气泡对话流，左右区分双方，含时间与类型</li><li>亮点区与有趣内容区（只读，不可编辑）</li><li>右上角 ⋯ 菜单：重新评估、标记为高光、编辑总结、编辑备注、收藏</li></ul><h4>用户可执行操作</h4><ul><li>展开互动统计</li><li>点击 ⋯ 打开操作菜单</li><li>点击「重新评估」</li><li>点击「标记为高光」</li><li>编辑总结 / 备注 / 切换收藏</li></ul><h4>操作后去向</h4><ul><li>展开统计 <span class="to">→ D2 互动统计展开</span></li><li>重新评估 <span class="to">→ D3 评估中</span></li><li>标记为高光 → 生成手动高光 <span class="to">→ G1 高光列表可见</span></li><li>编辑总结 <span class="to">→ C6</span></li><li>编辑备注 <span class="to">→ C7</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>亮点与有趣内容只读展示，不可编辑。</div><div class="tbd"><b>规则</b>「标记为高光」入口在日详情提供，手动高光类型固定为综合高光。</div><div class="tbd"><b>规则</b>「重新评估」入口仅在本屏提供。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -714,8 +751,12 @@ table.tb th{background:#ededed}
       <div class="box" style="text-align:center;font-size:7.5px;padding:2px"><b>5</b><br>对话段</div>
       <div class="box" style="text-align:center;font-size:7.5px;padding:2px"><b>38</b><br>最长段</div>
       <div class="box" style="text-align:center;font-size:7.5px;padding:2px"><b>4分</b><br>间隔中位</div>
-    </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>1-2 数值卡片：消息总条数、总字数</li><li>3-4 条数双色堆叠条 + 百分比标注</li><li>5-6 字数双色堆叠条 + 百分比标注</li><li>7-8 平均每条字数、双方平均并列卡片</li><li>9 首末消息时间轴起止标注</li><li>10-12 连续对话段数、最长连续条数、回复间隔中位数</li></ul><h4>用户可执行操作</h4><ul><li>折叠统计区</li><li>滚动查看全部 12 项</li></ul><h4>操作后去向</h4><ul><li>折叠 <span class="to">→ D1 对话流</span></li></ul><div class="tbd"><b>规则</b>统计项按固定顺序呈现并图形化：占比用双色水平堆叠条，时间用时间轴，其余用数值卡片。</div><div class="tbd"><b>规则</b>连续对话段判定：相邻消息间隔超过 30 分钟视为新段。</div></div>
+    </div>
+    <div class="lbl">沟通比 85</div>
+    <div class="box" style="font-size:7.8px;padding:3px;line-height:1.7">
+      投入对等 88 · 发起对等 80<br>响应对等 86 · 接续对等 84
+      <div style="color:#666;margin-top:1px">看双方是否对等，不看聊得多少</div></div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>1-2 数值卡片：消息总条数、总字数</li><li>3-4 条数双色堆叠条 + 百分比标注</li><li>5-6 字数双色堆叠条 + 百分比标注</li><li>7-8 平均每条字数、双方平均并列卡片</li><li>9 首末消息时间轴起止标注</li><li>10-12 连续对话段数、最长连续条数、回复间隔中位数</li><li>沟通比区：总分值与投入、发起、响应、接续四个分项对等度</li><li>沟通比缺失时该区显示「--」与一句说明</li></ul><h4>用户可执行操作</h4><ul><li>折叠统计区</li><li>滚动查看全部 12 项与沟通比分项</li></ul><h4>操作后去向</h4><ul><li>折叠 <span class="to">→ D1 对话流</span></li></ul><div class="tbd"><b>规则</b>统计项按固定顺序呈现并图形化：占比用双色水平堆叠条，时间用时间轴，其余用数值卡片。</div><div class="tbd"><b>规则</b>连续对话段判定：相邻消息间隔超过 30 分钟视为新段。</div><div class="tbd"><b>规则</b>沟通比由客户端从本屏同一份互动统计计算，四个分项为投入对等 0.30、发起对等 0.25、响应对等 0.25、接续对等 0.20，分项不可用时剔除并按剩余权重归一化。</div><div class="tbd"><b>规则</b>消息总条数少于 4 条时沟通比缺失，不参与天气判定与趋势曲线。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -756,27 +797,28 @@ table.tb th{background:#ededed}
     <div class="btn pri" style="width:100%">重新评估</div>
     <div class="hr"></div>
     <div class="box" style="font-size:9px;padding:3px">
-      ☀ 晴 · 😌 平静 72 · 总分 80 · 亲密度 78
+      ☀ 晴 · 😌 平静 72 · 总分 80 · 亲密度 78 · 沟通比 74
       <div style="font-size:8px;color:#777">以上为上次评估结果</div></div>
     <div class="bub">刚补了几条消息</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
     <div class="meta"><h4>关键元素</h4><ul><li>待重评状态条与原因说明</li><li>沿用上次成功评估的分数、天气、情绪与总结</li><li>「重新评估」按钮</li><li>旧评估结果正常展示</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新评估」</li><li>继续浏览旧结果</li></ul><h4>操作后去向</h4><ul><li>重新评估 <span class="to">→ D3 评估中</span></li><li>评估完成 → 覆盖 AI 原始结果、evalVersion 加 1 <span class="to">→ D1 对话流</span></li></ul><div class="tbd"><b>规则</b>评估缓存键 = 日期 + 聊天文件哈希 + 提示词版本号。该日期聊天文件变更时进入 STALE。</div><div class="tbd"><b>规则</b>STALE 期间沿用上次成功评估的分数、天气、封面与情绪着色参与各处计算，卡片角标显示「待重评」。</div><div class="tbd"><b>规则</b>提示词版本策略：新版本对其生效后新同步的日期生效；历史日期保留原结果与原 promptVersion，手动点击「重新评估」时使用当前版本。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">D6</span><h3>日详情 · 低置信度提示</h3>
-  <span class="pos">流程位置：评估置信度低于 40 时</span></div>
+  <div class="sc-head"><span class="sid">D6</span><h3>日详情 · 单向对话提示</h3>
+  <span class="pos">流程位置：沟通比低于 40 时</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>11月18日</span><span class="ic">←</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
-      🌫 雾 · 😐 中性 48 · 总分 52 · 亲密度 50</div>
+      🌫 雾 · 😐 中性 48 · 总分 52 · 亲密度 50 · 沟通比 23</div>
     <div class="box" style="font-size:8.5px;padding:3px;border-style:dashed">
-      ⓘ 本次评估置信度较低
-      <div style="color:#666;margin-top:1px">当天消息偏少，评估依据不足</div></div>
+      ⓘ 这天的对话偏单向
+      <div style="color:#666;margin-top:1px">一方发得多，另一方回得少</div></div>
     <div class="btn" style="width:100%">重新评估</div>
     <div class="hr"></div>
-    <div class="bub">嗯</div>
-    <div class="bub me">👌</div>
-    <div class="bub">在</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>天气显示为 🌫 雾（置信度 &lt;40 的判定结果）</li><li>置信度提示行「本次评估置信度较低」与一句原因说明，界面不展示置信度数值</li><li>封面与分数仍按评估结果展示</li><li>「重新评估」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新评估」</li><li>浏览对话流</li></ul><h4>操作后去向</h4><ul><li>重新评估 <span class="to">→ D3 评估中</span></li><li>置信度提升至 ≥40 → 天气按分数区间映射 <span class="to">→ D1 对话流</span></li></ul><div class="tbd"><b>规则</b>AI 输出新增 confidence 字段（0-100）。</div><div class="tbd"><b>规则</b>置信度 &lt;40 → 日天气映射为雾，日详情显示置信度提示行。</div><div class="tbd"><b>规则</b>置信度参考：消息充足语义明确 70-100；偏少模糊 40-69；极少无法判断 0-39。</div></div>
+    <div class="bub me">在吗</div>
+    <div class="bub me">今天开会好累</div>
+    <div class="bub me">晚上想吃火锅</div>
+    <div class="bub">嗯</div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>天气显示为 🌫 雾（沟通比 &lt;40 的判定结果）</li><li>提示行「这天的对话偏单向」与一句原因说明</li><li>顶部评估条照常展示沟通比数值</li><li>封面与分数仍按评估结果展示</li><li>「重新评估」按钮</li></ul><h4>用户可执行操作</h4><ul><li>点击「重新评估」</li><li>展开互动统计查看四个分项</li><li>浏览对话流</li></ul><h4>操作后去向</h4><ul><li>重新评估 <span class="to">→ D3 评估中</span></li><li>展开统计看分项 <span class="to">→ D2 互动统计展开</span></li><li>沟通比回到 ≥40 → 天气按分数区间映射 <span class="to">→ D1 对话流</span></li></ul><div class="tbd"><b>规则</b>沟通比由客户端从互动统计计算，不由 AI 输出，重新评估不改变沟通比。</div><div class="tbd"><b>规则</b>沟通比 &lt;40 → 日天气映射为雾，日详情显示单向对话提示行。</div><div class="tbd"><b>规则</b>沟通比只看双方对等程度：少量来回对等的对话得高分，一方刷屏另一方零星回应得低分。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -817,7 +859,7 @@ table.tb th{background:#ededed}
       ⏱ 今天还在进行中
       <div style="font-size:8.5px;color:#555;margin-top:2px">评估在次日生成，今天先看聊天与统计</div></div>
     <div class="box" style="font-size:9px;padding:3px">
-      天气 待评估 · 情绪 待评估 · 总分 -- · 亲密度 --</div>
+      天气 待评估 · 情绪 待评估 · 总分 -- · 亲密度 -- · 沟通比 81</div>
     <div class="box d" style="font-size:8.6px;padding:3px">
       互动统计 42 条 · 1860 字 · 按当前已同步消息实时计算 <span class="ic">展开 ›</span></div>
     <div class="hr"></div>
@@ -825,7 +867,7 @@ table.tb th{background:#ededed}
     <div class="bub me">楼下那家吧</div>
     <div class="row" style="margin-top:4px">
       <div class="btn">写一句话总结</div><div class="btn">添加备注</div></div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>进行中状态条「今天还在进行中」与说明行</li><li>评估结果区：天气与情绪显示待评估，分数显示「--」</li><li>互动统计按当前已同步消息实时计算</li><li>对话流正常展示</li><li>「写一句话总结」与「添加备注」入口</li></ul><h4>用户可执行操作</h4><ul><li>浏览对话流</li><li>展开互动统计</li><li>编辑总结</li><li>添加备注</li><li>切换收藏</li></ul><h4>操作后去向</h4><ul><li>写总结 <span class="to">→ C6 编辑一句话总结</span></li><li>添加备注 <span class="to">→ C7 添加 / 编辑备注</span></li><li>跨入次日后入队评估 <span class="to">→ D3 评估中</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>日期归属以后端切分日文件的时区为权威，设备时区变化不改变日期归属与统计结果。</div><div class="tbd"><b>规则</b>进行中日期不进入评估队列，评估状态保持 PENDING，日天气按优先级 1 显示为待评估，封面为默认占位封面。</div><div class="tbd"><b>规则</b>进行中日期不计入年/月均分、周期天气与趋势曲线。</div><div class="tbd"><b>规则</b>跨入次日后进入评估队列，评估完成时封面、天气、情绪、总结一次性落定，达标则生成高光。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>进行中状态条「今天还在进行中」与说明行</li><li>评估结果区：天气与情绪显示待评估，AI 分数显示「--」</li><li>沟通比随互动统计按当前已同步消息实时计算并展示</li><li>互动统计按当前已同步消息实时计算</li><li>对话流正常展示</li><li>「写一句话总结」与「添加备注」入口</li></ul><h4>用户可执行操作</h4><ul><li>浏览对话流</li><li>展开互动统计</li><li>编辑总结</li><li>添加备注</li><li>切换收藏</li></ul><h4>操作后去向</h4><ul><li>写总结 <span class="to">→ C6 编辑一句话总结</span></li><li>添加备注 <span class="to">→ C7 添加 / 编辑备注</span></li><li>跨入次日后入队评估 <span class="to">→ D3 评估中</span></li><li>返回 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>日期归属以后端切分日文件的时区为权威，设备时区变化不改变日期归属与统计结果。</div><div class="tbd"><b>规则</b>进行中日期不进入评估队列，评估状态保持 PENDING，日天气按优先级 1 显示为待评估，封面为默认占位封面。</div><div class="tbd"><b>规则</b>沟通比由本地互动统计算出，与 AI 评估相互独立，进行中日期随新消息到达实时刷新。</div><div class="tbd"><b>规则</b>进行中日期不计入年/月均分、周期天气与趋势曲线。</div><div class="tbd"><b>规则</b>跨入次日后进入评估队列，评估完成时封面、天气、情绪、总结一次性落定，达标则生成高光。</div></div>
   </div>
 </div>
 </div>
@@ -843,7 +885,8 @@ table.tb th{background:#ededed}
     <div style="display:flex;font-size:9px;border-bottom:1px solid #111">
       <div style="flex:1;text-align:center;padding:3px;background:#111;color:#fff;font-weight:700">曲线</div>
       <div style="flex:1;text-align:center;padding:3px">情绪日历</div></div>
-    <div><span class="chip on">总分</span><span class="chip">亲密度</span><span class="chip">情绪分</span></div>
+    <div><span class="chip on">总分</span><span class="chip">亲密度</span>
+      <span class="chip">情绪分</span><span class="chip">沟通比</span></div>
     <div><span class="chip">周</span><span class="chip on">月</span><span class="chip">年</span></div>
     <div class="box" style="font-size:9px;padding:2px;display:flex;justify-content:space-between;align-items:center">
       <span class="ic">◀</span><span>2026年11月 · ⛅ 多云</span><span class="ic">▶</span></div>
@@ -861,7 +904,7 @@ table.tb th{background:#ededed}
         <circle cx="176" cy="20" r="2.4" fill="#111"/>
       </svg>
     </div></div><div class="pnav"><span class="">时间墙</span><span class="on">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>顶部 Tab：曲线 / 情绪日历</li><li>指标切换：总分 / 亲密度 / 情绪分，支持单选或叠加</li><li>粒度切换：周 / 月 / 年（无日粒度）</li><li>周期切换器 ◀ 当前周期 ▶，并显示该周期关系天气</li><li>曲线含高光日标记 ★</li><li>缺评估日期处曲线断开，不连线不补零</li></ul><h4>用户可执行操作</h4><ul><li>切换指标</li><li>切换粒度</li><li>左右切换周期</li><li>点击曲线数据点</li><li>切到情绪日历 Tab</li></ul><h4>操作后去向</h4><ul><li>周粒度点击点（对应单日）<span class="to">→ D1 日详情</span></li><li>月粒度点击点（对应单周）<span class="to">→ 该周日卡片列表</span></li><li>年粒度点击点（对应单月）<span class="to">→ B3 该月月视图</span></li><li>切 Tab <span class="to">→ E2 情绪日历</span></li></ul><div class="tbd"><b>规则</b>粒度只有周/月/年，选择后默认显示当周/当月/当年，可左右切换其他周期。</div><div class="tbd"><b>规则</b>点击数据点跳转到该点对应的周期对象，不固定跳到天。</div><div class="tbd"><b>规则</b>缺评估日期曲线断开处理。</div><div class="tbd"><b>规则</b>曲线与热力图为 Tab 切换，非跳转页面。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>顶部 Tab：曲线 / 情绪日历</li><li>指标切换：总分 / 亲密度 / 情绪分 / 沟通比，支持单选或叠加</li><li>粒度切换：周 / 月 / 年（无日粒度）</li><li>周期切换器 ◀ 当前周期 ▶，并显示该周期关系天气</li><li>曲线含高光日标记 ★</li><li>缺评估日期处曲线断开，不连线不补零</li></ul><h4>用户可执行操作</h4><ul><li>切换指标</li><li>切换粒度</li><li>左右切换周期</li><li>点击曲线数据点</li><li>切到情绪日历 Tab</li></ul><h4>操作后去向</h4><ul><li>周粒度点击点（对应单日）<span class="to">→ D1 日详情</span></li><li>月粒度点击点（对应单周）<span class="to">→ 该周日卡片列表</span></li><li>年粒度点击点（对应单月）<span class="to">→ B3 该月月视图</span></li><li>切 Tab <span class="to">→ E2 情绪日历</span></li></ul><div class="tbd"><b>规则</b>粒度只有周/月/年，选择后默认显示当周/当月/当年，可左右切换其他周期。</div><div class="tbd"><b>规则</b>点击数据点跳转到该点对应的周期对象，不固定跳到天。</div><div class="tbd"><b>规则</b>缺评估日期曲线断开处理。</div><div class="tbd"><b>规则</b>沟通比缺失的日期在沟通比曲线上断开，与缺评估断开为两个独立判定。</div><div class="tbd"><b>规则</b>曲线与热力图为 Tab 切换，非跳转页面。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -907,7 +950,7 @@ table.tb th{background:#ededed}
 </div>
 <div class="screen">
   <div class="sc-head"><span class="sid">E3</span><h3>情绪色系映射速查（规则屏）</h3>
-  <span class="pos">流程位置：E2 图例展开 / H4 规则说明页同表</span></div>
+  <span class="pos">流程位置：E2 图例展开 / H5 规则说明页同表</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>情绪色系</span><span class="ic">←</span></div><div class="body"><div style="font-size:7.8px;line-height:1.75">
       <div style="display:flex;gap:3px;align-items:center;margin-bottom:2px">
@@ -937,7 +980,7 @@ table.tb th{background:#ededed}
       <div style="flex:1;height:17px;background:#f2e6c4;border:1px solid #999;font-size:6.5px;text-align:center;line-height:17px">26-50</div>
       <div style="flex:1;height:17px;background:#dcd8cd;border:1px solid #999;font-size:6.5px;text-align:center;line-height:17px">0-25</div>
     </div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>6 个色系与 30 种情绪的完整映射表</li><li>每色系的色块示例与所含情绪类型</li><li>明度随情绪分变化的 4 档示例</li></ul><h4>用户可执行操作</h4><ul><li>查阅映射关系</li><li>返回</li></ul><h4>操作后去向</h4><ul><li>返回 <span class="to">→ E2 情绪日历 / H4 规则说明</span></li></ul><div class="tbd"><b>规则</b>颜色越鲜艳明亮代表情绪越好，越灰暗代表越差，与用户直觉对应。</div><div class="tbd"><b>规则</b>映射关系通过配置文件可调整。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>6 个色系与 30 种情绪的完整映射表</li><li>每色系的色块示例与所含情绪类型</li><li>明度随情绪分变化的 4 档示例</li></ul><h4>用户可执行操作</h4><ul><li>查阅映射关系</li><li>返回</li></ul><h4>操作后去向</h4><ul><li>返回 <span class="to">→ E2 情绪日历 / H5 规则说明</span></li></ul><div class="tbd"><b>规则</b>颜色越鲜艳明亮代表情绪越好，越灰暗代表越差，与用户直觉对应。</div><div class="tbd"><b>规则</b>映射关系通过配置文件可调整。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -958,7 +1001,7 @@ table.tb th{background:#ededed}
 </div>
 <div class="grp" id="gf">
 <h2>F · 喜好与礼物（需求 10-11）</h2>
-<div class="gnote">同页双 Tab。喜好默认按星级降序，礼物默认按计划日期升序。筛选统一为底部浮层，常用维度默认展开、其余收进「更多筛选」，支持多选且跨会话保留。删除统一为长按触发 + 二次确认。共同喜好为喜好条目上的标记字段，通过筛选查看。</div>
+<div class="gnote">同页双 Tab。喜好默认按星级降序，礼物默认按计划日期升序。筛选统一为底部浮层，常用维度默认展开、其余收进「更多筛选」，支持多选且跨会话保留。删除统一为长按触发 + 二次确认。共同喜好为喜好条目上的标记字段，通过筛选查看。条目图片每条一张，选择后 1:1 裁剪、客户端压缩再上传，列表位展示后端生成的缩略图。</div>
 <div class="screens">
 <div class="screen">
   <div class="sc-head"><span class="sid">F1</span><h3>喜好 Tab · 列表（正常，核心屏）</h3>
@@ -1009,7 +1052,7 @@ table.tb th{background:#ededed}
     <div class="row"><div class="inp">　</div><div class="img" style="height:22px">+图</div></div>
     <div style="margin-top:auto"></div>
     <div class="row"><div class="btn">取消</div><div class="btn dis">保存</div></div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>名称输入框（必填，校验失败时边框变红）</li><li>字段级红色提示「请填写喜好名称」</li><li>类型选择：喜欢 / 不喜欢，默认「喜欢」</li><li>分类下拉（默认「其他」）</li><li>星级 1-5 星，默认 3</li><li>共同喜好标记下拉：共同喜欢 / 共同不喜欢 / TA 喜欢我不喜欢 / 待确认 / 独立喜好</li><li>备注（≤200 字）、图片</li><li>名称为空时保存按钮为禁用态</li></ul><h4>用户可执行操作</h4><ul><li>填写名称</li><li>选择类型 / 分类 / 星级 / 共同喜好标记</li><li>点击分类下拉进入分类管理</li><li>点击保存</li><li>点击取消</li></ul><h4>操作后去向</h4><ul><li>保存成功 <span class="to">→ F1 喜好列表</span></li><li>名称为空点保存 → 显示红色提示，停留本屏</li><li>分类下拉 <span class="to">→ F3 分类管理</span></li><li>取消 <span class="to">→ F1</span></li></ul><div class="tbd"><b>规则</b>必填校验：名称为空时保存按钮为禁用态；点击后字段下方显示红色提示并将输入框边框变红，用户开始输入后提示消失。</div><div class="tbd"><b>规则</b>类型、分类均有默认值，表单打开即为已选中状态。</div><div class="tbd"><b>规则</b>「类型」代表 TA 的态度，共同喜好标记代表双方态度的组合关系；类型为喜欢且标记为「TA 喜欢我不喜欢」即 CONFLICT。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>名称输入框（必填，校验失败时边框变红）</li><li>字段级红色提示「请填写喜好名称」</li><li>类型选择：喜欢 / 不喜欢，默认「喜欢」</li><li>分类下拉（默认「其他」）</li><li>星级 1-5 星，默认 3</li><li>共同喜好标记下拉：共同喜欢 / 共同不喜欢 / TA 喜欢我不喜欢 / 待确认 / 独立喜好</li><li>备注（≤200 字）、图片（1:1 裁剪后压缩上传，上传中显示占位与重试入口）</li><li>名称为空时保存按钮为禁用态</li></ul><h4>用户可执行操作</h4><ul><li>填写名称</li><li>选择类型 / 分类 / 星级 / 共同喜好标记</li><li>点击分类下拉进入分类管理</li><li>点击保存</li><li>点击取消</li></ul><h4>操作后去向</h4><ul><li>保存成功 <span class="to">→ F1 喜好列表</span></li><li>名称为空点保存 → 显示红色提示，停留本屏</li><li>分类下拉 <span class="to">→ F3 分类管理</span></li><li>取消 <span class="to">→ F1</span></li></ul><div class="tbd"><b>规则</b>必填校验：名称为空时保存按钮为禁用态；点击后字段下方显示红色提示并将输入框边框变红，用户开始输入后提示消失。</div><div class="tbd"><b>规则</b>类型、分类均有默认值，表单打开即为已选中状态。</div><div class="tbd"><b>规则</b>「类型」代表 TA 的态度，共同喜好标记代表双方态度的组合关系；类型为喜欢且标记为「TA 喜欢我不喜欢」即 CONFLICT。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -1185,7 +1228,7 @@ table.tb th{background:#ededed}
     <div class="row"><div class="inp">　</div><div class="img" style="height:22px">+图</div></div>
     <div style="margin-top:auto"></div>
     <div class="row"><div class="btn">取消</div><div class="btn pri">保存</div></div></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>礼物名称（必填）</li><li>关联喜好通过下拉选择变更或解除关联</li><li>分类、等级、场合（均必填且有默认值）</li><li>状态、优先级、预算档</li><li>计划日期、送出日期（状态流转自动写入，可手动改）</li><li>备注（≤200 字）、图片</li></ul><h4>用户可执行操作</h4><ul><li>填写名称</li><li>下拉变更或解除关联喜好</li><li>选择各维度</li><li>修改送出日期</li><li>保存 / 取消</li></ul><h4>操作后去向</h4><ul><li>保存成功 <span class="to">→ F8 礼物清单</span></li><li>名称为空点保存 → 红色提示「请填写礼物名称」</li><li>取消 <span class="to">→ F8</span></li></ul><div class="tbd"><b>规则</b>必填字段：礼物名称；分类、等级、场合、状态、优先级均有默认值。</div><div class="tbd"><b>规则</b>关联喜好通过下拉选择变更或解除，不手动编辑内容。</div><div class="tbd"><b>规则</b>送出日期在条目详情与列表项上展示。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>礼物名称（必填）</li><li>关联喜好通过下拉选择变更或解除关联</li><li>分类、等级、场合（均必填且有默认值）</li><li>状态、优先级、预算档</li><li>计划日期、送出日期（状态流转自动写入，可手动改）</li><li>备注（≤200 字）、图片（1:1 裁剪后压缩上传，上传中显示占位与重试入口）</li></ul><h4>用户可执行操作</h4><ul><li>填写名称</li><li>下拉变更或解除关联喜好</li><li>选择各维度</li><li>修改送出日期</li><li>保存 / 取消</li></ul><h4>操作后去向</h4><ul><li>保存成功 <span class="to">→ F8 礼物清单</span></li><li>名称为空点保存 → 红色提示「请填写礼物名称」</li><li>取消 <span class="to">→ F8</span></li></ul><div class="tbd"><b>规则</b>必填字段：礼物名称；分类、等级、场合、状态、优先级均有默认值。</div><div class="tbd"><b>规则</b>关联喜好通过下拉选择变更或解除，不手动编辑内容。</div><div class="tbd"><b>规则</b>送出日期在条目详情与列表项上展示。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -1338,7 +1381,7 @@ table.tb th{background:#ededed}
           <b>10月28日</b><span class="tag">有趣对话</span></div>
         <div style="font-size:8px;color:#666">☀ 87 / 80 · 😄 调皮</div>
         <div style="font-size:8px">互相讲冷笑话…</div></div></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="on">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>顶部类型筛选条：全部 + 5 种高光类型</li><li>列表按日期倒序</li><li>每条：封面缩略图、日期、高光类型标签、天气、总分/亲密度、情绪、总结摘要</li></ul><h4>用户可执行操作</h4><ul><li>点击类型筛选条过滤</li><li>点击条目进入日详情</li><li>长按条目删除</li></ul><h4>操作后去向</h4><ul><li>点击条目 <span class="to">→ D1 日详情</span></li><li>点击类型筛选 <span class="to">→ G3 类型筛选态</span></li><li>长按 <span class="to">→ G2 删除确认</span></li></ul><div class="tbd"><b>规则</b>高光列表支持按高光类型筛选。</div><div class="tbd"><b>规则</b>高光快照含：日期、总分、情绪类型、情绪分、亲密度、总结、亮点、封面等级、天气、高光类型。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>顶部类型筛选条：全部 + 5 种高光类型</li><li>列表按日期倒序</li><li>每条：封面缩略图、日期、高光类型标签、天气、总分/亲密度、情绪、总结摘要</li></ul><h4>用户可执行操作</h4><ul><li>点击类型筛选条过滤</li><li>点击条目进入日详情</li><li>长按条目删除</li></ul><h4>操作后去向</h4><ul><li>点击条目 <span class="to">→ D1 日详情</span></li><li>点击类型筛选 <span class="to">→ G3 类型筛选态</span></li><li>长按 <span class="to">→ G2 删除确认</span></li></ul><div class="tbd"><b>规则</b>高光列表支持按高光类型筛选。</div><div class="tbd"><b>规则</b>高光快照含：日期、总分、情绪类型、情绪分、亲密度、沟通比、总结、亮点、封面等级、天气、高光类型。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -1444,7 +1487,7 @@ table.tb th{background:#ededed}
       <span>关于</span><span>›</span></div>
     <div class="box" style="font-size:9px;padding:3px;display:flex;justify-content:space-between">
       <span>锁定</span><span style="color:#666">立即需要密码 ›</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>同步分组：同步状态、上次同步时间、已同步天数、失败天数</li><li>「立即同步」按钮</li><li>失败天数不为零时显示「查看失败日期」</li><li>待同步行：待提交的编辑条数与「立即重试」按钮</li><li>偏好分组：主题（右侧显示当前主题名）、显示偏好</li><li>说明分组：隐私说明、封面与天气规则说明</li><li>其他分组：关于、锁定</li></ul><h4>用户可执行操作</h4><ul><li>点击「立即同步」</li><li>点击「查看失败日期」</li><li>点击「立即重试」提交待同步的编辑</li><li>点击「锁定」</li><li>进入各子页</li></ul><h4>操作后去向</h4><ul><li>立即同步 <span class="to">→ A7 同步中</span></li><li>查看失败日期 <span class="to">→ H8 失败日期列表</span></li><li>立即重试 <span class="to">→ H1 本屏（提交成功后条数减少，全部成功后该行显示「全部已同步」）</span></li><li>锁定 <span class="to">→ A2 密码门禁</span></li><li>主题 <span class="to">→ H2 主题选择</span></li><li>显示偏好 <span class="to">→ H4</span></li><li>隐私说明 <span class="to">→ H5</span></li><li>规则说明 <span class="to">→ H6</span></li><li>关于 <span class="to">→ H7</span></li></ul><div class="tbd"><b>规则</b>设置页展示同步状态并提供「立即同步」，作为 A7/A9/A10 重试流程的用户侧落点。</div><div class="tbd"><b>规则</b>待同步行在有待提交编辑时展示条数与「立即重试」；全部提交完成后该行展示「全部已同步」。</div><div class="tbd"><b>规则</b>点击「锁定」立即清除密码免输入有效期，返回门禁页重新输入。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>同步分组：同步状态、上次同步时间、已同步天数、失败天数</li><li>「立即同步」按钮</li><li>失败天数不为零时显示「查看失败日期」</li><li>待同步行：待提交的编辑条数与「立即重试」按钮</li><li>偏好分组：主题（右侧显示当前主题名）、显示偏好</li><li>说明分组：隐私说明、封面与天气规则说明</li><li>其他分组：关于、锁定</li></ul><h4>用户可执行操作</h4><ul><li>点击「立即同步」</li><li>点击「查看失败日期」</li><li>点击「立即重试」提交待同步的编辑</li><li>点击「锁定」</li><li>进入各子页</li></ul><h4>操作后去向</h4><ul><li>立即同步 <span class="to">→ A7 同步中</span></li><li>查看失败日期 <span class="to">→ H7 失败日期列表</span></li><li>立即重试 <span class="to">→ H1 本屏（提交成功后条数减少，全部成功后该行显示「全部已同步」）</span></li><li>锁定 <span class="to">→ A2 密码门禁</span></li><li>主题 <span class="to">→ H2 主题选择</span></li><li>显示偏好 <span class="to">→ H3</span></li><li>隐私说明 <span class="to">→ H4</span></li><li>规则说明 <span class="to">→ H5</span></li><li>关于 <span class="to">→ H6</span></li></ul><div class="tbd"><b>规则</b>设置页展示同步状态并提供「立即同步」，作为 A7/A9/A10 重试流程的用户侧落点。</div><div class="tbd"><b>规则</b>待同步行在有待提交编辑时展示条数与「立即重试」；全部提交完成后该行展示「全部已同步」。</div><div class="tbd"><b>规则</b>点击「锁定」立即清除密码免输入有效期，返回门禁页重新输入。</div></div>
   </div>
 </div>
 <div class="screen">
@@ -1469,33 +1512,11 @@ table.tb th{background:#ededed}
         <div style="font-size:9px;font-weight:700;margin-top:2px">磨砂玻璃</div>
         <div style="font-size:7.6px;color:#666">封面模糊 · 半透明面板</div></div>
     </div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>2 列网格，4 个主题预览图</li><li>每格：预览图、主题名、视觉特征说明</li><li>当前选中项带勾选标识</li><li>主题枚举：PAPER_CALENDAR / STAR_MAP / COLOR_FIELD / FROSTED_GLASS</li></ul><h4>用户可执行操作</h4><ul><li>点击任一主题立即应用</li><li>返回设置首页</li></ul><h4>操作后去向</h4><ul><li>选择主题 <span class="to">→ H3 主题应用效果</span></li><li>返回 <span class="to">→ H1 设置首页（主题行显示新主题名）</span></li></ul><div class="tbd"><b>规则</b>点击立即应用并写入 UserPreference.theme，返回即生效。</div><div class="tbd"><b>规则</b>主题作用范围：全局底色、卡片容器样式、字体族、分隔线、按钮与标签样式。</div><div class="tbd"><b>规则</b>封面等级、天气图标、情绪色系的映射规则在 4 套主题下保持一致，随主题变化的部分限于呈现样式。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>2 列网格，4 个主题预览图</li><li>每格：预览图、主题名、视觉特征说明</li><li>当前选中项带勾选标识</li><li>主题枚举：PAPER_CALENDAR / STAR_MAP / COLOR_FIELD / FROSTED_GLASS</li></ul><h4>用户可执行操作</h4><ul><li>点击任一主题立即应用</li><li>返回设置首页</li></ul><h4>操作后去向</h4><ul><li>选择主题 → 立即应用并返回 <span class="to">→ H1 设置首页（主题行显示新主题名）</span></li><li>切主题后回时间墙查看呈现 <span class="to">→ B3 月视图</span></li></ul><div class="tbd"><b>规则</b>点击立即应用并写入 UserPreference.theme，返回即生效。</div><div class="tbd"><b>规则</b>主题作用范围：全局底色、卡片容器样式、字体族、分隔线、按钮与标签样式。</div><div class="tbd"><b>规则</b>封面等级、天气图标、情绪色系的映射规则在 4 套主题下保持一致，随主题变化的部分限于呈现样式。</div><div class="tbd"><b>规则</b>情绪色系在各主题下保持相同色相序列，由主题调整饱和度与底色对比，越鲜艳明亮越好的辨识方向在 4 套主题下一致。</div><div class="tbd"><b>规则</b>封面状态在 4 套主题下均展示封面图，情绪色块以蒙层叠加：纸月历与星图 15%、色域 45%、磨砂玻璃 30%。日期角标、天气与情绪图标绘制在蒙层之上。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">H3</span><h3>主题应用效果 · 月视图对照</h3>
-  <span class="pos">流程位置：H2 切换主题后的月视图呈现</span></div>
-  <div class="sc-body">
-    <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>2026年11月</span></div><div class="body"><div class="lbl">纸月历（默认）</div>
-    <div class="g2">
-      <div class="dcard" style="height:38px">13<br><span style="font-size:7px">晴 · 86</span></div>
-      <div class="dcard" style="height:38px">14<br><span style="font-size:7px">多云 · 78</span></div>
-    </div>
-    <div class="lbl">星图</div>
-    <div class="g2">
-      <div class="dcard" style="height:38px;background:#2b3a55;color:#fff">13<br><span style="font-size:7px">晴 · 86</span></div>
-      <div class="dcard" style="height:38px;background:#2b3a55;color:#fff">14<br><span style="font-size:7px">多云 · 78</span></div>
-    </div>
-    <div class="lbl">色域 / 磨砂玻璃</div>
-    <div class="g2">
-      <div class="dcard" style="height:38px;background:#ffd98a">13<br><span style="font-size:7px">晴 · 86</span></div>
-      <div class="dcard" style="height:38px;background:#e8e8e8">14<br><span style="font-size:7px">多云 · 78</span></div>
-    </div></div><div class="pnav"><span class="on">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>同一份数据在 4 套主题下的卡片呈现对照</li><li>日期、天气、分数等数据字段在各主题下一致</li><li>随主题变化的部分：底色、卡片容器、字体、分隔线</li></ul><h4>用户可执行操作</h4><ul><li>浏览对照效果</li><li>返回设置继续切换</li></ul><h4>操作后去向</h4><ul><li>返回 <span class="to">→ H2 主题选择</span></li><li>进入日详情 <span class="to">→ D1 日详情</span></li></ul><div class="tbd"><b>规则</b>情绪色系在各主题下保持相同色相序列，由主题调整饱和度与底色对比，越鲜艳明亮越好的辨识方向在 4 套主题下一致。</div><div class="tbd"><b>规则</b>封面状态在 4 套主题下均展示封面图，情绪色块以蒙层叠加：纸月历与星图 15%、色域 45%、磨砂玻璃 30%。日期角标、天气与情绪图标绘制在蒙层之上。</div></div>
-  </div>
-</div>
-<div class="screen">
-  <div class="sc-head"><span class="sid">H4</span><h3>显示偏好</h3>
+  <div class="sc-head"><span class="sid">H3</span><h3>显示偏好</h3>
   <span class="pos">流程位置：H1 进入 · 5 项配置</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>显示偏好</span><span class="ic">←</span></div><div class="body"><div class="lbl">默认卡片状态</div>
@@ -1506,18 +1527,19 @@ table.tb th{background:#ededed}
     <div class="box d" style="font-size:8px;color:#666">
       下次进入月视图时，日卡片按所选状态初始化</div>
     <div class="lbl">趋势默认指标</div>
-    <div><span class="chip on">总分</span><span class="chip">亲密度</span><span class="chip">情绪分</span></div>
+    <div><span class="chip on">总分</span><span class="chip">亲密度</span>
+      <span class="chip">情绪分</span><span class="chip">沟通比</span></div>
     <div class="lbl">趋势默认粒度</div>
     <div><span class="chip">周</span><span class="chip on">月</span><span class="chip">年</span></div>
     <div class="box" style="font-size:9px;padding:3px;display:flex;justify-content:space-between">
       <span>曲线叠加显示</span><span>○—</span></div>
     <div class="box" style="font-size:9px;padding:3px;display:flex;justify-content:space-between">
       <span>日详情互动统计默认展开</span><span>—●</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>默认卡片状态单选：封面 / 一句话总结</li><li>下次进入月视图时按所选状态初始化</li><li>趋势默认指标单选</li><li>趋势默认粒度单选</li><li>曲线叠加显示开关</li><li>日详情互动统计默认展开开关</li></ul><h4>用户可执行操作</h4><ul><li>选择默认卡片状态</li><li>选择趋势默认指标与粒度</li><li>切换两个开关</li></ul><h4>操作后去向</h4><ul><li>修改默认卡片状态 → 下次进入月视图生效 <span class="to">→ B3 月视图</span></li><li>修改趋势偏好 <span class="to">→ E1 曲线（按新默认加载）</span></li></ul><div class="tbd"><b>规则</b>默认卡片状态作用于进入月视图时的初始化；进入后每张卡片独立切换，切换结果随月视图生命周期存在。</div><div class="tbd"><b>规则</b>显示偏好共 5 项：默认卡片状态、趋势默认指标、趋势默认粒度、曲线叠加、统计默认展开。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>默认卡片状态单选：封面 / 一句话总结</li><li>下次进入月视图时按所选状态初始化</li><li>趋势默认指标单选：总分 / 亲密度 / 情绪分 / 沟通比</li><li>趋势默认粒度单选</li><li>曲线叠加显示开关</li><li>日详情互动统计默认展开开关</li></ul><h4>用户可执行操作</h4><ul><li>选择默认卡片状态</li><li>选择趋势默认指标与粒度</li><li>切换两个开关</li></ul><h4>操作后去向</h4><ul><li>修改默认卡片状态 → 下次进入月视图生效 <span class="to">→ B3 月视图</span></li><li>修改趋势偏好 <span class="to">→ E1 曲线（按新默认加载）</span></li></ul><div class="tbd"><b>规则</b>默认卡片状态作用于进入月视图时的初始化；进入后每张卡片独立切换，切换结果随月视图生命周期存在。</div><div class="tbd"><b>规则</b>显示偏好共 5 项：默认卡片状态、趋势默认指标、趋势默认粒度、曲线叠加、统计默认展开。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">H5</span><h3>隐私说明（只读）</h3>
+  <div class="sc-head"><span class="sid">H4</span><h3>隐私说明（只读）</h3>
   <span class="pos">流程位置：H1 进入</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>隐私说明</span><span class="ic">←</span></div><div class="body"><div class="box" style="font-size:9px;padding:4px;line-height:1.8">
@@ -1536,8 +1558,8 @@ table.tb th{background:#ededed}
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">H6</span><h3>封面与天气规则说明（只读）</h3>
-  <span class="pos">流程位置：H1 进入 · 合并展示封面、天气与情绪色系三套规则</span></div>
+  <div class="sc-head"><span class="sid">H5</span><h3>封面与天气规则说明（只读）</h3>
+  <span class="pos">流程位置：H1 进入 · 合并展示封面、天气、沟通比与情绪色系规则</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>规则说明</span><span class="ic">←</span></div><div class="body"><div class="lbl">关系分</div>
     <div class="box" style="font-size:8.5px;padding:3px;line-height:1.6">
@@ -1555,13 +1577,22 @@ table.tb th{background:#ededed}
       同一天固定取同一张，反复进入画面不变</div>
     <div class="lbl">天气分</div>
     <div class="box" style="font-size:8.5px;padding:3px;line-height:1.6">
-      由总分、情绪分与亲密度合成<br>
-      <span style="color:#666">总分占比最高，情绪分次之，亲密度再次之<br>
+      由总分、情绪分、沟通比与亲密度合成<br>
+      <span style="color:#666">总分占比最高，情绪分次之，沟通比再次之，亲密度最末<br>
         与封面的关系分各自计算，天气分侧重当天体感</span></div>
+    <div class="lbl">沟通比</div>
+    <div class="box" style="font-size:8px;padding:3px;line-height:1.7">
+      看双方是否对等，不看聊得多少<br>
+      投入对等 谁发的条数与字数占多少<br>
+      发起对等 谁更常开口说第一句<br>
+      响应对等 谁回得更快<br>
+      接续对等 话题由谁往下接<br>
+      <span style="color:#666">四项越接近越高分，少量来回也能满分<br>
+        当天消息不足 4 条时沟通比不计算</span></div>
     <div class="lbl">日天气判定优先级</div>
     <div class="box" style="font-size:7.6px;padding:3px;line-height:1.6">
       1 待评估 未同步或评估未完成<br>
-      2 🌫 雾 评估依据不足<br>
+      2 🌫 雾 对话偏单向<br>
       3 ❄ 雪 当天消息很少且情绪平稳<br>
       4-12 按天气分区间：<br>
       🌈95-100 ☀85-94 ⛅75-84 ☁65-74<br>
@@ -1573,11 +1604,11 @@ table.tb th{background:#ededed}
     <div class="box" style="font-size:7.6px;padding:3px">
       暖黄·粉红·浅绿·浅蓝·橙红·灰褐 6 色系<br>
       色相表类型，明度表情绪分 <span class="ic">查看全表 ›</span></div></div><div class="pnav"><span class="">时间墙</span><span class="">趋势</span><span class="">喜好礼物</span><span class="">回忆</span><span class="on">设置</span></div></div>
-    <div class="meta"><h4>关键元素</h4><ul><li>关系分构成说明与 5 档区间表</li><li>封面选图说明：等级定基调、亲密与情绪的偏向定同档内取向、同一天固定同一张</li><li>天气分构成说明与三项权重的主次顺序</li><li>日天气判定优先级表（含雾与雪的触发情形）</li><li>雪雾优先级与周期天气说明</li><li>情绪色系概览与查看全表入口</li></ul><h4>用户可执行操作</h4><ul><li>阅读规则</li><li>点击「查看全表」</li><li>返回</li></ul><h4>操作后去向</h4><ul><li>查看色系全表 <span class="to">→ E3 情绪色系映射速查</span></li><li>返回 <span class="to">→ H1 设置首页</span></li></ul><div class="tbd"><b>规则</b>界面用自然语言陈述规则；可执行口径为综合关系分 = 亲密度×0.6 + 情绪分×0.4，天气综合分 = 总分×0.5 + 情绪分×0.3 + 亲密度×0.2，封面等级 L1-L5 对应 5 档区间，池内变体 V1-V4 由亲密度档与情绪档差值合成。</div><div class="tbd"><b>规则</b>雪的可执行阈值：消息总条数 &lt; 10 且情绪分 ≥ 50，界面表述为「当天消息很少且情绪平稳」。</div><div class="tbd"><b>规则</b>雾的可执行阈值：置信度 &lt;40，界面表述为「评估依据不足」。</div><div class="tbd"><b>规则</b>按优先级依次判定，前一条命中即停止，消除分数区间重叠冲突。</div><div class="tbd"><b>规则</b>本页同时展示封面规则与天气规则。</div></div>
+    <div class="meta"><h4>关键元素</h4><ul><li>关系分构成说明与 5 档区间表</li><li>封面选图说明：等级定基调、亲密与情绪的偏向定同档内取向、同一天固定同一张</li><li>天气分构成说明与四项权重的主次顺序</li><li>沟通比说明：四个分项的含义、对等度口径与 4 条消息的计算门槛</li><li>日天气判定优先级表（含雾与雪的触发情形）</li><li>雪雾优先级与周期天气说明</li><li>情绪色系概览与查看全表入口</li></ul><h4>用户可执行操作</h4><ul><li>阅读规则</li><li>点击「查看全表」</li><li>返回</li></ul><h4>操作后去向</h4><ul><li>查看色系全表 <span class="to">→ E3 情绪色系映射速查</span></li><li>返回 <span class="to">→ H1 设置首页</span></li></ul><div class="tbd"><b>规则</b>界面用自然语言陈述规则；可执行口径为综合关系分 = 亲密度×0.6 + 情绪分×0.4，天气综合分 = 总分×0.4 + 情绪分×0.25 + 沟通比×0.2 + 亲密度×0.15，封面等级 L1-L5 对应 5 档区间，池内变体 V1-V4 由亲密度档与情绪档差值合成。</div><div class="tbd"><b>规则</b>沟通比 = 投入对等×0.30 + 发起对等×0.25 + 响应对等×0.25 + 接续对等×0.20，单项对等度 = 2×min(甲,乙)÷(甲+乙)×100，分项不可用时剔除并按剩余权重归一化。</div><div class="tbd"><b>规则</b>沟通比缺失时天气综合分剔除该项并按剩余权重 0.8 归一化。</div><div class="tbd"><b>规则</b>雪的可执行阈值：消息总条数 &lt; 10 且情绪分 ≥ 50，界面表述为「当天消息很少且情绪平稳」。</div><div class="tbd"><b>规则</b>雾的可执行阈值：沟通比 &lt;40，界面表述为「对话偏单向」。</div><div class="tbd"><b>规则</b>按优先级依次判定，前一条命中即停止，消除分数区间重叠冲突。</div><div class="tbd"><b>规则</b>本页同时展示封面规则、天气规则与沟通比规则。</div></div>
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">H7</span><h3>关于（只读）</h3>
+  <div class="sc-head"><span class="sid">H6</span><h3>关于（只读）</h3>
   <span class="pos">流程位置：H1 进入</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>关于</span><span class="ic">←</span></div><div class="body"><div class="ctr" style="flex:0 0 auto;padding:6px 0">
@@ -1587,7 +1618,7 @@ table.tb th{background:#ededed}
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
       <span>数据库结构版本</span><span class="mono">1</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
-      <span>规则版本</span><span class="mono">1</span></div>
+      <span>规则版本</span><span class="mono">2</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
       <span>AI 提示词版本</span><span class="mono">v2</span></div>
     <div class="box" style="font-size:8.5px;padding:3px;display:flex;justify-content:space-between">
@@ -1606,7 +1637,7 @@ table.tb th{background:#ededed}
   </div>
 </div>
 <div class="screen">
-  <div class="sc-head"><span class="sid">H8</span><h3>失败日期列表</h3>
+  <div class="sc-head"><span class="sid">H7</span><h3>失败日期列表</h3>
   <span class="pos">流程位置：H1 点击「查看失败日期」· 与 A10 同组件</span></div>
   <div class="sc-body">
     <div class="ph"><div class="pbar"><span>09:41</span><span>▮▮▮</span></div><div class="ttl"><span>失败日期</span><span class="ic">←</span></div><div class="body"><div class="box" style="background:#f0f0f0;font-size:9px;padding:3px">
@@ -1645,7 +1676,7 @@ table.tb th{background:#ededed}
 <tr><td>Token 更新</td><td>Token 由配置文件维护，鉴权失败页操作限于重试同步与离线查看</td></tr>
 <tr><td>取消同步</td><td>提供「取消同步」。停止新请求、中断传输中请求，已落盘日文件保留；取消后可「继续同步」断点续传</td></tr>
 <tr><td>同步失败形态</td><td>整页失败态，展示失败原因分类与最近成功同步时间</td></tr>
-<tr><td>失败日期</td><td>向用户暴露失败日期列表，重试粒度支持单日 + 批量；设置页 H8 与 A10 同组件</td></tr>
+<tr><td>失败日期</td><td>向用户暴露失败日期列表，重试粒度支持单日 + 批量；设置页 H7 与 A10 同组件</td></tr>
 <tr><td>手动同步按钮</td><td>时间墙空状态手动同步入口位于设置页「立即同步」</td></tr>
 <tr><td>数据归属</td><td>后端持有权威数据，客户端缓存用于展示与离线查看；各端拉取同一份数据，同步时远端版本覆盖本地缓存</td></tr>
 <tr><td>编辑回写</td><td>用户编辑总结、备注、收藏、高光、喜好、礼物、偏好后立即写本地缓存并入回写队列，界面即时反映结果；联网时队列按入队顺序自动提交，无需手动触发</td></tr>
@@ -1671,11 +1702,12 @@ table.tb th{background:#ededed}
 <tr><td>亮点与有趣内容</td><td>日详情只读展示，不可编辑</td></tr>
 <tr><td>互动统计图形化</td><td>12 项固定顺序：占比用双色水平堆叠条，时间用时间轴，其余用数值卡片</td></tr>
 <tr><td>连续对话段阈值</td><td>相邻消息间隔超过 30 分钟视为新段</td></tr>
-<tr><td>评估置信度</td><td>AI 输出新增 confidence（0-100）。充足明确 70-100；偏少模糊 40-69；极少无法判断 0-39</td></tr>
-<tr><td>天气综合分</td><td>= 总分 × 0.5 + 情绪分 × 0.3 + 亲密度 × 0.2（四舍五入）。与封面综合关系分（亲密度×0.6+情绪分×0.4）独立计算，DayWeather.score 存储天气综合分</td></tr>
-<tr><td>天气判定</td><td>优先级：待评估 → 雾（置信度&lt;40）→ 雪（消息总条数 &lt; 10 且情绪分 ≥ 50）→ 天气综合分九档区间。前一条命中即停止</td></tr>
+<tr><td>沟通比</td><td>= 投入对等×0.30 + 发起对等×0.25 + 响应对等×0.25 + 接续对等×0.20。单项对等度 = 2×min(甲,乙)÷(甲+乙)×100，分项不可用时剔除并按剩余权重归一化；消息总条数 &lt; 4 时缺失。由客户端从互动统计计算，不由 AI 输出</td></tr>
+<tr><td>天气综合分</td><td>= 总分 × 0.4 + 情绪分 × 0.25 + 沟通比 × 0.2 + 亲密度 × 0.15（四舍五入）。沟通比缺失时剔除该项并按剩余权重 0.8 归一化。与封面综合关系分（亲密度×0.6+情绪分×0.4）独立计算，DayWeather.score 存储天气综合分</td></tr>
+<tr><td>天气判定</td><td>优先级：待评估 → 雾（沟通比&lt;40）→ 雪（消息总条数 &lt; 10 且情绪分 ≥ 50）→ 天气综合分九档区间。前一条命中即停止</td></tr>
 <tr><td>周期天气</td><td>周/月按有评估日期的天气综合分平均值映射，不应用雾与雪</td></tr>
 <tr><td>无消息 vs 未同步</td><td>两种独立空状态。无消息可编辑总结、无同步入口；未同步提供「同步这一天」</td></tr>
+<tr><td>无消息日卡片样式</td><td>只显示日期，不展示封面、天气、情绪、分数与总结；底色取主题最浅中性色、整卡不透明度 40%、无边框无投影，与有消息卡片的层次差异来自投影的有无。右下角箭头保留，写入总结或备注后恢复全不透明</td></tr>
 <tr><td>无评估日编辑总结</td><td>允许</td></tr>
 <tr><td>曲线点跳转</td><td>点对应什么就跳什么：周粒度→日详情、月粒度→该周日卡片列表、年粒度→该月月视图</td></tr>
 <tr><td>曲线粒度与范围</td><td>仅周/月/年，无日粒度。选择后默认当前周期，可左右切换</td></tr>
@@ -1688,6 +1720,9 @@ table.tb th{background:#ededed}
 <tr><td>礼物默认排序</td><td>计划日期升序，无计划日期排最后并按更新时间降序</td></tr>
 <tr><td>删除触发</td><td>统一长按触发，均需二次确认</td></tr>
 <tr><td>必填校验</td><td>必填为空时保存按钮置灰；点击后字段下方红色提示 + 输入框边框变红，开始输入后消失</td></tr>
+<tr><td>条目图片选择</td><td>相册或拍照，每条目一张，重选即替换。支持 JPEG、PNG、HEIC、WebP，选择后进入 1:1 裁剪</td></tr>
+<tr><td>图片客户端压缩</td><td>长边上限 1600 像素，统一转 JPEG 质量 80；超过 2 MB 按质量 70、60 递降重压，三次仍超过提示「图片过大，请换一张」。剥离地理位置、设备型号与时间戳，保留朝向并旋转为正向图。单张压缩耗时上限 3 秒</td></tr>
+<tr><td>图片上传与展示</td><td>图片与条目分两步提交，幂等键为条目标识 + 图片内容哈希。上传失败时条目其他字段照常保存，图片位显示「图片待上传」与重试入口。列表位展示后端生成的 320 像素缩略图，本地缓存上限 200 MB 按最近最少使用淘汰</td></tr>
 <tr><td>喜好必填项</td><td>名称、类型、分类（后两项有默认值）</td></tr>
 <tr><td>礼物必填项</td><td>名称、分类、等级、场合、状态、优先级（除名称外均有默认值）</td></tr>
 <tr><td>自定义分类</td><td>支持新增。内置 26 项不可编辑删除；自定义可编辑删除，删除后相关喜好重置为「其他」</td></tr>
@@ -1742,7 +1777,7 @@ table.tb th{background:#ededed}
 
 <div class="grp" id="coverpool">
 <h2>封面资源寻址</h2>
-<div class="gnote">封面等级定主池、亲密度档与情绪档合成池内变体、日期哈希在子池内轮换。对应需求文档 5.2，影响屏幕 C1 · H6。</div>
+<div class="gnote">封面等级定主池、亲密度档与情绪档合成池内变体、日期哈希在子池内轮换。对应需求文档 5.2，影响屏幕 C1 · H5。</div>
 <table class="tb">
 <tr><th style="width:150px">环节</th><th>规则</th></tr>
 <tr><td>主池</td><td>封面等级 L1-L5，由综合关系分（亲密度×0.6 + 情绪分×0.4）映射，共 5 个主池</td></tr>
@@ -1754,8 +1789,8 @@ table.tb th{background:#ededed}
 </table>
 </div>
 <footer>
-<p><b>屏幕统计</b>：A 启动与同步 10 屏 · B 时间墙 5 屏 · C 日卡片 7 屏 · D 日详情 9 屏 ·
-E 趋势 4 屏 · F 喜好与礼物 14 屏 · G 回忆 4 屏 · H 设置 8 屏 ——<b>共 61 屏</b>。</p>
+<p><b>屏幕统计</b>：A 启动与同步 10 屏 · B 时间墙 5 屏 · C 日卡片 8 屏 · D 日详情 9 屏 ·
+E 趋势 4 屏 · F 喜好与礼物 14 屏 · G 回忆 4 屏 · H 设置 7 屏 ——<b>共 61 屏</b>。</p>
 <p><b>手机壳内外的分工</b>：手机壳内＝最终界面呈现内容；手机壳外的「关键元素 / 用户可执行操作 / 操作后去向 / 规则」＝给开发看的实现说明，不绘制到界面上。</p>
 <p>配套文档：《LingLing 需求描述文档》。两份交付物中的阈值、文案、字段、优先级规则一一对应，需求文档全 16 章无未定项。</p>
 </footer>

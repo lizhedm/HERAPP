@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // SYS-H-007 [P2] 隐私说明页说明本地加密、安全存储与脱敏口径
   // 需求 REQ-16-36 / 章节 12.4
-  // 屏幕 H5
+  // 屏幕 H4
   // given: 进入隐私说明页
   // when: 浏览页面
   // then: 说明聊天记录在本地加密存储，后端 Token 与 AI Key 存入系统安全存储

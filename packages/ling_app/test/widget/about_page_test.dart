@@ -5,15 +5,16 @@
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // SYS-H-009 [P2] 关于页展示应用名、版本号与资源池版本
+  // SYS-H-009 [P2] 关于页同屏展示五条版本轴与资源来源说明
   // 需求 REQ-16-29, REQ-16-33 / 章节 12.6
-  // 屏幕 H7
+  // 屏幕 H6
   // given: 进入关于页
   // when: 浏览页面
-  // then: 展示应用名称 LingLing 与版本号、AI 提示词版本号
-  // then: 展示封面资源池版本与资源来源说明，标注资源为原创角色或已授权 IP
+  // then: 展示应用名称 LingLing
+  // then: 同屏展示 appVersion、schemaVersion、ruleVersion、promptVersion、coverPoolVersion 五个版本号
+  // then: 五个版本号各自独立取值，互不换算
+  // then: 展示封面资源来源说明，标注资源为原创角色或已授权 IP
   // then: 展示数据来源说明与本地数据存储位置说明
-  // then: 资源池版本与规则版本各自独立展示
   testWidgets('关于页字段', (tester) async {
     // 实现 SYS-H-009 的断言
   }, skip: 'SYS-H-009 待实现');

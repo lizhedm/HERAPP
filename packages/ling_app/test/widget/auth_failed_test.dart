@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // SYS-A-004 [P0] 同步返回 401 或 403 进入鉴权失败态并提供离线查看
   // 需求 REQ-16-02 / 章节 3.3
-  // 屏幕 A4
+  // 屏幕 A6
   // given: 配置中的 Token 已失效
   // when: 发起同步请求并收到 401 或 403
   // then: 展示文案「鉴权失败。配置文件中的 Token 已失效，请更新配置文件后重新启动应用」

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // SYS-PERF-002 [P1] 全量同步峰值内存不超过预算
   // 需求 REQ-16-03 / 章节 3.4
-  // 屏幕 A5
+  // 屏幕 A7
   // given: 同步 300 个日期且每日含 500 条消息
   // when: 执行全量同步并采样内存
   // then: 峰值内存不超过 300 MB

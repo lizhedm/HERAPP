@@ -335,7 +335,8 @@
    "members": [
     "OVERALL_SCORE",
     "INTIMACY_SCORE",
-    "EMOTION_SCORE"
+    "EMOTION_SCORE",
+    "COMMUNICATION_BALANCE"
    ]
   },
   "TrendGranularity": {

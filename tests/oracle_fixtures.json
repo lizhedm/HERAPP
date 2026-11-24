@@ -1,6 +1,6 @@
 {
  "$comment": "由 tests/generate.py 从 tests/registry/ 生成。Dart 与后端读取同一份期望值，保证跨语言一致。",
- "ruleVersion": 1,
+ "ruleVersion": 2,
  "oracles": {
   "SYS-BACKEND-011": {
    "fn": "mask",
@@ -30,49 +30,88 @@
   },
   "SYS-RULE-001": {
    "fn": "weather_score",
-   "title": "天气综合分按总分 0.5、情绪 0.3、亲密 0.2 加权并四舍五入",
+   "title": "天气综合分按总分 0.4、情绪 0.25、沟通比 0.2、亲密 0.15 加权并四舍五入",
    "testId": "packages/ling_core/test/weather_test.dart::天气综合分加权",
    "exhaustive": null,
    "cases": [
     {
-     "args": [
-      88,
-      82,
-      90
-     ],
-     "expect": 87
+     "kwargs": {
+      "overall": 88,
+      "emotion": 82,
+      "intimacy": 90,
+      "balance": 85
+     },
+     "expect": 86
     },
     {
-     "args": [
-      0,
-      0,
-      0
-     ],
+     "kwargs": {
+      "overall": 0,
+      "emotion": 0,
+      "intimacy": 0,
+      "balance": 0
+     },
      "expect": 0
     },
     {
-     "args": [
-      100,
-      100,
-      100
-     ],
+     "kwargs": {
+      "overall": 100,
+      "emotion": 100,
+      "intimacy": 100,
+      "balance": 100
+     },
      "expect": 100
     },
     {
-     "args": [
-      85,
-      85,
-      85
-     ],
+     "kwargs": {
+      "overall": 85,
+      "emotion": 85,
+      "intimacy": 85,
+      "balance": 85
+     },
      "expect": 85
     },
     {
-     "args": [
-      86,
-      87,
-      86
-     ],
+     "kwargs": {
+      "overall": 86,
+      "emotion": 87,
+      "intimacy": 86,
+      "balance": 86
+     },
      "expect": 86
+    },
+    {
+     "kwargs": {
+      "overall": 100,
+      "emotion": 0,
+      "intimacy": 0,
+      "balance": 0
+     },
+     "expect": 40
+    },
+    {
+     "kwargs": {
+      "overall": 0,
+      "emotion": 0,
+      "intimacy": 0,
+      "balance": 100
+     },
+     "expect": 20
+    },
+    {
+     "kwargs": {
+      "overall": 88,
+      "emotion": 82,
+      "intimacy": 90
+     },
+     "expect": 87
+    },
+    {
+     "kwargs": {
+      "overall": 100,
+      "emotion": 100,
+      "intimacy": 100
+     },
+     "expect": 100
     }
    ]
   },
@@ -271,7 +310,7 @@
   },
   "SYS-RULE-005": {
    "fn": "day_weather",
-   "title": "置信度低于 40 时日天气为雾并遮蔽综合分区间",
+   "title": "沟通比低于 40 时日天气为雾并遮蔽综合分区间",
    "testId": "packages/ling_core/test/weather_test.dart::雾优先级",
    "exhaustive": null,
    "cases": [
@@ -280,7 +319,7 @@
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 50,
-      "confidence": 39,
+      "balance": 39,
       "overall": 100,
       "emotion": 100,
       "intimacy": 100
@@ -292,24 +331,35 @@
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 50,
-      "confidence": 40,
+      "balance": 40,
       "overall": 100,
       "emotion": 100,
       "intimacy": 100
      },
-     "expect": "RAINBOW"
+     "expect": "SUNNY"
     },
     {
      "kwargs": {
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 50,
-      "confidence": 0,
+      "balance": 0,
       "overall": 0,
       "emotion": 0,
       "intimacy": 0
      },
      "expect": "FOG"
+    },
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 50,
+      "overall": 100,
+      "emotion": 100,
+      "intimacy": 100
+     },
+     "expect": "RAINBOW"
     }
    ]
   },
@@ -324,7 +374,7 @@
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 9,
-      "confidence": 80,
+      "balance": 80,
       "overall": 100,
       "emotion": 50,
       "intimacy": 100
@@ -336,31 +386,31 @@
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 10,
-      "confidence": 80,
+      "balance": 80,
       "overall": 100,
       "emotion": 50,
       "intimacy": 100
      },
-     "expect": "SUNNY"
+     "expect": "PARTLY_CLOUDY"
     },
     {
      "kwargs": {
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 9,
-      "confidence": 80,
+      "balance": 80,
       "overall": 100,
       "emotion": 49,
       "intimacy": 100
      },
-     "expect": "SUNNY"
+     "expect": "PARTLY_CLOUDY"
     },
     {
      "kwargs": {
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 9,
-      "confidence": 39,
+      "balance": 39,
       "overall": 100,
       "emotion": 50,
       "intimacy": 100
@@ -433,7 +483,7 @@
       "eval_status": "STALE",
       "synced": true,
       "msg_count": 50,
-      "confidence": 80,
+      "balance": 85,
       "overall": 88,
       "emotion": 82,
       "intimacy": 90
@@ -2027,6 +2077,270 @@
       "queued": [],
       "deferred": []
      }
+    }
+   ]
+  },
+  "SYS-RULE-060": {
+   "fn": "balance_ratio",
+   "title": "单项对等度关于双方对称，相等得 100、一方为 0 得 0",
+   "testId": "packages/ling_core/test/balance_test.dart::单项对等度对称性",
+   "exhaustive": null,
+   "cases": [
+    {
+     "args": [
+      5,
+      5
+     ],
+     "expect": 100
+    },
+    {
+     "args": [
+      0,
+      0
+     ],
+     "expect": 100
+    },
+    {
+     "args": [
+      10,
+      0
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      0,
+      10
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      3,
+      7
+     ],
+     "expect": 60
+    },
+    {
+     "args": [
+      7,
+      3
+     ],
+     "expect": 60
+    },
+    {
+     "args": [
+      1,
+      2
+     ],
+     "expect": 67
+    },
+    {
+     "args": [
+      120,
+      80
+     ],
+     "expect": 80
+    }
+   ]
+  },
+  "SYS-RULE-061": {
+   "fn": "communication_balance",
+   "title": "沟通比按四个分项加权合成，分项不可用时剔除并归一化",
+   "testId": "packages/ling_core/test/balance_test.dart::沟通比四项合成",
+   "exhaustive": null,
+   "cases": [
+    {
+     "kwargs": {
+      "msg_counts": [
+       5,
+       5
+      ],
+      "char_counts": [
+       100,
+       100
+      ],
+      "initiations": [
+       2,
+       2
+      ],
+      "reply_intervals": [
+       [
+        60,
+        60
+       ],
+       [
+        60,
+        60
+       ]
+      ],
+      "continuations": [
+       [
+        3,
+        4
+       ],
+       [
+        3,
+        4
+       ]
+      ]
+     },
+     "expect": 100
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       10,
+       0
+      ],
+      "char_counts": [
+       500,
+       0
+      ]
+     },
+     "expect": 0
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       2,
+       2
+      ],
+      "char_counts": [
+       20,
+       20
+      ],
+      "initiations": [
+       1,
+       1
+      ],
+      "reply_intervals": [
+       [
+        30
+       ],
+       [
+        30
+       ]
+      ],
+      "continuations": [
+       [
+        1,
+        1
+       ],
+       [
+        1,
+        1
+       ]
+      ]
+     },
+     "expect": 100
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       2,
+       1
+      ],
+      "char_counts": [
+       20,
+       10
+      ]
+     },
+     "expect": null
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       10,
+       10
+      ],
+      "char_counts": [
+       900,
+       100
+      ]
+     },
+     "expect": 20
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       6,
+       6
+      ],
+      "char_counts": [
+       120,
+       120
+      ],
+      "initiations": [
+       4,
+       0
+      ]
+     },
+     "expect": 55
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       6,
+       6
+      ],
+      "char_counts": [
+       120,
+       120
+      ],
+      "initiations": [
+       2,
+       2
+      ],
+      "reply_intervals": [
+       [
+        30,
+        30
+       ],
+       [
+        600,
+        600
+       ]
+      ]
+     },
+     "expect": 72
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       12,
+       8
+      ],
+      "char_counts": [
+       300,
+       200
+      ],
+      "initiations": [
+       3,
+       2
+      ],
+      "reply_intervals": [
+       [
+        60,
+        90
+       ],
+       [
+        120,
+        150
+       ]
+      ],
+      "continuations": [
+       [
+        5,
+        8
+       ],
+       [
+        3,
+        6
+       ]
+      ]
+     },
+     "expect": 80
     }
    ]
   }

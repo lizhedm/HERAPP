@@ -1,7 +1,7 @@
 [
  {
   "id": "SYS-RULE-001",
-  "title": "天气综合分按总分 0.5、情绪 0.3、亲密 0.2 加权并四舍五入",
+  "title": "天气综合分按总分 0.4、情绪 0.25、沟通比 0.2、亲密 0.15 加权并四舍五入",
   "req": [
    "REQ-16-14"
   ],
@@ -12,58 +12,98 @@
   "layer": "rule",
   "priority": "P0",
   "given": [
-   "一组总分、情绪分、亲密度，取值均在 0-100"
+   "一组总分、情绪分、亲密度、沟通比，取值均在 0-100"
   ],
   "when": [
    "计算天气综合分"
   ],
   "then": [
-   "结果等于 总分×0.5 + 情绪分×0.3 + 亲密度×0.2 四舍五入取整",
-   "需求 7.1 的示例 88 / 82 / 90 得 87",
-   "三项均为 0 得 0，三项均为 100 得 100"
+   "结果等于 总分×0.4 + 情绪分×0.25 + 亲密度×0.15 + 沟通比×0.2 四舍五入取整",
+   "需求 7.1 的示例 88 / 82 / 90 / 85 得 86",
+   "四项均为 0 得 0，四项均为 100 得 100",
+   "沟通比缺失时剔除该项并按剩余权重 0.8 归一化，88 / 82 / 90 得 87"
   ],
   "oracle": {
    "fn": "weather_score",
    "cases": [
     {
-     "args": [
-      88,
-      82,
-      90
-     ],
-     "expect": 87
+     "kwargs": {
+      "overall": 88,
+      "emotion": 82,
+      "intimacy": 90,
+      "balance": 85
+     },
+     "expect": 86
     },
     {
-     "args": [
-      0,
-      0,
-      0
-     ],
+     "kwargs": {
+      "overall": 0,
+      "emotion": 0,
+      "intimacy": 0,
+      "balance": 0
+     },
      "expect": 0
     },
     {
-     "args": [
-      100,
-      100,
-      100
-     ],
+     "kwargs": {
+      "overall": 100,
+      "emotion": 100,
+      "intimacy": 100,
+      "balance": 100
+     },
      "expect": 100
     },
     {
-     "args": [
-      85,
-      85,
-      85
-     ],
+     "kwargs": {
+      "overall": 85,
+      "emotion": 85,
+      "intimacy": 85,
+      "balance": 85
+     },
      "expect": 85
     },
     {
-     "args": [
-      86,
-      87,
-      86
-     ],
+     "kwargs": {
+      "overall": 86,
+      "emotion": 87,
+      "intimacy": 86,
+      "balance": 86
+     },
      "expect": 86
+    },
+    {
+     "kwargs": {
+      "overall": 100,
+      "emotion": 0,
+      "intimacy": 0,
+      "balance": 0
+     },
+     "expect": 40
+    },
+    {
+     "kwargs": {
+      "overall": 0,
+      "emotion": 0,
+      "intimacy": 0,
+      "balance": 100
+     },
+     "expect": 20
+    },
+    {
+     "kwargs": {
+      "overall": 88,
+      "emotion": 82,
+      "intimacy": 90
+     },
+     "expect": 87
+    },
+    {
+     "kwargs": {
+      "overall": 100,
+      "emotion": 100,
+      "intimacy": 100
+     },
+     "expect": 100
     }
    ]
   },
@@ -83,15 +123,16 @@
   "layer": "rule",
   "priority": "P0",
   "given": [
-   "总分 88、情绪分 82、亲密度 90"
+   "总分 88、情绪分 82、亲密度 90、沟通比 85"
   ],
   "when": [
    "分别计算天气综合分与封面综合关系分"
   ],
   "then": [
-   "天气综合分为 87",
+   "天气综合分为 86",
    "封面综合关系分为 87，由 亲密度×0.6 + 情绪分×0.4 得出",
-   "两套权重各自独立，任一权重变更不影响另一套的结果"
+   "两套权重各自独立，任一权重变更不影响另一套的结果",
+   "沟通比只进入天气综合分，不进入封面综合关系分"
   ],
   "oracle": {
    "fn": "cover_score",
@@ -335,7 +376,7 @@
  },
  {
   "id": "SYS-RULE-005",
-  "title": "置信度低于 40 时日天气为雾并遮蔽综合分区间",
+  "title": "沟通比低于 40 时日天气为雾并遮蔽综合分区间",
   "req": [
    "REQ-16-13",
    "REQ-16-15"
@@ -350,7 +391,7 @@
   "layer": "rule",
   "priority": "P0",
   "given": [
-   "评估成功、消息充足、置信度为 39"
+   "评估成功、消息充足、沟通比为 39"
   ],
   "when": [
    "判定日天气"
@@ -358,7 +399,8 @@
   "then": [
    "结果为 FOG",
    "综合分落在彩虹区间时仍返回 FOG",
-   "置信度为 40 时不再命中雾，按综合分区间返回 RAINBOW"
+   "沟通比为 40 时不再命中雾，按综合分 88 落入晴区间返回 SUNNY",
+   "沟通比缺失时不命中雾，综合分按剩余权重归一化后映射"
   ],
   "oracle": {
    "fn": "day_weather",
@@ -368,7 +410,7 @@
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 50,
-      "confidence": 39,
+      "balance": 39,
       "overall": 100,
       "emotion": 100,
       "intimacy": 100
@@ -380,24 +422,35 @@
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 50,
-      "confidence": 40,
+      "balance": 40,
       "overall": 100,
       "emotion": 100,
       "intimacy": 100
      },
-     "expect": "RAINBOW"
+     "expect": "SUNNY"
     },
     {
      "kwargs": {
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 50,
-      "confidence": 0,
+      "balance": 0,
       "overall": 0,
       "emotion": 0,
       "intimacy": 0
      },
      "expect": "FOG"
+    },
+    {
+     "kwargs": {
+      "eval_status": "SUCCESS",
+      "synced": true,
+      "msg_count": 50,
+      "overall": 100,
+      "emotion": 100,
+      "intimacy": 100
+     },
+     "expect": "RAINBOW"
     }
    ]
   },
@@ -416,7 +469,7 @@
   "layer": "rule",
   "priority": "P0",
   "given": [
-   "评估成功、置信度不低于 40、消息 9 条、情绪分 50"
+   "评估成功、沟通比不低于 40、消息 9 条、情绪分 50"
   ],
   "when": [
    "判定日天气"
@@ -424,8 +477,8 @@
   "then": [
    "结果为 SNOW",
    "消息 10 条时不命中雪，改按综合分区间判定，综合分 85 得 SUNNY",
-   "情绪分 49 时不命中雪，改按综合分区间判定，综合分 85 得 SUNNY",
-   "置信度低于 40 时雾优先于雪"
+   "情绪分 49 时不命中雪，改按综合分区间判定",
+   "沟通比低于 40 时雾优先于雪"
   ],
   "oracle": {
    "fn": "day_weather",
@@ -435,7 +488,7 @@
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 9,
-      "confidence": 80,
+      "balance": 80,
       "overall": 100,
       "emotion": 50,
       "intimacy": 100
@@ -447,31 +500,31 @@
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 10,
-      "confidence": 80,
+      "balance": 80,
       "overall": 100,
       "emotion": 50,
       "intimacy": 100
      },
-     "expect": "SUNNY"
+     "expect": "PARTLY_CLOUDY"
     },
     {
      "kwargs": {
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 9,
-      "confidence": 80,
+      "balance": 80,
       "overall": 100,
       "emotion": 49,
       "intimacy": 100
      },
-     "expect": "SUNNY"
+     "expect": "PARTLY_CLOUDY"
     },
     {
      "kwargs": {
       "eval_status": "SUCCESS",
       "synced": true,
       "msg_count": 9,
-      "confidence": 39,
+      "balance": 39,
       "overall": 100,
       "emotion": 50,
       "intimacy": 100
@@ -578,7 +631,7 @@
   "layer": "rule",
   "priority": "P1",
   "given": [
-   "日期评估状态为 STALE，上次成功评估的分数为 88 / 82 / 90、置信度 80、消息 50 条"
+   "日期评估状态为 STALE，上次成功评估的分数为 88 / 82 / 90、沟通比 85、消息 50 条"
   ],
   "when": [
    "判定日天气"
@@ -595,7 +648,7 @@
       "eval_status": "STALE",
       "synced": true,
       "msg_count": 50,
-      "confidence": 80,
+      "balance": 85,
       "overall": 88,
       "emotion": 82,
       "intimacy": 90

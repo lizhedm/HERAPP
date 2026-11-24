@@ -51,18 +51,34 @@
 | 键名 | 类型 | 默认值 | 取值范围 | 生效时机 | 需求 |
 | --- | --- | --- | --- | --- | --- |
 | `thresholds.configLoadTimeoutSeconds` | int | 8 | 3-30 | 启动 | 3.1 |
-| `thresholds.fogConfidenceBelow` | int | 40 | 0-100 | 即时 | 7.2 |
+| `thresholds.fogBalanceBelow` | int | 40 | 0-100 | 即时 | 7.2 |
+| `thresholds.balanceMinMessages` | int | 4 | 1-50 | 即时 | 6.4 |
 | `thresholds.snowMessageCountBelow` | int | 10 | 0-100 | 即时 | 7.2 |
 | `thresholds.snowEmotionAtLeast` | int | 50 | 0-100 | 即时 | 7.2 |
 | `thresholds.highlightOverallAtLeast` | int | 85 | 0-100 | 即时 | 8.1 |
 | `thresholds.highlightEmotionAtLeast` | int | 70 | 0-100 | 即时 | 8.1 |
 | `thresholds.highlightOverallAlone` | int | 90 | 0-100 | 即时 | 8.1 |
 | `thresholds.funMomentCountAtLeast` | int | 2 | 1-3 | 即时 | 8.1 |
-| `thresholds.summaryMaxChars` | int | 50 | 10-200 | 即时 | 4.8、6.2 |
+| `thresholds.summaryMaxChars` | int | 120 | 10-200 | 即时 | 4.8、6.2 |
+| `thresholds.noteMaxChars` | int | 200 | 10-500 | 即时 | 4.9 |
 | `thresholds.highlightCandidateMax` | int | 3 | 1-10 | 下次同步 | 6.2 |
 | `thresholds.gateGraceMinutes` | int | 10 | 1-120 | 即时 | 3.10 |
 | `thresholds.gateMaxAttempts` | int | 5 | 3-10 | 即时 | 3.10 |
 | `thresholds.gateLockoutSeconds` | int | 60 | 30-600 | 即时 | 3.10 |
+
+### image 图片处理
+
+压缩与缓存的全部数值取自需求 3.12。质量阶梯以逗号分隔的降序整数表达，`ImageService` 按序重压直至体积达标。
+
+| 键名 | 类型 | 默认值 | 取值范围 | 生效时机 | 需求 |
+| --- | --- | --- | --- | --- | --- |
+| `image.maxEdgePixels` | int | 1600 | 512-4096 | 即时 | 3.12 |
+| `image.qualitySteps` | string | `80,70,60` | 1-3 个 1-100 的降序整数 | 即时 | 3.12 |
+| `image.maxBytes` | int | 2097152 | 262144-10485760 | 即时 | 3.12 |
+| `image.compressTimeoutSeconds` | int | 3 | 1-30 | 即时 | 3.12 |
+| `image.thumbEdgePixels` | int | 320 | 96-1024 | 启动 | 3.12 |
+| `image.cacheMaxBytes` | int | 209715200 | 52428800-2147483648 | 即时 | 3.12 |
+| `image.unreferencedRetentionDays` | int | 7 | 1-90 | 下次同步 | 3.12 |
 
 ### coverPools 封面资源池
 

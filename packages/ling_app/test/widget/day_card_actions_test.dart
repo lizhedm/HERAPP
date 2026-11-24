@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // SYS-C-001 [P0] 长按动作面板含收藏、编辑总结、添加备注与取消
   // 需求 REQ-16-09 / 章节 4.7
-  // 屏幕 C6
+  // 屏幕 C5
   // given: 月视图中某张日卡片
   // when: 长按该卡片
   // then: 底部动作面板含收藏、编辑总结、添加备注、取消四项

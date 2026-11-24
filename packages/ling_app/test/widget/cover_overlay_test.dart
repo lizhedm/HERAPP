@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // SYS-COVER-001 [P1] 封面情绪蒙层不透明度按主题取 4 个固定值
   // 需求 REQ-16-32 / 章节 5.3, 11.2
-  // 屏幕 C1, H2, H3
+  // 屏幕 C1, H2
   // given: 日卡片处于封面状态，评估成功且情绪色系已确定
   // when: 依次切换纸月历、星图、色域、磨砂玻璃四套主题
   // then: 四套主题均展示封面图，情绪色块以蒙层叠加在封面图之上

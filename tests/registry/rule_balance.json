@@ -1,0 +1,317 @@
+[
+ {
+  "id": "SYS-RULE-060",
+  "title": "单项对等度关于双方对称，相等得 100、一方为 0 得 0",
+  "req": [
+   "REQ-16-13"
+  ],
+  "reqSection": [
+   "6.4"
+  ],
+  "screens": [],
+  "layer": "rule",
+  "priority": "P0",
+  "given": [
+   "双方在某一维度上的两个非负取值"
+  ],
+  "when": [
+   "计算该维度的对等度"
+  ],
+  "then": [
+   "结果等于 2×min(甲,乙)÷(甲+乙)×100 四舍五入取整",
+   "两值相等得 100，一方为 0 得 0",
+   "两值同时为 0 表示该维度双方都未发生，按完全对等得 100",
+   "交换甲乙两值结果不变"
+  ],
+  "oracle": {
+   "fn": "balance_ratio",
+   "cases": [
+    {
+     "args": [
+      5,
+      5
+     ],
+     "expect": 100
+    },
+    {
+     "args": [
+      0,
+      0
+     ],
+     "expect": 100
+    },
+    {
+     "args": [
+      10,
+      0
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      0,
+      10
+     ],
+     "expect": 0
+    },
+    {
+     "args": [
+      3,
+      7
+     ],
+     "expect": 60
+    },
+    {
+     "args": [
+      7,
+      3
+     ],
+     "expect": 60
+    },
+    {
+     "args": [
+      1,
+      2
+     ],
+     "expect": 67
+    },
+    {
+     "args": [
+      120,
+      80
+     ],
+     "expect": 80
+    }
+   ]
+  },
+  "testId": "packages/ling_core/test/balance_test.dart::单项对等度对称性"
+ },
+ {
+  "id": "SYS-RULE-061",
+  "title": "沟通比按四个分项加权合成，分项不可用时剔除并归一化",
+  "req": [
+   "REQ-16-13"
+  ],
+  "reqSection": [
+   "6.4"
+  ],
+  "screens": [
+   "D2",
+   "D6"
+  ],
+  "layer": "rule",
+  "priority": "P0",
+  "given": [
+   "一天的互动统计，含双方条数、字数、发起段数、段内回复间隔与被接话率"
+  ],
+  "when": [
+   "计算沟通比"
+  ],
+  "then": [
+   "结果等于 投入对等×0.30 + 发起对等×0.25 + 响应对等×0.25 + 接续对等×0.20",
+   "四项分项均对等时得 100，一方零回应时得 0",
+   "各 2 条的来回对等对话同样得 100，分数不随消息数量升降",
+   "投入对等取条数对等度与字数对等度中较低的一个",
+   "发起段数少于 2 段、某方无段内回复间隔、某方无非段末消息时剔除对应分项，按剩余权重归一化",
+   "消息总条数少于 4 条时沟通比缺失"
+  ],
+  "oracle": {
+   "fn": "communication_balance",
+   "cases": [
+    {
+     "kwargs": {
+      "msg_counts": [
+       5,
+       5
+      ],
+      "char_counts": [
+       100,
+       100
+      ],
+      "initiations": [
+       2,
+       2
+      ],
+      "reply_intervals": [
+       [
+        60,
+        60
+       ],
+       [
+        60,
+        60
+       ]
+      ],
+      "continuations": [
+       [
+        3,
+        4
+       ],
+       [
+        3,
+        4
+       ]
+      ]
+     },
+     "expect": 100
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       10,
+       0
+      ],
+      "char_counts": [
+       500,
+       0
+      ]
+     },
+     "expect": 0
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       2,
+       2
+      ],
+      "char_counts": [
+       20,
+       20
+      ],
+      "initiations": [
+       1,
+       1
+      ],
+      "reply_intervals": [
+       [
+        30
+       ],
+       [
+        30
+       ]
+      ],
+      "continuations": [
+       [
+        1,
+        1
+       ],
+       [
+        1,
+        1
+       ]
+      ]
+     },
+     "expect": 100
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       2,
+       1
+      ],
+      "char_counts": [
+       20,
+       10
+      ]
+     },
+     "expect": null
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       10,
+       10
+      ],
+      "char_counts": [
+       900,
+       100
+      ]
+     },
+     "expect": 20
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       6,
+       6
+      ],
+      "char_counts": [
+       120,
+       120
+      ],
+      "initiations": [
+       4,
+       0
+      ]
+     },
+     "expect": 55
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       6,
+       6
+      ],
+      "char_counts": [
+       120,
+       120
+      ],
+      "initiations": [
+       2,
+       2
+      ],
+      "reply_intervals": [
+       [
+        30,
+        30
+       ],
+       [
+        600,
+        600
+       ]
+      ]
+     },
+     "expect": 72
+    },
+    {
+     "kwargs": {
+      "msg_counts": [
+       12,
+       8
+      ],
+      "char_counts": [
+       300,
+       200
+      ],
+      "initiations": [
+       3,
+       2
+      ],
+      "reply_intervals": [
+       [
+        60,
+        90
+       ],
+       [
+        120,
+        150
+       ]
+      ],
+      "continuations": [
+       [
+        5,
+        8
+       ],
+       [
+        3,
+        6
+       ]
+      ]
+     },
+     "expect": 80
+    }
+   ]
+  },
+  "testId": "packages/ling_core/test/balance_test.dart::沟通比四项合成"
+ }
+]

@@ -222,7 +222,7 @@ def render_fixtures(cases: list) -> str:
     header = {
         "$comment": "由 tests/generate.py 从 tests/registry/ 生成。"
                     "Dart 与后端读取同一份期望值，保证跨语言一致。",
-        "ruleVersion": 1,
+        "ruleVersion": 2,
         "oracles": fixtures,
     }
     return json.dumps(header, ensure_ascii=False, indent=1) + "\n"

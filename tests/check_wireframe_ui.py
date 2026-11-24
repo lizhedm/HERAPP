@@ -34,11 +34,12 @@ FORBIDDEN = [
      r"|ACCEPTED|COVER|SUMMARY|DATE|FOG|SNOW|RAINBOW|SUNNY|THUNDERSTORM)\b", "枚举标识"),
     (r"\b(?:schemaVersion|promptVersion|ruleVersion|coverPoolVersion|appVersion"
      r"|evalVersion|preferenceId|commonStatus|cardDefaultState|userSummary"
-     r"|updatedAt|entityKey|fileHash|confidence|manifest|ETag)\b", "字段名"),
+     r"|updatedAt|entityKey|fileHash|manifest|ETag"
+     r"|imageId|contentHash|idempotencyKey|thumbUrl)\b", "字段名"),
     (r"\bL[1-5]\b(?!\s*[）)])", "封面等级代号"),
     (r"\bV[1-4]\b", "封面子池变体代号"),
     (r"[×*]\s*0\.[0-9]", "内部权重公式"),
-    (r"置信度\s*\d", "置信度数值"),
+    (r"\d+\s*像素|\bq?(?:80|70|60)\s*质量|质量\s*(?:80|70|60)\b", "图片压缩参数"),
     (r"\bargon2id\b|password_hash|gate\.password", "密码实现细节"),
 ]
 

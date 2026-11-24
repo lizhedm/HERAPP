@@ -77,7 +77,7 @@
   ],
   "screens": [
    "C1",
-   "H6"
+   "H5"
   ],
   "layer": "rule",
   "priority": "P0",
@@ -178,7 +178,7 @@
    "5.1"
   ],
   "screens": [
-   "H6"
+   "H5"
   ],
   "layer": "rule",
   "priority": "P0",
@@ -270,7 +270,7 @@
    "5.1"
   ],
   "screens": [
-   "H6"
+   "H5"
   ],
   "layer": "rule",
   "priority": "P0",
@@ -349,7 +349,7 @@
   ],
   "screens": [
    "C1",
-   "H6"
+   "H5"
   ],
   "layer": "rule",
   "priority": "P0",
@@ -520,7 +520,7 @@
    "5.2"
   ],
   "screens": [
-   "H6"
+   "H5"
   ],
   "layer": "rule",
   "priority": "P0",
@@ -705,8 +705,7 @@
   ],
   "screens": [
    "C1",
-   "H2",
-   "H3"
+   "H2"
   ],
   "layer": "widget",
   "priority": "P1",

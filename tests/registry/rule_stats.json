@@ -557,5 +557,34 @@
    "天气、封面与趋势聚合结果不变"
   ],
   "testId": "packages/ling_app/integration_test/timezone_test.dart::时区基准权威性"
+ },
+ {
+  "id": "SYS-D-005",
+  "title": "互动统计区展示沟通比总值与四个分项，缺失时显示占位符",
+  "req": [
+   "REQ-16-13"
+  ],
+  "reqSection": [
+   "6.4",
+   "4.10"
+  ],
+  "screens": [
+   "D2"
+  ],
+  "layer": "widget",
+  "priority": "P0",
+  "given": [
+   "某日消息充足且四个分项均可计算，另一日消息总条数为 3"
+  ],
+  "when": [
+   "展开互动统计区"
+  ],
+  "then": [
+   "统计区在 12 项之后展示沟通比总值与投入、发起、响应、接续四个分项对等度",
+   "分项不可用时该项显示占位符，总值按剩余分项的权重归一化后展示",
+   "消息总条数少于 4 条时沟通比整体显示占位符与一句说明",
+   "进行中日期的沟通比随当前已同步消息实时刷新"
+  ],
+  "testId": "packages/ling_app/test/widget/day_detail_test.dart::沟通比分项呈现"
  }
 ]

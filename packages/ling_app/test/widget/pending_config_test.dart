@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // SYS-A-003 [P0] 配置缺失进入待配置态，操作限于重新加载与查看说明
   // 需求 REQ-16-02 / 章节 3.2
-  // 屏幕 A3
+  // 屏幕 A5
   // given: 配置文件缺失或关键字段为空
   // when: 启动应用
   // then: 展示只读提示页与文案「未检测到有效配置。请在应用配置文件中填写后端地址与鉴权信息，然后重新启动应用」

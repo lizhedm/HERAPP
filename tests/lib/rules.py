@@ -15,12 +15,15 @@ from __future__ import annotations
 
 import unicodedata
 
-RULE_VERSION = 1
+RULE_VERSION = 2
 
 # ── 需求 7.1 / 5.1：两套独立的加权合成 ──────────────────────────────
 
-WEATHER_WEIGHTS = {"overall": 0.5, "emotion": 0.3, "intimacy": 0.2}
+WEATHER_WEIGHTS = {"overall": 0.4, "emotion": 0.25, "intimacy": 0.15, "balance": 0.2}
 COVER_WEIGHTS = {"intimacy": 0.6, "emotion": 0.4}
+
+# 沟通比缺失时按剩余三项的权重归一化，分母即三项权重之和。
+WEATHER_WEIGHTS_WITHOUT_BALANCE = 1 - WEATHER_WEIGHTS["balance"]
 
 
 def round_half_up(value: float) -> int:
@@ -34,9 +37,20 @@ def round_half_up(value: float) -> int:
     return math.floor(value + 0.5) if value >= 0 else math.ceil(value - 0.5)
 
 
-def weather_score(overall: int, emotion: int, intimacy: int) -> int:
-    """天气综合分。需求 7.1。"""
-    return round_half_up(overall * 0.5 + emotion * 0.3 + intimacy * 0.2)
+def weather_score(overall: int, emotion: int, intimacy: int, balance: int = None) -> int:
+    """天气综合分。需求 7.1。
+
+    沟通比缺失时剔除该项，按剩余三项的权重归一化，使缺失沟通比的日期与
+    有沟通比的日期落在同一 0-100 刻度上。
+    """
+    weighted = (
+        overall * WEATHER_WEIGHTS["overall"]
+        + emotion * WEATHER_WEIGHTS["emotion"]
+        + intimacy * WEATHER_WEIGHTS["intimacy"]
+    )
+    if balance is None:
+        return round_half_up(weighted / WEATHER_WEIGHTS_WITHOUT_BALANCE)
+    return round_half_up(weighted + balance * WEATHER_WEIGHTS["balance"])
 
 
 def cover_score(intimacy: int, emotion: int) -> int:
@@ -71,7 +85,7 @@ def day_weather(
     eval_status: str,
     synced: bool,
     msg_count: int,
-    confidence: int = None,
+    balance: int = None,
     overall: int = None,
     emotion: int = None,
     intimacy: int = None,
@@ -79,18 +93,19 @@ def day_weather(
     """日天气。需求 7.2，按优先级依次判定，前一条命中即停止。
 
     STALE 日期沿用上次成功评估的分数，由调用方传入该分数，从第 2 条起参与判定。
+    balance 为 None 表示沟通比缺失，该日期不命中雾，综合分按剩余权重归一化。
     """
     # 优先级 1：待评估
     if not synced or msg_count == 0 or eval_status in ("PENDING", "RUNNING", "FAILED"):
         return "PENDING"
     # 优先级 2：雾
-    if confidence is not None and confidence < 40:
+    if balance is not None and balance < FOG_BALANCE_THRESHOLD:
         return "FOG"
     # 优先级 3：雪
     if msg_count < 10 and emotion is not None and emotion >= 50:
         return "SNOW"
     # 优先级 4-12：综合分区间
-    return weather_by_band(weather_score(overall, emotion, intimacy))
+    return weather_by_band(weather_score(overall, emotion, intimacy, balance))
 
 
 def period_weather(scores: list) -> dict:
@@ -274,9 +289,81 @@ def longest_segment(timestamps: list) -> int:
     return best
 
 
-# ── 需求 6.4：置信度 ────────────────────────────────────────────
+# ── 需求 6.4：沟通比 ────────────────────────────────────────────
 
-FOG_CONFIDENCE_THRESHOLD = 40
+BALANCE_WEIGHTS = {"effort": 0.30, "initiation": 0.25, "response": 0.25, "continuation": 0.20}
+MIN_MESSAGES_FOR_BALANCE = 4
+FOG_BALANCE_THRESHOLD = 40
+
+
+def balance_ratio(a: float, b: float) -> int:
+    """单项对等度。需求 6.4：2 × min(甲,乙) ÷ (甲+乙) × 100。
+
+    关于双方对称，交换甲乙结果不变。两值相等得 100，一方为 0 得 0，
+    两值同时为 0 表示该维度双方都没有发生，按完全对等记 100。
+    """
+    if a < 0 or b < 0:
+        raise ValueError(f"对等度输入为负: {a}, {b}")
+    total = a + b
+    if total == 0:
+        return 100
+    return round_half_up(2 * min(a, b) / total * 100)
+
+
+def median(values: list):
+    """中位数。需求 6.1 第 12 项与 6.4 响应对等共用。空列表返回 None。"""
+    if not values:
+        return None
+    ordered = sorted(values)
+    mid = len(ordered) // 2
+    if len(ordered) % 2:
+        return float(ordered[mid])
+    return (ordered[mid - 1] + ordered[mid]) / 2
+
+
+def communication_balance(
+    msg_counts: tuple,
+    char_counts: tuple,
+    initiations: tuple = None,
+    reply_intervals: tuple = None,
+    continuations: tuple = None,
+) -> int:
+    """沟通比。需求 6.4。只看双方对等程度，不看消息数量。
+
+    参数均为「(甲, 乙)」二元组：
+
+    - msg_counts  双方消息条数
+    - char_counts 双方消息字数
+    - initiations 双方各自发起的连续对话段数
+    - reply_intervals 双方各自的段内回复间隔列表（秒），间隔归属回复方
+    - continuations  双方各自的 (被接话次数, 非段末消息数)
+
+    消息总条数少于 4 条时返回 None 表示沟通比缺失。分项不可用时剔除，
+    按剩余分项的权重归一化合成。
+    """
+    if sum(msg_counts) < MIN_MESSAGES_FOR_BALANCE:
+        return None
+
+    # 投入对等：条数对等度与字数对等度取较低者，单项失衡不被另一项掩盖。
+    items = [(BALANCE_WEIGHTS["effort"],
+              min(balance_ratio(*msg_counts), balance_ratio(*char_counts)))]
+
+    # 发起对等：只有 1 个对话段时无从比较谁更常开口，剔除该项。
+    if initiations is not None and sum(initiations) >= 2:
+        items.append((BALANCE_WEIGHTS["initiation"], balance_ratio(*initiations)))
+
+    # 响应对等：双方各自至少有 1 个段内回复间隔才可比较。
+    if reply_intervals is not None and all(len(side) >= 1 for side in reply_intervals):
+        items.append((BALANCE_WEIGHTS["response"],
+                      balance_ratio(*[median(side) for side in reply_intervals])))
+
+    # 接续对等：双方各自至少有 1 条非段末消息才有被接话的机会。
+    if continuations is not None and all(nonend >= 1 for _, nonend in continuations):
+        items.append((BALANCE_WEIGHTS["continuation"],
+                      balance_ratio(*[taken / nonend for taken, nonend in continuations])))
+
+    weight_sum = sum(weight for weight, _ in items)
+    return round_half_up(sum(weight * value for weight, value in items) / weight_sum)
 
 # ── 需求 6.3：评估调度 ──────────────────────────────────────────
 

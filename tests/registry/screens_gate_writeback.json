@@ -93,7 +93,7 @@
   "title": "用户编辑立即生效于界面并入回写队列",
   "req": ["REQ-16-45"],
   "reqSection": ["3.11"],
-  "screens": ["C6", "C7", "F4", "G2", "H4"],
+  "screens": ["C6", "C7", "F4", "G2", "H3"],
   "layer": "integration",
   "priority": "P0",
   "given": ["联网状态，回写队列为空"],

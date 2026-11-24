@@ -8,14 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // SYS-A-011 [P0] 聊天文件以远端为权威，用户数据同步不覆盖
-  // 需求 REQ-16-03 / 章节 3.8
-  // given: 某日已有用户总结、备注、收藏，远端该日聊天文件发生变更
+  // SYS-A-011 [P0] 同步以后端版本为权威覆盖本地缓存，本地未提交编辑保留在回写队列
+  // 需求 REQ-16-03 / 章节 3.8, 3.11
+  // given: 某日已有用户总结、备注、收藏，其中备注尚未提交后端
   // when: 执行同步
-  // then: 聊天文件以远端版本覆盖本地
-  // then: 用户总结、备注、收藏、喜好、礼物独立保存，同步不覆盖
+  // then: 聊天文件与已回写的用户数据以后端版本覆盖本地缓存
+  // then: 回写队列中尚未提交的编辑保留并在联网后继续提交
+  // then: 本地编辑被远端较新版本覆盖时提示「该条内容已在其他设备上更新，已显示最新版本」
   // then: 聊天文件变化触发该日 AI 重评
-  testWidgets('用户数据不被覆盖', (tester) async {
+  testWidgets('后端权威与回写保留', (tester) async {
     // 实现 SYS-A-011 的断言
   }, skip: 'SYS-A-011 待实现');
 

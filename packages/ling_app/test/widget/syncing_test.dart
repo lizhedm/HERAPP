@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // SYS-A-005 [P0] 同步中展示 5 个阶段与批量进度且不阻塞浏览
   // 需求 REQ-16-03 / 章节 3.4
-  // 屏幕 A5
+  // 屏幕 A7
   // given: 冷启动自动同步正在执行
   // when: 观察同步页并切换底部导航
   // then: 依次展示请求清单、比对版本、拉取日文件、本地统计、AI 评估五个阶段与批量进度
